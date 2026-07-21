@@ -6,10 +6,12 @@ JSON Schema 検証に加え、スキーマでは表現しない運用ポリシ�
 - 語彙キーが vocabularies/*.yaml に存在すること
 - hosted は content/ を持つこと (警告) / referenced は持たないこと (警告)
 - NC 系ライセンスは非推奨 (警告)
+- description が quotedDescription の丸写しでないこと
 
 使い方:
     python3 tools/validate.py                # resources/ 全件
     python3 tools/validate.py resources/xxx  # 指定ディレクトリのみ
+    python3 tools/validate.py --check-quotes # 引用文が原文のままかキャッシュと照合
 終了コード: エラーがあれば 1 (警告のみなら 0)
 """
 
@@ -25,7 +27,45 @@ import jsonschema
 from common import SCHEMA_PATH, VOCAB_FILES, iter_resources, load_all_vocabs, load_config
 
 
-def validate_resource(slug, resource_dir, meta, validator, vocabs):
+def _squash(text: str) -> str:
+    """比較用に空白・記号ゆれを落とす。"""
+    return re.sub(r"[\s　]+", "", text)
+
+
+def _text_values(value):
+    return [value] if isinstance(value, str) else list(value.values())
+
+
+def check_quote_verbatim(meta):
+    """quotedDescription が取得済みページの本文に「そのまま」含まれるか照合する。
+
+    AI 生成メタデータで最も起きやすい事故（要約・改変されたものが引用として載る）を
+    人手ではなく機械で捕まえる。キャッシュが無ければ検査をスキップする。
+    """
+    quoted = meta.get("quotedDescription")
+    if not quoted:
+        return [], []
+    from extract import visible_lines
+    from fetch import cache_path_for
+
+    source = quoted.get("source") or meta.get("externalUrl")
+    cache_path = cache_path_for(source)
+    if not cache_path.exists():
+        return [], [f"引用の照合をスキップ（キャッシュ無し: {source} → tools/fetch.py で取得）"]
+
+    page_text = _squash("\n".join(visible_lines(cache_path.read_text(encoding="utf-8",
+                                                                     errors="ignore"))))
+    errors = []
+    for value in _text_values(quoted["text"]):
+        # 原文が改行で分かれている場合があるので行ごとに照合する
+        for line in [l for l in value.splitlines() if len(l.strip()) >= 10]:
+            if _squash(line) not in page_text:
+                errors.append(f"quotedDescription が原文と一致しない（改変の疑い）: 「{line[:40]}…」")
+                break
+    return errors, []
+
+
+def validate_resource(slug, resource_dir, meta, validator, vocabs, check_quotes=False):
     errors, warnings = [], []
 
     if meta is None:
@@ -57,12 +97,30 @@ def validate_resource(slug, resource_dir, meta, validator, vocabs):
     ):
         warnings.append("NC 系ライセンスは非推奨 (営利形態の教育機関で使えない。§7.2)")
 
+    # description (CC0 で出す自作要約) が引用文の丸写しだと CC0 宣言と衝突する
+    quoted = meta.get("quotedDescription")
+    if quoted:
+        own = {_squash(v) for v in _text_values(meta.get("description", ""))}
+        for value in _text_values(quoted["text"]):
+            squashed = _squash(value)
+            if any(o and (o in squashed or squashed in o) for o in own):
+                errors.append("description が quotedDescription の丸写し "
+                              "(CC0 で出せないため、自分の言葉で要約すること。§7.3-7)")
+                break
+
+    if check_quotes:
+        quote_errors, quote_warnings = check_quote_verbatim(meta)
+        errors += quote_errors
+        warnings += quote_warnings
+
     return errors, warnings
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="*", help="検証するリソースディレクトリ (省略時は全件)")
+    parser.add_argument("--check-quotes", action="store_true",
+                        help="quotedDescription を取得済みキャッシュと照合する (レビュー支援)")
     args = parser.parse_args()
 
     with open(SCHEMA_PATH, encoding="utf-8") as f:
@@ -73,7 +131,8 @@ def main() -> int:
     total = error_count = warning_count = 0
     for slug, resource_dir, meta in iter_resources(args.paths or None):
         total += 1
-        errors, warnings = validate_resource(slug, resource_dir, meta, validator, vocabs)
+        errors, warnings = validate_resource(slug, resource_dir, meta, validator, vocabs,
+                                             check_quotes=args.check_quotes)
         error_count += len(errors)
         warning_count += len(warnings)
         mark = "NG" if errors else ("WARN" if warnings else "OK")

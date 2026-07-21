@@ -17,6 +17,9 @@
 # 検証 (スキーマ + 語彙キー + 運用ポリシー)。CI で必須にする
 python3 tools/validate.py [resources/<slug> ...]
 
+# レビュー支援: 引用文が原文のままかキャッシュと照合する (改変・要約の混入を検出)
+python3 tools/validate.py --check-quotes [resources/<slug> ...]
+
 # JSON-LD 生成 (1件を標準出力 / 全件を _site/jsonld/ へ)
 python3 tools/jsonld.py --print <slug>
 python3 tools/jsonld.py
@@ -36,7 +39,28 @@ python3 tools/wayback.py --check
 
 # 旧クローラ収集データ (科研STOER output/*.xlsx) → referenced 下書き
 python3 tools/convert_legacy.py "<path>/output/ocw_kyoto_u.xlsx" --limit 10 --with-source
+
+# ページから説明文の候補を抽出 (quotedDescription の下ごしらえ)
+python3 tools/extract.py <html|url> [--corpus <同一サイトのディレクトリ>]
+python3 tools/extract.py --survey <コーパス>   # サイト別の的中率を測る
 ```
+
+### 説明文の抽出方針（extract.py）
+
+原文の転載は**コードで行う**（LLM に書かせると改変・幻覚が混じり、「原文のまま」を保証できない）。
+3段階で候補を挙げる: ①JSON-LD の description → ②og:description / meta description →
+③ラベル付きセクション（概要／講義の概要／授業の内容／Course Description …）。
+
+②には罠があり、多くのサイトで meta にサイト共通の紹介文（「○○大学 OCW は…」）が入っている。
+同一サイト内で3ページ以上に現れる文を定型文として自動除外する（`--corpus`／`--survey` 時）。
+
+**LLM が必要なのは次の3つだけ**:
+
+1. 候補が複数あるときの選択（名大のコースページは「講義の概要／講義の内容／講義内容（表の見出し・誤検出）／
+   og:description」の4候補が出る）
+2. ラベルも meta も無いサイト（上智など）からの抽出
+3. `description`（自作・CC0 で提供する要約）の作成 — これは転載であってはならないので、
+   そもそもコードで作るものではない
 
 ## サイトのビルド (Quarto)
 
@@ -63,11 +87,12 @@ make clean
 `validate.py` → PR → マージ後 `build_catalog.py`。
 
 **referenced エントリの量産（§7.3 パイプライン）**:
-`discover.py`（URL列挙）→ `fetch.py`（取得・キャッシュ）→ AI で metadata.yaml 下書き生成
-（[resource.schema.json](../schemas/resource.schema.json) を出力制約に使う。旧データからは
-`convert_legacy.py`）→ **人手レビュー**（description 作成・確認、`metadataProvenance.reviewedBy`
-記入）→ `validate.py` が通ったら `drafts/` から `resources/` へ移動 → `wayback.py --check` で
-リンク・スナップショット確認 → `archivedAt` 記入。
+`discover.py`（URL列挙）→ `fetch.py`（取得・キャッシュ）→ `extract.py`（説明文の候補抽出）→
+AI で metadata.yaml 下書き生成（[resource.schema.json](../schemas/resource.schema.json) を
+出力制約に使う。旧データからは `convert_legacy.py`）→ **人手レビュー**
+（[チェックリスト](../docs/review-checklist.md)、`validate.py --check-quotes`、
+`metadataProvenance.reviewedBy` 記入）→ `validate.py` が通ったら `drafts/` から `resources/` へ
+移動して PR → `wayback.py --check` でリンク・スナップショット確認 → `archivedAt` 記入。
 
 ## 出力先
 

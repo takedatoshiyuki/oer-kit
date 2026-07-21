@@ -9,7 +9,6 @@
     "name",
     "description",
     "inLanguage",
-    "license",
     "creator",
     "learningResourceType",
     "about",
@@ -22,10 +21,16 @@
         "required": ["mode"]
       },
       "then": {
-        "required": ["externalUrl", "dateAccessed", "metadataProvenance"]
+        "required": ["externalUrl", "dateAccessed", "metadataProvenance"],
+        "anyOf": [
+          { "required": ["license"] },
+          { "required": ["usageTerms"] }
+        ]
       },
       "else": {
+        "required": ["license"],
         "properties": {
+          "usageTerms": false,
           "license": {
             "oneOf": [
               { "enum": ["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0", "CC-BY-NC-4.0", "CC-BY-NC-SA-4.0"] },
@@ -103,8 +108,8 @@
       "type": "array",
       "items": { "$ref": "#/$defs/agent" }
     },
-    "datePublished": { "$ref": "#/$defs/isoDate", "description": "初公開日" },
-    "dateModified": { "$ref": "#/$defs/isoDate", "description": "最終更新日 (Gitから自動化可)" },
+    "datePublished": { "$ref": "#/$defs/isoDatePartial", "description": "初公開日。実開講年度が分かる場合はそれを、不明なら公開年を記す (年のみ可)" },
+    "dateModified": { "$ref": "#/$defs/isoDatePartial", "description": "最終更新日 (Gitから自動化可)" },
     "dateAccessed": { "$ref": "#/$defs/isoDate", "description": "referenced で必須: 外部教材を最後に確認した日" },
     "archivedAt": { "$ref": "#/$defs/httpUri", "description": "Webアーカイブ等のスナップショットURL (リンク切れ対策)" },
     "version": {
@@ -202,6 +207,31 @@
         "properties": {
           "format": { "type": "string", "minLength": 1, "description": "IANAメディアタイプ推奨 (例 application/pdf)" },
           "contentUrl": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "quotedDescription": {
+      "description": "出典サイトの説明文の転載・引用。目録ページに出所明示付きで表示するのみで、CC0 のカタログ/JSON-LD エクスポートには含めない (docs/design.md §7.3)。description (自作・CC0) とは別に持つ",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "source"],
+      "properties": {
+        "text": { "$ref": "#/$defs/localizedText", "description": "原文そのまま" },
+        "source": { "$ref": "#/$defs/httpUri", "description": "出所 URL" },
+        "note": { "type": "string", "description": "転載・引用の根拠 (例: 出典サイトの利用条件に基づく転載)" }
+      }
+    },
+    "usageTerms": {
+      "description": "CC 以外の利用条件 (referenced のみ)。license と少なくとも一方が必須 (docs/design.md §7.3)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "summary", "reuse"],
+      "properties": {
+        "url": { "$ref": "#/$defs/httpUri", "description": "利用条件ページの URL" },
+        "summary": { "$ref": "#/$defs/localizedText", "description": "条件の要約 (人間可読)" },
+        "reuse": {
+          "enum": ["allowed_with_conditions", "not_allowed"],
+          "description": "allowed_with_conditions: 条件付きで複製・改変・配布可 / not_allowed: 視聴のみ"
         }
       }
     },
@@ -313,6 +343,11 @@
     "isoDate": {
       "type": "string",
       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "isoDatePartial": {
+      "description": "YYYY / YYYY-MM / YYYY-MM-DD。年度しか分からない教材で精度を捏造しないため粒度を選べる",
+      "type": "string",
+      "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$"
     },
     "isoDuration": {
       "type": "string",

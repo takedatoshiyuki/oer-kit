@@ -22,6 +22,7 @@
 | 6 | 多言語 | 日本語主体、英語は任意併記 | メタデータは多言語対応の構造にしておく |
 | 7 | 主題分野 `about` の必須化 | **決定（2026-07-21）: 必須** | SPARC Rosetta Stone の Required に合わせた。スキーマと §5.2 に反映済み |
 | 9 | リンク参照エントリ（レファラトリ機能） | **決定（2026-07-21）: 導入** | ND系・外部教材は本体をホストせず、メタデータと短い内容紹介のみで目録化（`mode: referenced`）。AI生成メタデータは人手レビュー後に公開。詳細は §7.3 |
+| 10 | CC 以外の外部教材の目録化 | **決定（2026-07-21）**: 独自条件で再利用可の教材（例: 名大の授業）は `usageTerms` 付きで目録化。視聴のみ（例: UTokyo Channel）も**「再利用不可」ラベルを明示して**目録化 | §7.3 の対象区分。目録ページの警告表示とカタログのカテゴリで再利用可否を判別可能にする |
 | 8 | 図書館目録（OPAC）への導出 | 当面なし | Rosetta Stone は MARC21 への出口を持つ。国内では JPCOAR→IRDB→CiNii Research 経路（§8.2）が実質的な代替。大学図書館OPAC収載が必要になったら MARC21/NACSIS-CAT 列をマッピング表に追加 |
 
 ## 2. 既存プラクティスの調査まとめ
@@ -150,7 +151,7 @@ AMB 自体の必須は `@context` / `id` / `type` / `name` の4つと最小だ�
 | `creator` | Person/Organization のリスト | `creator` | 著者。ORCID・所属を推奨 |
 | `learningResourceType` | 語彙キーのリスト | `learningResourceType` | [HCRT語彙](https://w3id.org/kim/hcrt/scheme)（→ `vocabularies/learning-resource-types.yaml`） |
 | `about` | 語彙キーのリスト | `about` | 主題分野。ISCED-F 2013 ベース（→ `vocabularies/subjects.yaml`）。SPARC Rosetta Stone の Required に合わせ必須 |
-| `datePublished` | ISO 8601 日付 | `datePublished` | 初公開日 |
+| `datePublished` | ISO 8601 日付 | `datePublished` | 初公開日。**実開講年度が分かる場合はそれを、不明なら公開年**を記す。粒度は `YYYY` / `YYYY-MM` / `YYYY-MM-DD` から選べる（年度しか分からない教材で精度を捏造しないため） |
 
 自動導出（記入不要）: `id`（BASE_URL + slug）、`type`（既定 `["LearningResource"]`。
 `type` フィールドで schema.org 型を追記可能、例 `Video`, `Course`, `PresentationDigitalDocument`）。
@@ -194,6 +195,8 @@ AMB 自体の必須は `@context` / `id` / `type` / `name` の4つと最小だ�
 | `dateAccessed` | ISO 8601 日付 | — | `referenced` で必須。外部教材を最後に確認した日 |
 | `archivedAt` | URL | — | Webアーカイブ等のスナップショット（リンク切れ対策） |
 | `metadataProvenance` | オブジェクト | `mainEntityOfPage` 経由で出力 | メタデータ自体の作成来歴。AI生成時は人手レビュー必須（§7.3）。`referenced` で必須 |
+| `usageTerms` | `{url, summary, reuse}` | `usageInfo` | `referenced` 専用: CC 以外の利用条件。`reuse` は `allowed_with_conditions` / `not_allowed`。`license` と少なくとも一方が必須 |
+| `quotedDescription` | `{text, source, note}` | （出力しない） | 出典の説明文の転載・引用。ページ表示のみで CC0 エクスポート対象外（§7.3-7） |
 | `extensions` | 自由オブジェクト | — | スキーマ検証を通しつつ実験的項目を置く逃げ場 |
 
 ### 5.5 記入例（`resources/intro-statistics-slides/metadata.yaml`）
@@ -368,9 +371,22 @@ ND（改変禁止）系の教材は 5R を満たさないため本体をホス�
    本格運用の際は機関の知財担当への確認を推奨（47条の5 には政令基準の遵守要件がある）。
 5. **リンク切れ対策**: `dateAccessed`（最終確認日）を必須とし、可能なら Web アーカイブの
    スナップショットを `archivedAt` に記録する。CI で定期リンクチェックを行う。
-6. 対象は当面 CC ライセンスの教材（ND 含む）とし、CC 以外の外部教材の目録化は将来判断する。
-   外部教材のライセンス表記は CC 系 URL であれば旧版（2.x/3.0・国別ポート含む）も受理する
-   （スキーマ上 `referenced` のみ。ホスト型は 4.0 系に限定）。
+6. **対象の範囲（2026-07-21 決定）**: 外部教材は再利用可否で3区分し、いずれも目録化できる。
+   `license` か `usageTerms` の少なくとも一方が必須（スキーマで強制。ホスト型は `usageTerms` 不可）。
+   - **CC ライセンス** — `license` に記録。旧版（2.x/3.0・国別ポート含む）は `referenced` に限り受理
+     （ホスト型は 4.0 系のみ）
+   - **独自条件で再利用可**（例: 名大の授業 = 非営利教育目的での複製・改変・配布可＋クレジット義務）
+     — `usageTerms: {url, summary, reuse: allowed_with_conditions}` に記録
+   - **再利用不可・視聴のみ**（例: UTokyo Channel = 利用規約が複製・頒布を禁止）
+     — `usageTerms.reuse: not_allowed`。目録ページに警告表示、カタログに「再利用不可」カテゴリを
+     付与して発見用途に限定する。ライセンス変化を `wayback.py --check` とあわせ定期確認する
+
+7. **出典の説明文の利用（`quotedDescription`）**: 出典サイトの「授業の内容」等の原文を使いたい場合は、
+   `description`（自作・CC0）とは別の `quotedDescription: {text, source, note}` に入れる。
+   - 目録ページにのみ**引用ブロック＋出所明示**で表示し、CC0 の `catalog.json` / JSON-LD には含めない
+     （転載文を CC0 で再配布することになり、出典の権利と衝突するため）
+   - 根拠は出典により異なる: 再利用許諾のあるサイト（名大型）は先方の利用条件に基づく転載、
+     許諾のないサイト（東大型）は著作権法32条の引用（明瞭区別・出所明示・主従関係を満たす表示にする）
 
 記入例: [resources/sample-external-nd-course/metadata.yaml](../resources/sample-external-nd-course/metadata.yaml)
 （`referenced` エントリは `content/` ディレクトリを持たない）
@@ -378,6 +394,15 @@ ND（改変禁止）系の教材は 5R を満たさないため本体をホス�
 AIメタデータ生成パイプライン（`tools/` 実装時の想定）:
 取得 → テキスト抽出（PDF・字幕・書き起こし） → LLM によるスキーマ制約付き生成
 （[resource.schema.json](../schemas/resource.schema.json) を出力制約に使う） → 人手レビュー（PR） → 公開
+
+**コードと LLM の役割分担**（[tools/extract.py](../tools/extract.py) の実測に基づく）:
+
+| 対象 | 手段 | 理由・実測 |
+|------|------|-----------|
+| `quotedDescription`（原文の転載） | **コード** | LLM に書かせると改変・幻覚が入り「原文のまま」を保証できない。JSON-LD → meta（サイト共通の定型文は自動除外）→ ラベル辞書の3段階で、説明文があるページなら 63〜100% 抽出できた（旧東大100%・ICU 84%・北大63%） |
+| 候補が複数あるときの選択 | LLM／人手 | 名大のコースページは4候補（うち1つは表の見出しの誤検出）が出る |
+| ラベルも meta も無いサイト | LLM | 例: 上智（候補0%） |
+| `description`（CC0 の自作要約） | LLM／人手 | 転載ではない要約なので、そもそもコードで作るものではない。**説明文が存在しないページ**（例: 京大の最終講義ページは構造化メタデータのみで本文説明が無い）もこの経路で書く |
 
 ## 8. 相互運用性と配信
 
@@ -419,7 +444,15 @@ AIメタデータ生成パイプライン（`tools/` 実装時の想定）:
   2. 語彙キーの存在検証（`vocabularies/*.yaml` との突合）
   3. slug とディレクトリ名の一致、`license` 許可リスト、リンク切れ
   4. （将来）生成 JSON-LD を AMB 同梱の JSON Schema でも検証
-- レビュー体制: リソース追加・変更は PR とし、内容レビュー（教育的観点）とメタデータレビュー（機械検証＋目視）を分ける。
+- レビュー体制: リソース追加・変更は PR とする（[チェックリスト](review-checklist.md)・
+  [PR テンプレート](../.github/pull_request_template.md)）。**機械で確認できることは機械に任せ、
+  レビューでは人にしか判断できない項目に集中する**という分担にする:
+  - 機械: 必須項目・型・語彙キー（スキーマ）、**引用文が原文のままか**（`--check-quotes` が
+    キャッシュと文字列照合し改変を検出）、`description` が引用の丸写しでないか、リンク生存
+  - 人: 事実の正しさ（著者・年・URL の取り違え）、**ライセンス／利用条件の読み取り**、
+    内容紹介が自分の言葉になっているか、分類の妥当性
+- CI（[.github/workflows/](../.github/workflows/)）: PR ごとに `validate` + `build_catalog`。
+  外部リンクの確認は外部サイトを叩くため分離し、週1回 `linkcheck` で実施する。
 
 ## 10. 次のステップ
 

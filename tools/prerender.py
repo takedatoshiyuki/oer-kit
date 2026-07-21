@@ -41,6 +41,15 @@ PROVENANCE_METHOD_LABEL = {
     "ai_generated": "AI 生成（人手レビュー済み）",
 }
 
+REUSE_LABEL = {
+    "allowed_with_conditions": "条件付き再利用可（独自ライセンス）",
+    "not_allowed": "再利用不可（視聴のみ）",
+}
+REUSE_CATEGORY = {
+    "allowed_with_conditions": "条件付き再利用可",
+    "not_allowed": "再利用不可",
+}
+
 
 def license_label(value: str) -> str:
     if value in SPDX_LABEL:
@@ -89,7 +98,11 @@ def jsonld_script(doc) -> str:
 def tasl_line(meta, url, config, lang) -> str:
     authors = "、".join(agent_names(meta.get("creator"), lang))
     title = localized(meta["name"], lang)
-    return f"{authors}「{title}」{config['site_name']}. {license_label(meta['license'])}. {url}"
+    if meta.get("license"):
+        rights = license_label(meta["license"])
+    else:
+        rights = REUSE_LABEL.get(meta.get("usageTerms", {}).get("reuse"), "")
+    return f"{authors}「{title}」{config['site_name']}. {rights}. {url}"
 
 
 def text_item(value, lang) -> str:
@@ -109,9 +122,26 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_tru
                          "参照してください。")
         lines += [":::", ""]
 
+    terms = meta.get("usageTerms")
+    if terms:
+        kind = "warning" if terms["reuse"] == "not_allowed" else "note"
+        lines += [f'::: {{.callout-{kind} title="{REUSE_LABEL[terms["reuse"]]}"}}',
+                  f"{localized(terms['summary'], lang)}（[利用条件の原文]({terms['url']})）",
+                  ":::", ""]
+
     # 概要はタイトル直下 (front matter の description) に出る。切り詰めた場合のみ全文を本文へ
     if description_truncated:
         lines += [localized(meta["description"], lang), ""]
+
+    quoted = meta.get("quotedDescription")
+    if quoted:
+        text = quoted["text"]
+        values = [text] if isinstance(text, str) else list(text.values())
+        for value in values:
+            lines += [f"> {l}" for l in value.strip().splitlines()]
+            lines.append(">")
+        source_label = quoted.get("note") or "出典サイトの説明"
+        lines += [f"> — {source_label}: <{quoted['source']}>", ""]
 
     rows = []
 
@@ -126,7 +156,11 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_tru
     add("言語", "、".join(meta.get("inLanguage", [])))
     add("標準学習時間", duration_label(meta.get("timeRequired", "")))
     add("再生時間", duration_label(meta.get("duration", "")))
-    add("ライセンス", f"[{license_label(meta['license'])}]({expand_license(meta['license'])})")
+    if meta.get("license"):
+        add("ライセンス", f"[{license_label(meta['license'])}]({expand_license(meta['license'])})")
+    terms = meta.get("usageTerms")
+    if terms:
+        add("利用条件", f"[{REUSE_LABEL[terms['reuse']]}]({terms['url']})")
     add("公開日", meta.get("datePublished"))
     add("更新日", meta.get("dateModified"))
     add("版", meta.get("version"))
@@ -231,6 +265,8 @@ def main() -> int:
         categories = (concept_labels(meta, "learningResourceType", vocabs, lang)
                       + concept_labels(meta, "about", vocabs, lang)
                       + concept_labels(meta, "educationalLevel", vocabs, lang))
+        if meta.get("usageTerms"):
+            categories.append(REUSE_CATEGORY[meta["usageTerms"]["reuse"]])
         if categories:
             front["categories"] = categories
         image = meta.get("image")

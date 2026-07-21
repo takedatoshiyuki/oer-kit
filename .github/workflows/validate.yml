@@ -1,0 +1,23 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+      - name: メタデータ検証（スキーマ・語彙・運用ポリシー）
+        run: python3 tools/validate.py
+      - name: JSON-LD / catalog.json の生成確認
+        run: python3 tools/build_catalog.py
+
+# 外部リンクの生存確認は外部サイトへアクセスするため、PR ごとには走らせない
+# （週1回の linkcheck.yml で実施）。

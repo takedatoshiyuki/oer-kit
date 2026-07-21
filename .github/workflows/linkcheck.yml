@@ -1,0 +1,20 @@
+name: linkcheck
+
+# referenced エントリの外部リンクは切れる。週1回まとめて確認する
+# （PR ごとに外部サイトを叩かないよう validate とは分けている）。
+on:
+  schedule:
+    - cron: "0 3 * * 1"   # 毎週月曜 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema requests
+      - name: リンク生存・Wayback スナップショット確認
+        run: python3 tools/wayback.py --check

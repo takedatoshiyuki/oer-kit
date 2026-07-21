@@ -95,7 +95,13 @@ def build_jsonld(slug, meta, config, vocabs):
     if meta.get("alternateName"):
         doc["alternateName"] = localized(meta["alternateName"], lang)
     doc["inLanguage"] = meta["inLanguage"]
-    doc["license"] = {"id": expand_license(meta["license"])}
+    if meta.get("license"):
+        doc["license"] = {"id": expand_license(meta["license"])}
+    if meta.get("usageTerms"):
+        terms = meta["usageTerms"]
+        doc["usageInfo"] = {"id": terms["url"], "description": localized(terms["summary"], lang)}
+    # quotedDescription (出典からの転載・引用文) は CC0 エクスポートに含めない (§7.3)。
+    # ページ表示のみ prerender が行う。
 
     for field in ("creator", "contributor", "publisher", "funder"):
         if meta.get(field):
