@@ -42,6 +42,25 @@ def safe_filename(url: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]", "_", name)
 
 
+def repair_candidates(url: str):
+    """壊れたパーセントエンコードの復元候補を優先順に返す。
+
+    名大の一部ページは、空白を含むファイル名のリンクのエンコードが崩れている
+    (実測): `%20` が `20%25` / `20%` に化ける、`%25` のまま残る、など。
+    例: `western20%25blot.pdf` → `western%20blot.pdf`
+        `4_amino20%acids.pdf`  → `4_amino%20acids.pdf`
+        `answers%25for%25HW.pdf` → `answers%20for%20HW.pdf`
+    """
+    seen = {url}
+    for candidate in (re.sub(r"20%25", "%20", url),
+                      re.sub(r"20%", "%20", url),
+                      re.sub(r"%25", "%20", url),
+                      re.sub(r"20%25", "%20", re.sub(r"%25", "%20", url))):
+        if candidate not in seen:
+            seen.add(candidate)
+            yield candidate
+
+
 def build_credit(meta, lang) -> str:
     """クレジット表示の素材 (例: © 2005 岩崎 雄吾（名古屋大学）)。書式はサイト要求に応じ調整。"""
     year = str(meta.get("datePublished", ""))[:4]
@@ -54,6 +73,12 @@ def build_credit(meta, lang) -> str:
 
 def download(url: str, dest: Path, session: requests.Session, timeout=120):
     r = session.get(url, timeout=timeout, stream=True)
+    if r.status_code == 404:
+        for candidate in repair_candidates(url):
+            r2 = session.get(candidate, timeout=timeout, stream=True)
+            if r2.ok:
+                r = r2
+                break
     r.raise_for_status()
     sha = hashlib.sha256()
     size = 0
@@ -63,11 +88,17 @@ def download(url: str, dest: Path, session: requests.Session, timeout=120):
             f.write(chunk)
             sha.update(chunk)
             size += len(chunk)
-    if dest.suffix.lower() == ".pdf" and not tmp.read_bytes()[:5].startswith(b"%PDF"):
-        tmp.unlink()
-        raise ValueError("PDF マジックバイト不一致 (サインイン要求ページ等の可能性)")
+    head = tmp.read_bytes()[:5]
+    type_mismatch = ""
+    if dest.suffix.lower() == ".pdf" and not head.startswith(b"%PDF"):
+        if head[:1] == b"<":
+            # HTML が返っている = サインイン要求・エラーページ。保存しない
+            tmp.unlink()
+            raise ValueError("PDF でなく HTML が返された (サインイン要求・エラーページの可能性)")
+        # PDF ではないが実体のあるファイル (拡張子の誤り)。保存して印を残す
+        type_mismatch = f"拡張子は .pdf だが内容が異なる (先頭バイト {head.hex()})"
     tmp.rename(dest)
-    return sha.hexdigest(), size, r.headers.get("Content-Type", "")
+    return sha.hexdigest(), size, r.headers.get("Content-Type", ""), type_mismatch
 
 
 def harvest_resource(slug, meta, config, session, limit=0, force=False):
@@ -112,7 +143,7 @@ def harvest_resource(slug, meta, config, session, limit=0, force=False):
             print(f"  = {dest.name} (既存)")
         else:
             try:
-                sha256, size, content_type = download(url, dest, session)
+                sha256, size, content_type, type_mismatch = download(url, dest, session)
             except Exception as error:
                 entry["error"] = f"{type(error).__name__}: {error}"[:200]
                 print(f"  ! {dest.name}: {entry['error']}")
@@ -120,7 +151,10 @@ def harvest_resource(slug, meta, config, session, limit=0, force=False):
                 continue
             entry.update({"sha256": sha256, "bytes": size,
                           "contentType": content_type or mimetypes.guess_type(url)[0] or ""})
-            print(f"  + {dest.name} ({size:,} bytes)")
+            if type_mismatch:
+                entry["warning"] = type_mismatch
+            print(f"  + {dest.name} ({size:,} bytes)"
+                  + (f"  ※{type_mismatch}" if type_mismatch else ""))
             count += 1
             time.sleep(sleep_seconds)
         manifest["files"].append(entry)
