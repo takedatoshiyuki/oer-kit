@@ -1,0 +1,34 @@
+# 想定利用者語彙: LRMI Educational Audience Role (DCMI)
+# 出所: https://www.dublincore.org/specifications/lrmi/concept_schemes/educationalAudienceRole/
+# 日本語ラベルは本リポジトリによる参考訳。
+# metadata.yaml の audience には key を書く。
+
+scheme:
+  id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/
+  name: LRMI Educational Audience Role
+
+concepts:
+  - key: student
+    id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/student
+    prefLabel: { ja: 学習者, en: student }
+  - key: teacher
+    id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/teacher
+    prefLabel: { ja: 教員, en: teacher }
+  - key: administrator
+    id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/administrator
+    prefLabel: { ja: 教育管理者, en: administrator }
+  - key: general_public
+    id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/generalPublic
+    prefLabel: { ja: 一般, en: general public }
+  - key: mentor
+    id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/mentor
+    prefLabel: { ja: メンター, en: mentor }
+  - key: parent
+    id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/parent
+    prefLabel: { ja: 保護者, en: parent }
+  - key: peer_tutor
+    id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/peerTutor
+    prefLabel: { ja: ピアチューター, en: peer tutor }
+  - key: professional
+    id: http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/professional
+    prefLabel: { ja: 実務者・専門職, en: professional }

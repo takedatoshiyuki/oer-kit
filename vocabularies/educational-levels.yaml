@@ -1,0 +1,37 @@
+# 教育段階語彙: 本リポジトリ定義 (日本の学校段階 + ISCED 2011 対応)
+# scheme.id は公開URL確定後に実URLへ差し替える。
+# isced は ISCED 2011 レベルへの対応 (closeMatch)。null は ISCED 対応なし。
+# metadata.yaml の educationalLevel には key を書く。
+
+scheme:
+  id: https://oer.example.ac.jp/vocab/educational-level
+  name: 教育段階 (本リポジトリ定義)
+
+concepts:
+  - key: preschool
+    prefLabel: { ja: 就学前教育, en: Pre-primary education }
+    isced: "0"
+  - key: primary
+    prefLabel: { ja: 小学校, en: Primary education }
+    isced: "1"
+  - key: lower_secondary
+    prefLabel: { ja: 中学校, en: Lower secondary education }
+    isced: "2"
+  - key: upper_secondary
+    prefLabel: { ja: 高等学校, en: Upper secondary education }
+    isced: "3"
+  - key: short_cycle_tertiary
+    prefLabel: { ja: 短期高等教育（短大・高専・専門学校）, en: Short-cycle tertiary education }
+    isced: "5"
+  - key: bachelor
+    prefLabel: { ja: 学士課程（大学学部）, en: "Bachelor's level" }
+    isced: "6"
+  - key: master
+    prefLabel: { ja: 修士課程, en: "Master's level" }
+    isced: "7"
+  - key: doctoral
+    prefLabel: { ja: 博士課程, en: Doctoral level }
+    isced: "8"
+  - key: continuing_education
+    prefLabel: { ja: 生涯学習・リカレント教育, en: Continuing education }
+    isced: null

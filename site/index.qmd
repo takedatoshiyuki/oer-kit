@@ -1,0 +1,15 @@
+---
+title: "カタログ"
+page-layout: full
+listing:
+  contents:
+    - "r/*/index.qmd"
+  type: default
+  sort: "date desc"
+  sort-ui: [date, title]
+  filter-ui: true
+  categories: true
+  fields: [date, title, author, description, categories]
+---
+
+公開中の教材の一覧です。カテゴリ（教材タイプ・主題分野・教育段階）や検索で絞り込めます。

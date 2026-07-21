@@ -1,0 +1,391 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://oer.example.ac.jp/schemas/resource.schema.json",
+  "title": "OER リソースメタデータ (metadata.yaml)",
+  "description": "1リソース1ディレクトリに置く metadata.yaml の正規仕様。schema.org/LRMI (AMBプロファイル) 準拠の JSON-LD へ機械変換できる形に限定する。$id のドメインは公開URL確定後に差し替えること。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "description",
+    "inLanguage",
+    "license",
+    "creator",
+    "learningResourceType",
+    "about",
+    "datePublished"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "mode": { "const": "referenced" } },
+        "required": ["mode"]
+      },
+      "then": {
+        "required": ["externalUrl", "dateAccessed", "metadataProvenance"]
+      },
+      "else": {
+        "properties": {
+          "license": {
+            "oneOf": [
+              { "enum": ["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0", "CC-BY-NC-4.0", "CC-BY-NC-SA-4.0"] },
+              {
+                "type": "string",
+                "pattern": "^https://creativecommons\\.org/(licenses/(by|by-sa|by-nc|by-nc-sa)/4\\.0|publicdomain/(zero|mark)/1\\.0)/$"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "slug": {
+      "description": "リポジトリ内ID。省略時はディレクトリ名。公開後は変更しない。",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "mode": {
+      "description": "hosted: 教材本体を本リポジトリで保持 (既定) / referenced: 外部教材をメタデータのみで目録化するリンク参照エントリ (docs/design.md §7.3)",
+      "enum": ["hosted", "referenced"],
+      "default": "hosted"
+    },
+    "externalUrl": {
+      "description": "referenced で必須: 教材本体の所在URL (JSON-LD の id になる)",
+      "$ref": "#/$defs/httpUri"
+    },
+    "type": {
+      "description": "schema.org 型。省略時は [LearningResource]。追記する場合も LearningResource を必ず含める。",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[A-Za-z]+$" },
+      "contains": { "const": "LearningResource" },
+      "minItems": 1
+    },
+    "name": { "$ref": "#/$defs/localizedText", "description": "タイトル" },
+    "alternateName": { "$ref": "#/$defs/localizedText", "description": "別題・略称" },
+    "description": { "$ref": "#/$defs/localizedText", "description": "概要 (1〜3文)" },
+    "inLanguage": {
+      "description": "教材本体の言語 (BCP 47)。先頭が主言語。",
+      "type": "array",
+      "items": { "$ref": "#/$defs/languageTag" },
+      "minItems": 1
+    },
+    "license": {
+      "description": "リソース全体のライセンス。SPDX ID または CC の正規URL。自作の既定は CC0 推奨、派生物は元素材の継承義務に従う (docs/design.md §7.2)。ND系は mode=referenced (リンク参照エントリ) でのみ可 — トップレベル allOf の条件で強制。",
+      "oneOf": [
+        {
+          "enum": ["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0", "CC-BY-NC-4.0", "CC-BY-NC-SA-4.0", "CC-BY-ND-4.0", "CC-BY-NC-ND-4.0"]
+        },
+        {
+          "type": "string",
+          "pattern": "^https://creativecommons\\.org/(licenses/(by|by-sa|by-nc|by-nc-sa|by-nd|by-nc-nd)/[0-9]\\.[0-9](/[a-z]{2})?|publicdomain/(zero|mark)/1\\.0)/$"
+        }
+      ]
+    },
+    "creator": {
+      "description": "著者 (Person/Organization)",
+      "type": "array",
+      "items": { "$ref": "#/$defs/agent" },
+      "minItems": 1
+    },
+    "contributor": {
+      "description": "翻訳・編集協力など",
+      "type": "array",
+      "items": { "$ref": "#/$defs/agent" }
+    },
+    "publisher": {
+      "description": "公開主体",
+      "type": "array",
+      "items": { "$ref": "#/$defs/agent" }
+    },
+    "funder": {
+      "description": "助成機関",
+      "type": "array",
+      "items": { "$ref": "#/$defs/agent" }
+    },
+    "datePublished": { "$ref": "#/$defs/isoDate", "description": "初公開日" },
+    "dateModified": { "$ref": "#/$defs/isoDate", "description": "最終更新日 (Gitから自動化可)" },
+    "dateAccessed": { "$ref": "#/$defs/isoDate", "description": "referenced で必須: 外部教材を最後に確認した日" },
+    "archivedAt": { "$ref": "#/$defs/httpUri", "description": "Webアーカイブ等のスナップショットURL (リンク切れ対策)" },
+    "version": {
+      "description": "大改訂の版 (例 2.0.0)",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$"
+    },
+    "learningResourceType": {
+      "description": "教材タイプ。vocabularies/learning-resource-types.yaml のキー (HCRT)",
+      "type": "array",
+      "items": { "$ref": "#/$defs/conceptRef" },
+      "minItems": 1
+    },
+    "about": {
+      "description": "主題分野。vocabularies/subjects.yaml のキー (SPARC Rosetta Stone に合わせ必須)",
+      "type": "array",
+      "items": { "$ref": "#/$defs/conceptRef" },
+      "minItems": 1
+    },
+    "keywords": {
+      "description": "自由キーワード",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "audience": {
+      "description": "想定利用者。vocabularies/audiences.yaml のキー",
+      "type": "array",
+      "items": { "$ref": "#/$defs/conceptRef" }
+    },
+    "educationalLevel": {
+      "description": "教育段階。vocabularies/educational-levels.yaml のキー",
+      "type": "array",
+      "items": { "$ref": "#/$defs/conceptRef" }
+    },
+    "teaches": {
+      "description": "学習成果 (「〜できる」形式の文、またはコンピテンシー語彙の概念参照)",
+      "type": "array",
+      "items": { "$ref": "#/$defs/textOrConcept" }
+    },
+    "assesses": {
+      "description": "評価対象のコンピテンシー",
+      "type": "array",
+      "items": { "$ref": "#/$defs/textOrConcept" }
+    },
+    "competencyRequired": {
+      "description": "前提知識",
+      "type": "array",
+      "items": { "$ref": "#/$defs/textOrConcept" }
+    },
+    "educationalUse": {
+      "description": "想定用途 (例: 反転授業の予習用)",
+      "type": "array",
+      "items": { "$ref": "#/$defs/textOrConcept" }
+    },
+    "interactivityType": {
+      "description": "LOM由来の3値",
+      "enum": ["active", "expositive", "mixed"]
+    },
+    "timeRequired": { "$ref": "#/$defs/isoDuration", "description": "標準学習時間 (例 PT90M)" },
+    "duration": { "$ref": "#/$defs/isoDuration", "description": "動画・音声の再生時間" },
+    "image": {
+      "description": "サムネイル (リソース内相対パスまたはURL)",
+      "type": "string",
+      "minLength": 1
+    },
+    "isBasedOn": {
+      "description": "改変元教材のURL (リミックス系譜)",
+      "type": "array",
+      "items": { "$ref": "#/$defs/httpUri" }
+    },
+    "hasPart": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/httpUri" }
+    },
+    "isPartOf": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/httpUri" }
+    },
+    "sameAs": {
+      "description": "DOI や他プラットフォーム上の同一物",
+      "type": "array",
+      "items": { "$ref": "#/$defs/httpUri" }
+    },
+    "conditionsOfAccess": {
+      "description": "アクセス条件 (登録が必要な場合など。原則不要)",
+      "type": "string"
+    },
+    "encoding": {
+      "description": "配布ファイル形式。外部ホスト (動画等) の参照にも使う",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["format"],
+        "properties": {
+          "format": { "type": "string", "minLength": 1, "description": "IANAメディアタイプ推奨 (例 application/pdf)" },
+          "contentUrl": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "curriculumAlignment": {
+      "description": "K-12拡張: 学習指導要領コード (16桁)。学習指導要領LODのURIがあれば uri に併記",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^[0-9A-Za-z]{16}$" },
+          "label": { "type": "string" },
+          "uri": { "$ref": "#/$defs/httpUri" }
+        }
+      }
+    },
+    "accessibility": {
+      "description": "schema.org アクセシビリティ・プロパティ群",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "accessMode": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "例: textual, visual, auditory, tactile"
+        },
+        "accessModeSufficient": {
+          "type": "array",
+          "items": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "description": "単独で内容を得られるモードの組合せのリスト"
+        },
+        "accessibilityFeature": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "例: alternativeText, captions, transcript, readingOrder, MathML"
+        },
+        "accessibilityHazard": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "例: flashing / noFlashingHazard, sound / noSoundHazard"
+        },
+        "accessibilitySummary": { "$ref": "#/$defs/localizedText" }
+      }
+    },
+    "attributions": {
+      "description": "収録した第三者素材の帰属表示 (TASL)",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "author": { "type": "string" },
+          "source": { "type": "string" },
+          "license": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "metadataProvenance": {
+      "description": "このメタデータ自体の作成来歴。AI生成 (ai_generated/ai_assisted) の場合は公開前の人手レビューが必須 (docs/design.md §7.3)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method"],
+      "properties": {
+        "method": { "enum": ["manual", "ai_assisted", "ai_generated"] },
+        "generator": { "type": "string", "description": "使用したモデル・ツール名" },
+        "generatedDate": { "$ref": "#/$defs/isoDate" },
+        "reviewedBy": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "公開前レビューの担当者名"
+        },
+        "notes": { "type": "string" }
+      },
+      "if": {
+        "properties": { "method": { "enum": ["ai_assisted", "ai_generated"] } }
+      },
+      "then": {
+        "required": ["reviewedBy"],
+        "properties": { "reviewedBy": { "minItems": 1 } }
+      }
+    },
+    "extensions": {
+      "description": "実験的・ローカル項目の置き場。スキーマ検証の対象外",
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "languageTag": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{1,8})*$"
+    },
+    "localizedText": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-z]{2,3}(-[A-Za-z0-9]{1,8})*$": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "isoDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "isoDuration": {
+      "type": "string",
+      "pattern": "^P(?=.)([0-9]+Y)?([0-9]+M)?([0-9]+W)?([0-9]+D)?(T(?=.)([0-9]+H)?([0-9]+M)?([0-9]+(\\.[0-9]+)?S)?)?$"
+    },
+    "httpUri": {
+      "type": "string",
+      "pattern": "^https?://[^\\s]+$"
+    },
+    "vocabKey": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "conceptRef": {
+      "description": "統制語彙のキー、または語彙外の概念の直書き {id, prefLabel}",
+      "oneOf": [
+        { "$ref": "#/$defs/vocabKey" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id"],
+          "properties": {
+            "id": { "$ref": "#/$defs/httpUri" },
+            "prefLabel": { "$ref": "#/$defs/localizedText" }
+          }
+        }
+      ]
+    },
+    "textOrConcept": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id"],
+          "properties": {
+            "id": { "$ref": "#/$defs/httpUri" },
+            "prefLabel": { "$ref": "#/$defs/localizedText" }
+          }
+        }
+      ]
+    },
+    "agent": {
+      "description": "Person または Organization。type 省略時は Person とみなす。orcid は Person、ror は Organization でのみ意味を持つ",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "type": { "enum": ["Person", "Organization"] },
+        "name": { "$ref": "#/$defs/localizedText" },
+        "orcid": {
+          "type": "string",
+          "pattern": "^(https://orcid\\.org/)?[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+        },
+        "ror": {
+          "type": "string",
+          "pattern": "^(https://ror\\.org/)?0[a-z0-9]{8}$"
+        },
+        "url": { "$ref": "#/$defs/httpUri" },
+        "affiliation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": { "$ref": "#/$defs/localizedText" },
+            "ror": {
+              "type": "string",
+              "pattern": "^(https://ror\\.org/)?0[a-z0-9]{8}$"
+            },
+            "url": { "$ref": "#/$defs/httpUri" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+# 記入例 (サンプルリソース)。実在の教材ではありません。
+# 正規仕様: schemas/resource.schema.json / 解説: docs/design.md §5
+
+slug: intro-statistics-slides
+type: [LearningResource, PresentationDigitalDocument]
+
+name:
+  ja: 統計学入門 講義スライド
+  en: Introduction to Statistics — Lecture Slides
+description:
+  ja: >-
+    記述統計・確率分布・推定・仮説検定までを扱う半期15回分の講義スライド一式。
+    表計算ソフトによる演習課題を含む。
+inLanguage: [ja]
+
+license: CC-BY-4.0
+creator:
+  - type: Person
+    name: 山田 太郎              # 例
+    orcid: 0000-0000-0000-0000   # 例 (実際は本人のORCID)
+    affiliation:
+      name: ○○大学
+publisher:
+  - type: Organization
+    name: ○○大学 オープンエデュケーションセンター
+datePublished: "2026-07-21"
+version: "1.0"
+
+learningResourceType: [slide, worksheet]
+about: [natural_sciences_math]
+keywords: [統計学, 記述統計, 確率分布, 仮説検定, 表計算演習]
+audience: [student, teacher]
+educationalLevel: [bachelor]
+
+teaches:
+  - 記述統計量を用いてデータの分布を要約・説明できる
+  - 標本と母集団の関係を確率分布の言葉で説明できる
+  - 帰無仮説検定の枠組みを説明し、t検定を適用できる
+competencyRequired:
+  - 高等学校数学Ⅰ程度の数式操作
+timeRequired: PT22H30M   # 90分 × 15回
+educationalUse:
+  - 講義用スライドおよび自習用資料
+
+image: assets/cover.png
+encoding:
+  - format: text/markdown          # content/ 内の編集可能ソース
+  - format: application/pdf        # ビルドで生成する配布形式
+
+accessibility:
+  accessMode: [textual, visual]
+  accessModeSufficient: [[textual]]
+  accessibilityFeature: [alternativeText, readingOrder]
+  accessibilityHazard: [noFlashingHazard, noMotionSimulationHazard, noSoundHazard]
+  accessibilitySummary:
+    ja: 全図版に代替テキストを付与。スクリーンリーダーでの読み上げ順を確認済み。
+
+attributions:
+  - title: Iris データセット
+    author: R. A. Fisher
+    source: https://archive.ics.uci.edu/dataset/53/iris
+    license: CC BY 4.0
+    note: 第10回の演習用データとして同梱

@@ -1,0 +1,20 @@
+# ビルド成果物
+_site/
+
+# Quarto の生成物 (site/_quarto.yml は prerender が config.yaml から生成)
+site/_quarto.yml
+site/r/
+site/.quarto/
+
+# 取得キャッシュ・作業ファイル (公開物ではない)
+.cache/
+
+# レビュー前の下書き
+drafts/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

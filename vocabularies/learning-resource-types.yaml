@@ -1,0 +1,88 @@
+# 教材タイプ語彙: HCRT (Higher Education Resource Types)
+# 出所: https://w3id.org/kim/hcrt/scheme (DINI-AG KIM, SKOS)
+# 日本語ラベルは本リポジトリによる参考訳。
+# metadata.yaml の learningResourceType には key を書く。
+
+scheme:
+  id: https://w3id.org/kim/hcrt/scheme
+  name: Higher Education Resource Types (HCRT)
+
+concepts:
+  - key: application
+    id: https://w3id.org/kim/hcrt/application
+    prefLabel: { ja: ソフトウェア・アプリケーション, en: Software Application }
+  - key: assessment
+    id: https://w3id.org/kim/hcrt/assessment
+    prefLabel: { ja: 評価・試験問題, en: Assessment }
+  - key: audio
+    id: https://w3id.org/kim/hcrt/audio
+    prefLabel: { ja: 音声, en: Audio Recording }
+  - key: case_study
+    id: https://w3id.org/kim/hcrt/case_study
+    prefLabel: { ja: ケーススタディ, en: Case Study }
+  - key: course
+    id: https://w3id.org/kim/hcrt/course
+    prefLabel: { ja: コース, en: Course }
+  - key: data
+    id: https://w3id.org/kim/hcrt/data
+    prefLabel: { ja: データ, en: Data }
+  - key: diagram
+    id: https://w3id.org/kim/hcrt/diagram
+    prefLabel: { ja: 図表, en: Diagram }
+  - key: drill_and_practice
+    id: https://w3id.org/kim/hcrt/drill_and_practice
+    prefLabel: { ja: ドリル・練習問題, en: Drill and Practice }
+  - key: educational_game
+    id: https://w3id.org/kim/hcrt/educational_game
+    prefLabel: { ja: 教育ゲーム, en: Educational Game }
+  - key: experiment
+    id: https://w3id.org/kim/hcrt/experiment
+    prefLabel: { ja: 実験, en: Experiment }
+  - key: image
+    id: https://w3id.org/kim/hcrt/image
+    prefLabel: { ja: 画像, en: Image }
+  - key: index
+    id: https://w3id.org/kim/hcrt/index
+    prefLabel: { ja: 索引・リンク集, en: Reference Work }
+  - key: lesson_plan
+    id: https://w3id.org/kim/hcrt/lesson_plan
+    prefLabel: { ja: 指導案・授業計画, en: Lesson Plan }
+  - key: map
+    id: https://w3id.org/kim/hcrt/map
+    prefLabel: { ja: 地図, en: Map }
+  - key: portal
+    id: https://w3id.org/kim/hcrt/portal
+    prefLabel: { ja: ポータル, en: Web Portal }
+  - key: questionnaire
+    id: https://w3id.org/kim/hcrt/questionnaire
+    prefLabel: { ja: 質問紙・アンケート, en: Questionnaire }
+  - key: script
+    id: https://w3id.org/kim/hcrt/script
+    prefLabel: { ja: 講義資料・講義ノート, en: Script }
+  - key: sheet_music
+    id: https://w3id.org/kim/hcrt/sheet_music
+    prefLabel: { ja: 楽譜, en: Sheet Music }
+  - key: simulation
+    id: https://w3id.org/kim/hcrt/simulation
+    prefLabel: { ja: シミュレーション, en: Simulation }
+  - key: slide
+    id: https://w3id.org/kim/hcrt/slide
+    prefLabel: { ja: スライド, en: "Slide(s)" }
+  - key: text
+    id: https://w3id.org/kim/hcrt/text
+    prefLabel: { ja: 文書・テキスト, en: Text }
+  - key: textbook
+    id: https://w3id.org/kim/hcrt/textbook
+    prefLabel: { ja: 教科書, en: Textbook }
+  - key: video
+    id: https://w3id.org/kim/hcrt/video
+    prefLabel: { ja: 動画, en: Video }
+  - key: web_page
+    id: https://w3id.org/kim/hcrt/web_page
+    prefLabel: { ja: ウェブページ, en: Web Page }
+  - key: worksheet
+    id: https://w3id.org/kim/hcrt/worksheet
+    prefLabel: { ja: ワークシート, en: Worksheet }
+  - key: other
+    id: https://w3id.org/kim/hcrt/other
+    prefLabel: { ja: その他, en: Other }

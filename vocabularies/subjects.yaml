@@ -1,0 +1,43 @@
+# 主題分野語彙: ISCED-F 2013 大分類 (UNESCO) + 日本語ラベル
+# まず大分類11分野から開始し、利用実態に応じて細分類 (ISCED-F 3桁等) を追加する。
+# K-12 の教科は curriculumAlignment (学習指導要領コード) 側で扱い、本語彙とは混ぜない。
+# metadata.yaml の about には key を書く。
+
+scheme:
+  id: https://oer.example.ac.jp/vocab/subject
+  name: 主題分野 (ISCED-F 2013 ベース)
+
+concepts:
+  - key: generic
+    prefLabel: { ja: 一般教養・共通, en: Generic programmes and qualifications }
+    iscedF: "00"
+  - key: education
+    prefLabel: { ja: 教育, en: Education }
+    iscedF: "01"
+  - key: arts_humanities
+    prefLabel: { ja: 人文学・芸術, en: Arts and humanities }
+    iscedF: "02"
+  - key: social_sciences
+    prefLabel: { ja: 社会科学・ジャーナリズム・情報, en: "Social sciences, journalism and information" }
+    iscedF: "03"
+  - key: business_law
+    prefLabel: { ja: 経営・行政・法学, en: "Business, administration and law" }
+    iscedF: "04"
+  - key: natural_sciences_math
+    prefLabel: { ja: 自然科学・数学・統計学, en: "Natural sciences, mathematics and statistics" }
+    iscedF: "05"
+  - key: ict
+    prefLabel: { ja: 情報通信技術, en: Information and Communication Technologies }
+    iscedF: "06"
+  - key: engineering
+    prefLabel: { ja: 工学・製造・建築, en: "Engineering, manufacturing and construction" }
+    iscedF: "07"
+  - key: agriculture
+    prefLabel: { ja: 農林水産・獣医学, en: "Agriculture, forestry, fisheries and veterinary" }
+    iscedF: "08"
+  - key: health_welfare
+    prefLabel: { ja: 保健・福祉, en: Health and welfare }
+    iscedF: "09"
+  - key: services
+    prefLabel: { ja: サービス, en: Services }
+    iscedF: "10"
