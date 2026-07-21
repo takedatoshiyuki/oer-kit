@@ -7,6 +7,7 @@ JSON Schema 検証に加え、スキーマでは表現しない運用ポリシ�
 - hosted は content/ を持つこと (警告) / referenced は持たないこと (警告)
 - NC 系ライセンスは非推奨 (警告)
 - description が quotedDescription の丸写しでないこと
+- リポジトリ横断の重複 (同じ externalUrl の二重登録、description の使い回し)
 
 使い方:
     python3 tools/validate.py                # resources/ 全件
@@ -18,6 +19,7 @@ JSON Schema 検証に加え、スキーマでは表現しない運用ポリシ�
 from __future__ import annotations
 
 import argparse
+import collections
 import json
 import re
 import sys
@@ -63,6 +65,61 @@ def check_quote_verbatim(meta):
                 errors.append(f"quotedDescription が原文と一致しない（改変の疑い）: 「{line[:40]}…」")
                 break
     return errors, []
+
+
+def check_duplicates(entries, existing=()):
+    """リポジトリ横断の重複検査。1件ずつの検証では見えない事故を捕まえる。
+
+    - 同じ externalUrl を二重に目録化していないか
+    - description が使い回されていないか（サイト共通の定型文を掴んだ、
+      AI が雛形的な文を量産した、などの兆候）
+    - 数字だけ違う description（年度違いの雛形）
+
+    entries: 今回検証した [(slug, meta)]、existing: 既存の [(slug, meta)]
+    """
+    findings = []
+    pool = list(entries) + [e for e in existing
+                            if e[0] not in {slug for slug, _ in entries}]
+    checked_slugs = {slug for slug, _ in entries}
+
+    def group(key_func, values_func):
+        groups = collections.defaultdict(list)
+        for slug, meta in pool:
+            for value in values_func(meta):
+                key = key_func(value)
+                if key:
+                    groups[key].append(slug)
+        # 今回検証した対象を含む重複だけを報告する
+        return {k: sorted(set(v)) for k, v in groups.items()
+                if len(set(v)) > 1 and checked_slugs & set(v)}
+
+    for url, slugs in group(lambda v: v, lambda m: [m.get("externalUrl")]).items():
+        findings.append(("ERROR", f"externalUrl の重複 ({', '.join(slugs)}): {url}"))
+
+    descriptions = group(_squash, lambda m: _text_values(m.get("description", "")))
+    for _key, slugs in descriptions.items():
+        findings.append(("ERROR",
+                         f"description が {len(slugs)} 件で同一 ({', '.join(slugs[:5])}"
+                         f"{' ほか' if len(slugs) > 5 else ''}): "
+                         "サイト共通の定型文を掴んでいないか確認すること"))
+
+    templated = group(lambda v: re.sub(r"\d+", "#", _squash(v)),
+                      lambda m: _text_values(m.get("description", "")))
+    for key, slugs in templated.items():
+        if key in {re.sub(r"\d+", "#", k) for k in descriptions}:
+            continue   # 完全一致として既に報告済み
+        findings.append(("warn",
+                         f"description が数字以外同一 ({', '.join(slugs[:5])}"
+                         f"{' ほか' if len(slugs) > 5 else ''}): 年度違いの雛形になっていないか"))
+
+    for _key, slugs in group(_squash,
+                             lambda m: _text_values((m.get("quotedDescription") or {}).get("text", ""))).items():
+        findings.append(("warn",
+                         f"quotedDescription が {len(slugs)} 件で同一 ({', '.join(slugs[:5])}"
+                         f"{' ほか' if len(slugs) > 5 else ''}): "
+                         "シリーズ共通の説明なら妥当、サイト定型文なら差し替えること"))
+
+    return findings
 
 
 def validate_resource(slug, resource_dir, meta, validator, vocabs, check_quotes=False):
@@ -129,8 +186,10 @@ def main() -> int:
     vocabs = load_all_vocabs(load_config())
 
     total = error_count = warning_count = 0
+    entries = []
     for slug, resource_dir, meta in iter_resources(args.paths or None):
         total += 1
+        entries.append((slug, meta or {}))
         errors, warnings = validate_resource(slug, resource_dir, meta, validator, vocabs,
                                              check_quotes=args.check_quotes)
         error_count += len(errors)
@@ -141,6 +200,18 @@ def main() -> int:
             print(f"  ERROR: {message}")
         for message in warnings:
             print(f"  warn:  {message}")
+
+    # 横断検査。対象を絞って実行した場合も既存リソース全件と突き合わせる
+    existing = [(s, m or {}) for s, _d, m in iter_resources()] if args.paths else []
+    findings = check_duplicates(entries, existing)
+    if findings:
+        print("--- 横断検査（重複）")
+        for level, message in findings:
+            print(f"  {'ERROR' if level == 'ERROR' else 'warn '}: {message}")
+            if level == "ERROR":
+                error_count += 1
+            else:
+                warning_count += 1
 
     print(f"---\n{total} 件検証: エラー {error_count} / 警告 {warning_count}")
     return 1 if error_count else 0
