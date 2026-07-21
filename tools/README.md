@@ -44,6 +44,9 @@ python3 tools/convert_legacy.py "<path>/output/ocw_kyoto_u.xlsx" --limit 10 --wi
 # ページから説明文の候補を抽出 (quotedDescription の下ごしらえ)
 python3 tools/extract.py <html|url> [--corpus <同一サイトのディレクトリ>]
 python3 tools/extract.py --survey <コーパス>   # サイト別の的中率を測る
+
+# 重複の原因調査: 各リソースの出力と原ページの抽出候補を1つの Markdown に集める
+python3 tools/diagnose.py [--slugs a b c] [--out report.md]
 ```
 
 ### 説明文の抽出方針（extract.py）
@@ -58,10 +61,22 @@ python3 tools/extract.py --survey <コーパス>   # サイト別の的中率を
 **LLM が必要なのは次の3つだけ**:
 
 1. 候補が複数あるときの選択（名大のコースページは「講義の概要／講義の内容／講義内容（表の見出し・誤検出）／
-   og:description」の4候補が出る）
+   og:description」の4候補が出る）。**同じサイトでも正解の手段はページごとに違う**
+   （0001 はラベル節、0002 は og:description が本文説明）ため、固定ルールでは決められない
 2. ラベルも meta も無いサイト（上智など）からの抽出
 3. `description`（自作・CC0 で提供する要約）の作成 — これは転載であってはならないので、
    そもそもコードで作るものではない
+
+### 重複が出たときの調べ方（diagnose.py）
+
+`validate.py` が「description が同一」と言ったら、`diagnose.py` で判断材料を集める。
+各リソースの現在の出力と、原ページから本来取れたはずの候補が並ぶので、
+「定型文を掴んでいたのか」「正しい説明文はどれか」「どの手段で取れるか」が一覧で分かる。
+
+集めるのはコード、吟味は人／LLM という分担にしてある（ツール側から LLM API は呼ばない）。
+理由: 診断はまれにしか起きず、結果は**ルールの修正**（`extract.py` のラベル辞書・
+定型文しきい値、生成プロンプト）という人が承認すべき変更になるため。
+CI を決定的・無料・オフラインに保つ意味もある。
 
 ## サイトのビルド (Quarto)
 
