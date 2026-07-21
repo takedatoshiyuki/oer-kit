@@ -51,6 +51,10 @@ python3 tools/diagnose.py [--slugs a b c] [--out report.md]
 # 教材ファイルリンクの抽出 (metadata.yaml の materials に貼れる YAML で出力)
 python3 tools/extract.py <html|url> --materials [--base-url <url>]
 
+# 各回が別ページの講座は --follow で深さ1巡回 (由来が materials[].page に入る)
+python3 tools/extract.py <コースURL> --materials --follow              # コースURL配下を各回とみなす (京大 ?video_id= 型)
+python3 tools/extract.py <コースURL> --materials --follow "/content/"  # 別パス型は正規表現で指定 (UTokyo Channel /content/?id= 型)
+
 # 教材ファイルの収集 (コーパス層 → archive_dir。権利ゲート・sha256・manifest付き)
 python3 tools/harvest.py drafts/<slug> [--limit N] [--force]
 ```

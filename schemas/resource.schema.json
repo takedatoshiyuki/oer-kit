@@ -220,6 +220,7 @@
         "properties": {
           "name": { "type": "string", "minLength": 1, "description": "表示名 (例: 講義ノート: Chapter 1)" },
           "contentUrl": { "type": "string", "minLength": 1 },
+          "page": { "$ref": "#/$defs/httpUri", "description": "ファイルが掲載されている各回ページ等のURL (由来。多ページ講座で使用)" },
           "format": { "type": "string", "description": "IANAメディアタイプ。省略時は拡張子から推定" },
           "bytes": { "type": "integer", "minimum": 0 },
           "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }

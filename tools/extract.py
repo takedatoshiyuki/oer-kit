@@ -146,6 +146,64 @@ def find_materials(html: str, base_url: str = ""):
     return out
 
 
+def _page_label(html: str) -> str:
+    m = re.search(r"<title[^>]*>(.*?)</title>", html, re.S | re.I)
+    if not m:
+        return ""
+    title = html_module.unescape(m.group(1))
+    return re.split(r"[|｜–—]", title)[0].strip()[:60]
+
+
+def collect_materials(start_url: str, follow: str | None = None, max_pages: int = 30):
+    """コースページから各回ページ (深さ1) をたどって教材ファイルを集める。
+
+    名大のように1ページ完結のサイトはそのまま、京大 (?video_id=N) や
+    UTokyo Channel (/content/?id=) のように各回が別ページのサイトは
+    follow (正規表現) か既定規則 (コースURL配下のリンク) でたどる。
+    取得は fetch.fetch_html 経由なのでキャッシュ・礼儀間隔・UA は共通。
+    戻り値の各要素には由来ページを page として付す。
+    """
+    import time
+    from fetch import fetch_html
+    from common import load_config
+
+    sleep_seconds = load_config()["crawler"]["sleep_seconds"]
+    html, hit = fetch_html(start_url)
+    materials = [dict(m, page=start_url) for m in find_materials(html, start_url)]
+
+    prefix = start_url.rstrip("/")
+    sub_urls = []
+    for m in re.finditer(r'<a[^>]+href="([^"]+)"', html, re.I):
+        url = urljoin(start_url, html_module.unescape(m.group(1))).split("#")[0]
+        if url == start_url or url in sub_urls:
+            continue
+        if urlparse(url).netloc != urlparse(start_url).netloc:
+            continue
+        if follow:
+            if not re.search(follow, url):
+                continue
+        elif not url.rstrip("/").startswith(prefix):
+            continue
+        sub_urls.append(url)
+
+    for url in sub_urls[:max_pages]:
+        sub_html, hit = fetch_html(url)
+        if not hit:
+            time.sleep(sleep_seconds)
+        label = _page_label(sub_html)
+        for m in find_materials(sub_html, url):
+            name = f"{label} — {m['name']}" if label and label not in m["name"] else m["name"]
+            materials.append({"name": name, "contentUrl": m["contentUrl"], "page": url})
+
+    seen, out = set(), []
+    for m in materials:
+        if m["contentUrl"] in seen:
+            continue
+        seen.add(m["contentUrl"])
+        out.append(m)
+    return out, len(sub_urls[:max_pages])
+
+
 def find_boilerplate(paths) -> set[str]:
     """同一サイト内で繰り返し出る文＝定型文のキー集合を返す。"""
     counter = collections.Counter()
@@ -195,6 +253,9 @@ def main() -> int:
     parser.add_argument("--materials", action="store_true",
                         help="説明文でなく教材ファイルリンクを抽出し、metadata.yaml に貼れる YAML で出す")
     parser.add_argument("--base-url", default="", help="--materials 時の相対URL解決に使う")
+    parser.add_argument("--follow", nargs="?", const="", default=None, metavar="REGEX",
+                        help="各回ページ (深さ1) もたどる。正規表現省略時はコースURL配下を各回とみなす")
+    parser.add_argument("--max-pages", type=int, default=30, help="--follow 時にたどる最大ページ数")
     args = parser.parse_args()
 
     if args.survey:
@@ -213,7 +274,14 @@ def main() -> int:
 
     if args.materials:
         import yaml
-        materials = find_materials(html, base_url)
+        if args.follow is not None:
+            if not args.target.startswith("http"):
+                parser.error("--follow は URL 指定時のみ (各回ページの取得が必要)")
+            materials, visited = collect_materials(args.target, follow=args.follow or None,
+                                                   max_pages=args.max_pages)
+            print(f"各回ページ {visited} 件を巡回", file=sys.stderr)
+        else:
+            materials = find_materials(html, base_url)
         if not materials:
             print("教材ファイルリンクなし", file=sys.stderr)
             return 1
