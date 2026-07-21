@@ -11,6 +11,8 @@ sites:
     sitemap: https://ocw.nagoya-u.jp/sitemap-index.xml
     course_url_pattern: "https://ocw.nagoya-u.jp/courses/<id>-<題名>-<年度>/ (英語版は /en/courses/)"
     rendering: playwright
+    parser: nagoya_u
+    usage_summary: 非営利の教育目的に限り、コピー・配布・翻訳・編集を含め利用可。クレジット「© 講義の年 教員の氏名（名大の授業）」の明記が条件。
     license_status: custom_reuse
     license_url: https://ocw.nagoya-u.jp/about/
     license_note: >-

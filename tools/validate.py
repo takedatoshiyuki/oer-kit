@@ -96,15 +96,18 @@ def check_duplicates(entries, existing=()):
     for url, slugs in group(lambda v: v, lambda m: [m.get("externalUrl")]).items():
         findings.append(("ERROR", f"externalUrl の重複 ({', '.join(slugs)}): {url}"))
 
-    descriptions = group(_squash, lambda m: _text_values(m.get("description", "")))
+    # 未記入プレースホルダ (下書き) は重複ではなく「未作成」なので対象外
+    def real_descriptions(m):
+        return [v for v in _text_values(m.get("description", "")) if not v.startswith("TODO")]
+
+    descriptions = group(_squash, real_descriptions)
     for _key, slugs in descriptions.items():
         findings.append(("ERROR",
                          f"description が {len(slugs)} 件で同一 ({', '.join(slugs[:5])}"
                          f"{' ほか' if len(slugs) > 5 else ''}): "
                          "サイト共通の定型文を掴んでいないか確認すること"))
 
-    templated = group(lambda v: re.sub(r"\d+", "#", _squash(v)),
-                      lambda m: _text_values(m.get("description", "")))
+    templated = group(lambda v: re.sub(r"\d+", "#", _squash(v)), real_descriptions)
     for key, slugs in templated.items():
         if key in {re.sub(r"\d+", "#", k) for k in descriptions}:
             continue   # 完全一致として既に報告済み
