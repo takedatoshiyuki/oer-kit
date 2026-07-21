@@ -188,6 +188,17 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_tru
         lines += ["## 教材へのアクセス",
                   f"[教材本体を開く]({meta['externalUrl']}){{.btn .btn-primary}}", ""]
 
+    if meta.get("materials"):
+        lines.append("## 教材ファイル")
+        if mode == "referenced":
+            lines.append("リンク先は外部サイト。利用は上記のライセンス・利用条件に従ってください。")
+            lines.append("")
+        for material in meta["materials"]:
+            ext = material["contentUrl"].rsplit(".", 1)[-1].upper() if "." in material["contentUrl"] else ""
+            suffix = f"（{ext}）" if ext and len(ext) <= 5 else ""
+            lines.append(f"- [{material['name']}]({material['contentUrl']}){suffix}")
+        lines.append("")
+
     if meta.get("attributions"):
         lines.append("## 収録している第三者素材")
         for att in meta["attributions"]:

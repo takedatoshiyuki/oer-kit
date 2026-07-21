@@ -9,6 +9,9 @@ site/.quarto/
 # 取得キャッシュ・作業ファイル (公開物ではない)
 .cache/
 
+# コーパス層 (取得した教材ファイル。公開物ではない。docs/design.md §7.4)
+archive/
+
 # レビュー前の下書き
 drafts/
 

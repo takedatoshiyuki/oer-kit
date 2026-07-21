@@ -25,6 +25,10 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urljoin, urlparse
+
+MATERIAL_EXTENSIONS = ("pdf", "ppt", "pptx", "doc", "docx", "xls", "xlsx",
+                       "zip", "ipynb", "csv", "tsv", "mp4", "mp3", "vtt", "srt")
 
 # 説明文の見出しラベル（サイト間で表記がまちまちなので辞書で吸収する）
 DESCRIPTION_LABELS = [
@@ -125,6 +129,23 @@ def extract_candidates(html: str, boilerplate: set[str] | None = None):
     return out
 
 
+def find_materials(html: str, base_url: str = ""):
+    """ページ内の教材ファイルリンク (拡張子ベース) を {name, contentUrl} で列挙する。"""
+    out, seen = [], set()
+    for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', html, re.S | re.I):
+        href = html_module.unescape(m.group(1))
+        path = urlparse(href).path.lower()
+        if not any(path.endswith(f".{ext}") for ext in MATERIAL_EXTENSIONS):
+            continue
+        url = urljoin(base_url, href) if base_url else href
+        if url in seen:
+            continue
+        seen.add(url)
+        label = re.sub(r"\s+", " ", html_module.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))).strip()
+        out.append({"name": label or Path(urlparse(url).path).name, "contentUrl": url})
+    return out
+
+
 def find_boilerplate(paths) -> set[str]:
     """同一サイト内で繰り返し出る文＝定型文のキー集合を返す。"""
     counter = collections.Counter()
@@ -171,6 +192,9 @@ def main() -> int:
     parser.add_argument("target", nargs="?", help="HTML ファイルまたは URL")
     parser.add_argument("--corpus", help="定型文判定に使う同一サイトのディレクトリ")
     parser.add_argument("--survey", help="コーパス全体の的中率を測る")
+    parser.add_argument("--materials", action="store_true",
+                        help="説明文でなく教材ファイルリンクを抽出し、metadata.yaml に貼れる YAML で出す")
+    parser.add_argument("--base-url", default="", help="--materials 時の相対URL解決に使う")
     args = parser.parse_args()
 
     if args.survey:
@@ -182,8 +206,20 @@ def main() -> int:
     if args.target.startswith("http"):
         from fetch import fetch_html
         html, _hit = fetch_html(args.target)
+        base_url = args.base_url or args.target
     else:
         html = Path(args.target).read_text(encoding="utf-8", errors="ignore")
+        base_url = args.base_url
+
+    if args.materials:
+        import yaml
+        materials = find_materials(html, base_url)
+        if not materials:
+            print("教材ファイルリンクなし", file=sys.stderr)
+            return 1
+        print(yaml.safe_dump({"materials": materials}, allow_unicode=True,
+                             sort_keys=False, width=120), end="")
+        return 0
 
     boilerplate = find_boilerplate(Path(args.corpus).rglob("*.html")) if args.corpus else set()
     candidates = extract_candidates(html, boilerplate)

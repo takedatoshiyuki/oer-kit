@@ -8,6 +8,10 @@ crawler:
   user_agent: oer-repo-tools/0.1
   sleep_seconds: 1.0
 
+# コーパス層 (取得した教材ファイル+権利情報マニフェスト) の置き場。Git 管理外。
+# 外部ディスク等に移す場合はここを変更 (絶対パス可)
+archive_dir: archive
+
 # 自作共有ライブラリの場所 (common_knowledge: Playwright取得等)
 lib_paths:
   - ~/Applications/lib/python

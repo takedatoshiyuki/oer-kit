@@ -135,6 +135,21 @@ def build_jsonld(slug, meta, config, vocabs):
         if meta.get(field):
             doc[field] = meta[field]
 
+    # materials (ファイルマニフェスト) は hasPart の CreativeWork として出力する
+    if meta.get("materials"):
+        import mimetypes
+        parts = []
+        for material in meta["materials"]:
+            url = material["contentUrl"]
+            if not url.startswith("http"):
+                url = urljoin(f"{resource_id}/", url)
+            media = {"type": "MediaObject", "contentUrl": url}
+            fmt = material.get("format") or mimetypes.guess_type(url)[0]
+            if fmt:
+                media["encodingFormat"] = fmt
+            parts.append({"type": "CreativeWork", "name": material["name"], "encoding": [media]})
+        doc["hasPart"] = doc.get("hasPart", []) + parts
+
     if meta.get("encoding"):
         doc["encoding"] = []
         for enc in meta["encoding"]:

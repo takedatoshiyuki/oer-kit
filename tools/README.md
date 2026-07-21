@@ -47,6 +47,12 @@ python3 tools/extract.py --survey <コーパス>   # サイト別の的中率を
 
 # 重複の原因調査: 各リソースの出力と原ページの抽出候補を1つの Markdown に集める
 python3 tools/diagnose.py [--slugs a b c] [--out report.md]
+
+# 教材ファイルリンクの抽出 (metadata.yaml の materials に貼れる YAML で出力)
+python3 tools/extract.py <html|url> --materials [--base-url <url>]
+
+# 教材ファイルの収集 (コーパス層 → archive_dir。権利ゲート・sha256・manifest付き)
+python3 tools/harvest.py drafts/<slug> [--limit N] [--force]
 ```
 
 ### 説明文の抽出方針（extract.py）

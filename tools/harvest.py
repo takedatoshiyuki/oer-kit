@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""教材ファイルの収集 — コーパス層 (docs/design.md §7.4)。
+
+カタログ (公開・メタデータCC0) とコーパス (取得ファイル・git外) を分離する
+二層構成のコーパス側。resources/・drafts/ の `materials` を archive_dir へ
+ダウンロードし、権利情報つきマニフェストを書く。
+
+権利ゲート:
+- usageTerms.reuse が not_allowed のリソース (視聴のみ。例: UTokyo Channel) は
+  規約が複製 (ダウンロード) を禁止しているため取得しない
+- 取得したファイルには license / usageTerms・クレジット素材を manifest に併記し、
+  下流 (LLM 学習データ・LMS) が権利で絞り込めるようにする
+
+使い方:
+    python3 tools/harvest.py drafts/nagoya-u-course-0001 [--limit 2] [--force]
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime
+import hashlib
+import json
+import mimetypes
+import re
+import sys
+import time
+from pathlib import Path
+
+import requests
+
+from common import REPO_ROOT, expand_license, iter_resources, load_config, localized
+
+
+def archive_root(config) -> Path:
+    root = Path(config.get("archive_dir", "archive")).expanduser()
+    return root if root.is_absolute() else REPO_ROOT / root
+
+
+def safe_filename(url: str) -> str:
+    name = Path(url.split("?")[0]).name or "file"
+    return re.sub(r"[^A-Za-z0-9._-]", "_", name)
+
+
+def build_credit(meta, lang) -> str:
+    """クレジット表示の素材 (例: © 2005 岩崎 雄吾（名古屋大学）)。書式はサイト要求に応じ調整。"""
+    year = str(meta.get("datePublished", ""))[:4]
+    creators = "、".join(localized(a["name"], lang) for a in meta.get("creator", []))
+    publisher = "、".join(localized(p["name"], lang) for p in meta.get("publisher", []))
+    parts = [p for p in (year, creators) if p]
+    credit = "© " + " ".join(parts) if parts else ""
+    return f"{credit}（{publisher}）" if publisher else credit
+
+
+def download(url: str, dest: Path, session: requests.Session, timeout=120):
+    r = session.get(url, timeout=timeout, stream=True)
+    r.raise_for_status()
+    sha = hashlib.sha256()
+    size = 0
+    tmp = dest.with_suffix(dest.suffix + ".part")
+    with open(tmp, "wb") as f:
+        for chunk in r.iter_content(chunk_size=1 << 16):
+            f.write(chunk)
+            sha.update(chunk)
+            size += len(chunk)
+    if dest.suffix.lower() == ".pdf" and not tmp.read_bytes()[:5].startswith(b"%PDF"):
+        tmp.unlink()
+        raise ValueError("PDF マジックバイト不一致 (サインイン要求ページ等の可能性)")
+    tmp.rename(dest)
+    return sha.hexdigest(), size, r.headers.get("Content-Type", "")
+
+
+def harvest_resource(slug, meta, config, session, limit=0, force=False):
+    lang = (meta.get("inLanguage") or ["ja"])[0]
+    materials = meta.get("materials") or []
+    if not materials:
+        print(f"[skip] {slug}: materials なし")
+        return 0
+
+    terms = meta.get("usageTerms") or {}
+    if terms.get("reuse") == "not_allowed":
+        print(f"[skip] {slug}: 利用条件が複製を禁止 (not_allowed) のため取得しない (§7.4)")
+        return 0
+
+    out_dir = archive_root(config) / slug
+    out_dir.mkdir(parents=True, exist_ok=True)
+    rights = {}
+    if meta.get("license"):
+        rights["license"] = expand_license(meta["license"])
+    if terms:
+        rights["usageTerms"] = {"url": terms["url"], "reuse": terms["reuse"],
+                                "summary": localized(terms["summary"], lang)}
+
+    manifest = {
+        "slug": slug,
+        "source": meta.get("externalUrl"),
+        "title": localized(meta.get("name"), lang),
+        "rights": rights,
+        "credit": build_credit(meta, lang),
+        "harvestedAt": datetime.date.today().isoformat(),
+        "files": [],
+    }
+
+    count = 0
+    sleep_seconds = config["crawler"]["sleep_seconds"]
+    for material in materials[: limit or len(materials)]:
+        url = material["contentUrl"]
+        dest = out_dir / safe_filename(url)
+        entry = {"name": material["name"], "url": url, "file": dest.name}
+        if dest.exists() and not force:
+            entry["skipped"] = "既存"
+            print(f"  = {dest.name} (既存)")
+        else:
+            try:
+                sha256, size, content_type = download(url, dest, session)
+            except Exception as error:
+                entry["error"] = f"{type(error).__name__}: {error}"[:200]
+                print(f"  ! {dest.name}: {entry['error']}")
+                manifest["files"].append(entry)
+                continue
+            entry.update({"sha256": sha256, "bytes": size,
+                          "contentType": content_type or mimetypes.guess_type(url)[0] or ""})
+            print(f"  + {dest.name} ({size:,} bytes)")
+            count += 1
+            time.sleep(sleep_seconds)
+        manifest["files"].append(entry)
+
+    (out_dir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with open(archive_root(config) / "harvest_log.jsonl", "a", encoding="utf-8") as f:
+        for entry in manifest["files"]:
+            f.write(json.dumps({"slug": slug, "harvestedAt": manifest["harvestedAt"],
+                                **entry}, ensure_ascii=False) + "\n")
+    return count
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("paths", nargs="+", help="リソースディレクトリ (resources/ or drafts/)")
+    parser.add_argument("--limit", type=int, default=0, help="1リソースあたりの最大取得数")
+    parser.add_argument("--force", action="store_true", help="既存ファイルも再取得")
+    args = parser.parse_args()
+
+    config = load_config()
+    session = requests.Session()
+    session.headers["User-Agent"] = config["crawler"]["user_agent"]
+
+    total = 0
+    for slug, _resource_dir, meta in iter_resources(args.paths):
+        print(f"[harvest] {slug} → {archive_root(config) / slug}")
+        total += harvest_resource(slug, meta or {}, config, session,
+                                  limit=args.limit, force=args.force)
+    print(f"---\n{total} ファイル取得")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

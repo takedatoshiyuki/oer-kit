@@ -210,6 +210,22 @@
         }
       }
     },
+    "materials": {
+      "description": "教材を構成する個々のファイル (講義ノート・課題・スライド等)。カタログ側のファイルマニフェスト。取得 (コーパス層) は tools/harvest.py (docs/design.md §7.4)",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "contentUrl"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "description": "表示名 (例: 講義ノート: Chapter 1)" },
+          "contentUrl": { "type": "string", "minLength": 1 },
+          "format": { "type": "string", "description": "IANAメディアタイプ。省略時は拡張子から推定" },
+          "bytes": { "type": "integer", "minimum": 0 },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
     "quotedDescription": {
       "description": "出典サイトの説明文の転載・引用。目録ページに出所明示付きで表示するのみで、CC0 のカタログ/JSON-LD エクスポートには含めない (docs/design.md §7.3)。description (自作・CC0) とは別に持つ",
       "type": "object",
