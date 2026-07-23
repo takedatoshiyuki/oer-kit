@@ -210,6 +210,16 @@
         }
       }
     },
+    "sourceCollection": {
+      "description": "この教材が載っている出典サイト・コレクションの名称 (例: 名大の授業 (NU OCW))。JSON-LD では isPartOf の Collection として出力し、カタログではサイト名で絞り込めるようにする",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/localizedText" },
+        "url": { "$ref": "#/$defs/httpUri" }
+      }
+    },
     "materials": {
       "description": "教材を構成する個々のファイル (講義ノート・課題・スライド等)。カタログ側のファイルマニフェスト。取得 (コーパス層) は tools/harvest.py (docs/design.md §7.4)",
       "type": "array",

@@ -135,6 +135,14 @@ def build_jsonld(slug, meta, config, vocabs):
         if meta.get(field):
             doc[field] = meta[field]
 
+    # 出典サイトは isPartOf の Collection として出す（どのサイトの目録かを機械可読に）
+    collection = meta.get("sourceCollection")
+    if collection:
+        node = {"type": "Collection", "name": localized(collection["name"], lang)}
+        if collection.get("url"):
+            node["id"] = collection["url"]
+        doc["isPartOf"] = [node] + doc.get("isPartOf", [])
+
     # materials (ファイルマニフェスト) は hasPart の CreativeWork として出力する
     if meta.get("materials"):
         import mimetypes

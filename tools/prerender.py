@@ -111,12 +111,14 @@ def text_item(value, lang) -> str:
     return localized(value.get("prefLabel"), lang) or value.get("id", "")
 
 
-def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_truncated):
+def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
     lines = []
     if mode == "referenced":
         access = f"（最終確認: {meta['dateAccessed']}）" if meta.get("dateAccessed") else ""
-        lines += ['::: {.callout-important title="外部教材の目録エントリ"}',
-                  f"教材本体は外部サイトにあります: <{meta['externalUrl']}>{access}"]
+        collection = meta.get("sourceCollection")
+        site = (f"「{localized(collection['name'], lang)}」" if collection else "外部サイト")
+        lines += [f'::: {{.callout-important title="外部教材の目録エントリ — {site}"}}',
+                  f"教材本体は{site}にあります: <{meta['externalUrl']}>{access}"]
         if meta.get("archivedAt"):
             lines.append(f"リンク切れの際は [Web アーカイブのスナップショット]({meta['archivedAt']}) を"
                          "参照してください。")
@@ -129,10 +131,8 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_tru
                   f"{localized(terms['summary'], lang)}（[利用条件の原文]({terms['url']})）",
                   ":::", ""]
 
-    # 概要はタイトル直下 (front matter の description) に出る。切り詰めた場合のみ全文を本文へ
-    if description_truncated:
-        lines += [localized(meta["description"], lang), ""]
-
+    # 概要はタイトル直下 (front matter の description) に全文が出るので本文には書かない。
+    # 検索インデックスへは build_catalog.py が別途追記する
     # 内容紹介の出所を明示する。AI 生成なら誰が確認したかと確からしさまで示す
     provenance = meta.get("metadataProvenance") or {}
     if provenance.get("method") in ("ai_generated", "ai_assisted"):
@@ -171,6 +171,10 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_tru
         if value:
             rows.append(f"| {label} | {value} |")
 
+    collection = meta.get("sourceCollection")
+    if collection:
+        label = localized(collection["name"], lang)
+        add("出典サイト", f"[{label}]({collection['url']})" if collection.get("url") else label)
     add("教材タイプ", "、".join(concept_labels(meta, "learningResourceType", vocabs, lang)))
     add("主題分野", "、".join(concept_labels(meta, "about", vocabs, lang)))
     add("教育段階", "、".join(concept_labels(meta, "educationalLevel", vocabs, lang)))
@@ -302,14 +306,16 @@ def main() -> int:
             front["date"] = published
             front["date-format"] = {4: "YYYY年", 7: "YYYY年M月"}.get(len(published),
                                                                     "YYYY年M月D日")
-        full_description = re.sub(r"\s+", " ", localized(meta["description"], lang)).strip()
-        truncated = len(full_description) > 120
-        front["description"] = full_description[:119] + "…" if truncated else full_description
+        # カタログ一覧では Quarto が自動で切り詰めるので、ここでは全文を渡す
+        front["description"] = re.sub(r"\s+", " ", localized(meta["description"], lang)).strip()
         categories = (concept_labels(meta, "learningResourceType", vocabs, lang)
                       + concept_labels(meta, "about", vocabs, lang)
                       + concept_labels(meta, "educationalLevel", vocabs, lang))
         if meta.get("usageTerms"):
             categories.append(REUSE_CATEGORY[meta["usageTerms"]["reuse"]])
+        # サイト名をカテゴリの先頭に置き、カタログでサイト別に絞り込めるようにする
+        if meta.get("sourceCollection"):
+            categories.insert(0, localized(meta["sourceCollection"]["name"], lang))
         if categories:
             front["categories"] = categories
         image = meta.get("image")
@@ -317,7 +323,7 @@ def main() -> int:
             front["image"] = image
         front["format"] = {"html": {"include-in-header": {"text": jsonld_script(doc)}}}
 
-        body = build_body(slug, meta, config, vocabs, lang, mode, page_dir, truncated)
+        body = build_body(slug, meta, config, vocabs, lang, mode, page_dir)
         page = ("---\n"
                 + yaml.safe_dump(front, allow_unicode=True, sort_keys=False, width=1000)
                 + "---\n\n" + body)

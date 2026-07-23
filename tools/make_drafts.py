@@ -82,6 +82,8 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
     else:
         meta["creator"] = [{"type": "Organization", "name": site["organization"]}]
     meta["publisher"] = [{"type": "Organization", "name": site["organization"]}]
+    # どのサイトの目録エントリかを一目で分かるようにする
+    meta["sourceCollection"] = {"name": site["name"], "url": site["url"]}
 
     if parsed.get("year"):
         meta["datePublished"] = str(parsed["year"])

@@ -46,6 +46,9 @@ creator:
 publisher:
 - type: Organization
   name: 名古屋大学
+sourceCollection:
+  name: 名大の授業 (NU OCW)
+  url: https://ocw.nagoya-u.jp/
 datePublished: '2005'
 dateAccessed: '2026-07-21'
 learningResourceType:
