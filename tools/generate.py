@@ -206,12 +206,11 @@ def update_draft(path: Path, meta, result, model):
     provenance = meta.setdefault("metadataProvenance", {})
     provenance["method"] = "ai_generated"
     provenance["generator"] = model
+    provenance["confidence"] = result.get("confidence", "high")
     notes = re.sub(r"description は未作成。?", "", provenance.get("notes", "")).strip()
     if notes and not notes.endswith("。"):
         notes += "。"
-    provenance["notes"] = (notes + f"description は {model} が生成"
-                           + ("（confidence=low: 情報が乏しく要確認）"
-                              if result.get("confidence") == "low" else "") + "。")
+    provenance["notes"] = notes + f"description は {model} が生成。"
 
     body = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False, width=100)
     path.write_text((header + "\n" if header else "") + body, encoding="utf-8")

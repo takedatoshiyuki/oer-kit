@@ -319,6 +319,10 @@
         "method": { "enum": ["manual", "ai_assisted", "ai_generated"] },
         "generator": { "type": "string", "description": "使用したモデル・ツール名" },
         "generatedDate": { "$ref": "#/$defs/isoDate" },
+        "confidence": {
+          "enum": ["high", "low"],
+          "description": "生成の確からしさ。low は根拠が乏しく確認が要ることを示す。ページに明示する (docs/design.md §7.3)"
+        },
         "reviewedBy": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },

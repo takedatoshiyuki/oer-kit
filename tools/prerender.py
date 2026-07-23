@@ -133,10 +133,32 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_tru
     if description_truncated:
         lines += [localized(meta["description"], lang), ""]
 
+    # 内容紹介の出所を明示する。AI 生成なら誰が確認したかと確からしさまで示す
+    provenance = meta.get("metadataProvenance") or {}
+    if provenance.get("method") in ("ai_generated", "ai_assisted"):
+        verb = "生成" if provenance["method"] == "ai_generated" else "作成支援"
+        origin = f"上の内容紹介は AI（{provenance.get('generator', 'モデル不明')}）が{verb}したものです"
+        reviewers = provenance.get("reviewedBy") or []
+        origin += f"。{'、'.join(reviewers)}が確認済み" if reviewers else "（未確認）"
+        if provenance.get("confidence") == "low":
+            lines += [f'::: {{.callout-caution collapse="false" title="内容紹介の確からしさ: 低"}}',
+                      f"{origin}。もとになる情報が少ないため、正確な内容は"
+                      + ("下の引用と" if meta.get("quotedDescription") else "")
+                      + "教材本体で確認してください。", ":::", ""]
+        else:
+            lines += [f"::: {{.callout-note appearance='minimal' collapse='true' "
+                      f"title='内容紹介の出所（AI 生成）'}}",
+                      f"{origin}。教材そのものの文章ではありません。"
+                      + ("原文は下の引用を参照してください。"
+                         if meta.get("quotedDescription") else ""), ":::", ""]
+
     quoted = meta.get("quotedDescription")
     if quoted:
         text = quoted["text"]
         values = [text] if isinstance(text, str) else list(text.values())
+        # 見出しを付ける。Quarto の検索インデックスは見出し単位で作られるため、
+        # 見出しの無い引用ブロックは索引に入らない（要約が短い分ここが効く）
+        lines += ["## 出典サイトの説明（原文）", ""]
         for value in values:
             lines += [f"> {l}" for l in value.strip().splitlines()]
             lines.append(">")
@@ -165,6 +187,10 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_tru
     add("更新日", meta.get("dateModified"))
     add("版", meta.get("version"))
     lines += ["## 基本情報", "", "| 項目 | 内容 |", "|------|------|", *rows, ""]
+
+    # キーワードは検索インデックスに効く（要約が短い分をここで補う）
+    if meta.get("keywords"):
+        lines += ["## キーワード", "、".join(meta["keywords"]), ""]
 
     if meta.get("teaches"):
         lines.append("## 学習目標")
@@ -219,13 +245,14 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir, description_tru
     lines.append("## このメタデータについて")
     lines.append("- メタデータは [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) で"
                  f"提供します（[JSON-LD](/jsonld/{slug}.json)）。")
-    provenance = meta.get("metadataProvenance", {})
     if provenance:
         detail = PROVENANCE_METHOD_LABEL.get(provenance.get("method"), provenance.get("method", ""))
         if provenance.get("generator"):
             detail += f"／使用モデル: {provenance['generator']}"
         if provenance.get("generatedDate"):
             detail += f"／作成日: {provenance['generatedDate']}"
+        if provenance.get("confidence"):
+            detail += f"／確からしさ: {'低（要確認）' if provenance['confidence'] == 'low' else '通常'}"
         if provenance.get("reviewedBy"):
             detail += f"／レビュー: {'、'.join(provenance['reviewedBy'])}"
         lines.append(f"- 作成方法: {detail}")

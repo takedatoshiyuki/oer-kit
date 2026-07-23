@@ -199,6 +199,19 @@ def build_jsonld(slug, meta, config, vocabs):
     record_date = provenance.get("generatedDate") or meta.get("dateModified") or meta.get("datePublished")
     if record_date:
         record["dateModified"] = record_date
+    # メタデータの作成来歴を機械可読にする。description が AI 生成であることを
+    # 取り込み側 (LMS-NG・アグリゲータ) が判別できるようにするため
+    if provenance.get("method") in ("ai_generated", "ai_assisted"):
+        creator = {"type": "SoftwareApplication"}
+        if provenance.get("generator"):
+            creator["name"] = provenance["generator"]
+        record["creator"] = creator
+        parts = ["description は AI 生成"]
+        if provenance.get("confidence") == "low":
+            parts.append("確からしさ: 低（要確認）")
+        if provenance.get("reviewedBy"):
+            parts.append(f"レビュー済み: {'、'.join(provenance['reviewedBy'])}")
+        record["description"] = "。".join(parts)
     doc["mainEntityOfPage"] = [record]
 
     return doc
