@@ -1,8 +1,10 @@
 # メタデータ・レビュー チェックリスト
 
-AI 生成・機械変換されたメタデータは、**公開前に人手レビューを通す**（[設計書](design.md) §7.3）。
-`metadataProvenance.method` が `ai_generated` / `ai_assisted` の場合、`reviewedBy` が無いと
-`tools/validate.py` が拒否するため、レビューを経ないと公開できない。
+レビューの要否は運用モードで決まる（[設計書](design.md) §9.1）:
+`institutional`（組織公開）と `personal`（個人公開）では公開前レビューが必須で、
+`reviewedBy` が無いと `tools/validate.py` が拒否する。`aggregator`（収集・公開型。本リポジトリ）
+では未レビュー公開を認め、本チェックリストは**サンプリング検証・誤り報告への対応・
+システム（抽出・生成）の検証**に使う。
 
 ## 手順
 

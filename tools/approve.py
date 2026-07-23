@@ -64,7 +64,8 @@ def write_meta(path: Path, meta: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("slugs", nargs="*")
-    parser.add_argument("--by", required=True, help="レビュー者名（reviewedBy に記入）")
+    parser.add_argument("--by", help="レビュー者名（reviewedBy に記入）。"
+                        "aggregator 運用では省略可（未レビューのまま公開し、ページに明示）")
     parser.add_argument("--from-file", help="slug を並べたファイル（空白・改行区切り）")
     parser.add_argument("--all", action="store_true", help="drafts/ 全件を承認する")
     parser.add_argument("--dry-run", action="store_true", help="検査だけ行い、移動しない")
@@ -83,6 +84,9 @@ def main() -> int:
         validator = jsonschema.Draft202012Validator(json.load(f))
     config = load_config()
     vocabs = load_all_vocabs(config)
+    policy = config["review_policy"]
+    if policy != "aggregator" and not args.by:
+        parser.error(f"review_policy={policy} では --by (レビュー者) が必須")
 
     # 横断検査は承認対象＋既存リソースをまとめて見る
     existing = [(slug, meta or {}) for slug, _d, meta in iter_resources()]
@@ -95,8 +99,12 @@ def main() -> int:
         if not metadata_path.exists():
             rejected.append((slug, ["drafts/ に無い"]))
             continue
-        meta = with_reviewer(metadata_path, args.by)
-        errors, _warnings = validate_resource(slug, draft_dir, meta, validator, vocabs)
+        if args.by:
+            meta = with_reviewer(metadata_path, args.by)
+        else:
+            meta = yaml.safe_load(metadata_path.read_text(encoding="utf-8"))
+        errors, _warnings = validate_resource(slug, draft_dir, meta, validator, vocabs,
+                                              policy=policy)
         if errors:
             rejected.append((slug, errors))
         else:

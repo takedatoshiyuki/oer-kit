@@ -134,11 +134,30 @@ def check_duplicates(entries, existing=()):
     return findings
 
 
-def validate_resource(slug, resource_dir, meta, validator, vocabs, check_quotes=False):
+def review_policy_findings(meta, policy):
+    """運用モード (§9.1) に応じたレビュー要件の検査。"""
+    provenance = meta.get("metadataProvenance") or {}
+    if provenance.get("method") not in ("ai_generated", "ai_assisted"):
+        return []
+    if policy in ("institutional", "personal"):
+        if not provenance.get("reviewedBy"):
+            who = "組織のレビュー者" if policy == "institutional" else "本人"
+            return [f"AI生成メタデータは公開前レビューが必要 "
+                    f"(review_policy={policy}: reviewedBy に{who}を記入)"]
+    else:  # aggregator: 未レビュー公開可。ただし信頼度の明示が公開条件
+        if not provenance.get("confidence"):
+            return ["aggregator 運用では confidence (high/low) の明示が公開条件 (§9.1)"]
+    return []
+
+
+def validate_resource(slug, resource_dir, meta, validator, vocabs, check_quotes=False,
+                      policy="institutional"):
     errors, warnings = [], []
 
     if meta is None:
         return [f"metadata.yaml が空、または読み込めない"], []
+
+    errors += review_policy_findings(meta, policy)
 
     for e in sorted(validator.iter_errors(meta), key=lambda e: e.json_path):
         errors.append(f"schema {e.json_path}: {e.message}")
@@ -195,7 +214,9 @@ def main() -> int:
     with open(SCHEMA_PATH, encoding="utf-8") as f:
         schema = json.load(f)
     validator = jsonschema.Draft202012Validator(schema)
-    vocabs = load_all_vocabs(load_config())
+    config = load_config()
+    vocabs = load_all_vocabs(config)
+    policy = config["review_policy"]
 
     total = error_count = warning_count = 0
     entries = []
@@ -203,7 +224,7 @@ def main() -> int:
         total += 1
         entries.append((slug, meta or {}))
         errors, warnings = validate_resource(slug, resource_dir, meta, validator, vocabs,
-                                             check_quotes=args.check_quotes)
+                                             check_quotes=args.check_quotes, policy=policy)
         error_count += len(errors)
         warning_count += len(warnings)
         mark = "NG" if errors else ("WARN" if warnings else "OK")

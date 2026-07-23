@@ -262,6 +262,9 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
         lines.append(f"- 作成方法: {detail}")
     for u in meta.get("isBasedOn", []) or []:
         lines.append(f"- 改変元: <{u}>")
+    if config.get("feedback_url"):
+        lines.append(f"- 誤りにお気づきの場合は[こちらから報告]({config['feedback_url']})して"
+                     "ください。確認のうえ訂正します。")
     return "\n".join(lines) + "\n"
 
 

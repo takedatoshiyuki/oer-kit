@@ -321,7 +321,7 @@
       }
     },
     "metadataProvenance": {
-      "description": "このメタデータ自体の作成来歴。AI生成 (ai_generated/ai_assisted) の場合は公開前の人手レビューが必須 (docs/design.md §7.3)",
+      "description": "このメタデータ自体の作成来歴。AI生成時のレビュー要件はスキーマでは強制せず、運用モード (config.yaml の review_policy) に応じて validate.py が検査する (docs/design.md §9.1)",
       "type": "object",
       "additionalProperties": false,
       "required": ["method"],
@@ -336,16 +336,9 @@
         "reviewedBy": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
-          "description": "公開前レビューの担当者名"
+          "description": "レビュー担当者名。institutional では組織のレビュー者、personal では本人。aggregator では未レビュー公開を認め、その場合ページに「未確認」と明示する"
         },
         "notes": { "type": "string" }
-      },
-      "if": {
-        "properties": { "method": { "enum": ["ai_assisted", "ai_generated"] } }
-      },
-      "then": {
-        "required": ["reviewedBy"],
-        "properties": { "reviewedBy": { "minItems": 1 } }
       }
     },
     "extensions": {

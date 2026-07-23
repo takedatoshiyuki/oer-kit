@@ -1,37 +1,44 @@
 # リンク参照エントリ (レファラトリ) の記入例。実在の教材ではありません。
 # ND系のため本体はホストせず、メタデータと短い内容紹介のみを目録化する。
 # 解説: docs/design.md §7.3 (referenced エントリは content/ を持たない)
-
 slug: sample-external-nd-course
 mode: referenced
 externalUrl: https://ocw.example.ac.jp/courses/linear-algebra-2025/
-
-type: [LearningResource, Course]
+type:
+- LearningResource
+- Course
 name:
   ja: 線形代数学Ⅰ 講義ビデオ
 description:
-  ja: >-
-    行列演算・連立一次方程式・固有値問題を扱う全13回の講義ビデオ。
-    ベクトル空間の抽象的定義には立ち入らず、計算と応用に重点を置く。
-inLanguage: [ja]
-
-license: CC-BY-NC-ND-4.0        # ND系はリンク参照エントリでのみ許容
+  ja: 行列演算・連立一次方程式・固有値問題を扱う全13回の講義ビデオ。 ベクトル空間の抽象的定義には立ち入らず、計算と応用に重点を置く。
+inLanguage:
+- ja
+license: CC-BY-NC-ND-4.0
 creator:
-  - type: Organization
-    name: △△大学 OCW            # 例
-datePublished: "2025-04-01"     # 元教材の公開日
-dateAccessed: "2026-07-21"      # 最終確認日
+- type: Organization
+  name: △△大学 OCW
+datePublished: '2025-04-01'
+dateAccessed: '2026-07-21'
 archivedAt: https://web.archive.org/web/20260721000000/https://ocw.example.ac.jp/courses/linear-algebra-2025/
-
-learningResourceType: [video, course]
-about: [natural_sciences_math]
-keywords: [線形代数, 行列, 連立一次方程式, 固有値]
-audience: [student]
-educationalLevel: [bachelor]
-
+learningResourceType:
+- video
+- course
+about:
+- natural_sciences_math
+keywords:
+- 線形代数
+- 行列
+- 連立一次方程式
+- 固有値
+audience:
+- student
+educationalLevel:
+- bachelor
 metadataProvenance:
   method: ai_generated
-  generator: claude-fable-5     # 例
-  generatedDate: "2026-07-21"
-  reviewedBy: [山田 太郎]       # 公開前の人手レビュー必須 (スキーマで強制)
+  generator: claude-fable-5
+  generatedDate: '2026-07-21'
+  reviewedBy:
+  - 山田 太郎
   notes: 講義ビデオの字幕テキストから抽出・生成し、目視で確認
+  confidence: high

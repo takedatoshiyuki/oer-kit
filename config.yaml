@@ -3,6 +3,17 @@ site_name: OER リポジトリ（仮称）
 base_url: https://oer.example.ac.jp
 primary_language: ja
 
+# レビュー方針 (docs/design.md §9.1 の利用者3類型)。validate.py が強制する
+#   aggregator:    収集・公開型 (本リポジトリ)。AI生成メタデータは機械検査+信頼度明示+
+#                  誤り報告窓口で公開可。人手レビューはシステム検証とサンプリングに充てる
+#   institutional: 組織公開型。公開前に組織のレビュー (reviewedBy) が必須
+#   personal:      個人公開型。本人による確認 (reviewedBy = 本人) が必須
+review_policy: aggregator
+
+# 誤り報告窓口 (aggregator 運用の前提)。GitHub Issues 等の URL を設定すると
+# 各ページの「このメタデータについて」に報告リンクが出る
+feedback_url: ""
+
 # クローラの礼儀設定 (tools/discover.py, fetch.py, wayback.py が使用)
 crawler:
   user_agent: oer-repo-tools/0.1

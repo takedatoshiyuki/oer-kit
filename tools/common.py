@@ -55,6 +55,9 @@ def load_config() -> dict:
     crawler.setdefault("user_agent", "oer-repo-tools/0.1")
     crawler.setdefault("sleep_seconds", 1.0)
     config.setdefault("lib_paths", [])
+    # レビュー方針 (docs/design.md §9.1)。未設定なら最も厳格な institutional
+    config.setdefault("review_policy", "institutional")
+    config.setdefault("feedback_url", "")
     return config
 
 
