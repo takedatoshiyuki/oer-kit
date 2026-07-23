@@ -48,6 +48,11 @@ python3 tools/extract.py --survey <コーパス>   # サイト別の的中率を
 # 重複の原因調査: 各リソースの出力と原ページの抽出候補を1つの Markdown に集める
 python3 tools/diagnose.py [--slugs a b c] [--out report.md]
 
+# description (CC0の自作要約) の一括生成。quotedDescription には触れない
+python3 tools/generate.py --provider mock drafts/<slug>      # API不要の試運転
+python3 tools/generate.py --limit 10                         # まず10件で実測 (要 OPENAI_API_KEY)
+python3 tools/generate.py --base-url http://localhost:11434/v1 --model qwen3 --api-key dummy  # ローカルLLM
+
 # 教材ファイルリンクの抽出 (metadata.yaml の materials に貼れる YAML で出力)
 python3 tools/extract.py <html|url> --materials [--base-url <url>]
 
@@ -76,6 +81,27 @@ python3 tools/harvest.py drafts/<slug> [--limit N] [--force]
 2. ラベルも meta も無いサイト（上智など）からの抽出
 3. `description`（自作・CC0 で提供する要約）の作成 — これは転載であってはならないので、
    そもそもコードで作るものではない
+
+### description の生成（generate.py）
+
+`quotedDescription`（原文の転載）はコードの仕事、`description`（CC0 で提供する自作要約）は
+LLM／人の仕事、という分担（§7.3）の後者。**生成物は必ず機械検査してから書き戻す**:
+引用文の丸写し（連続40字以上の一致を含む）、評価語（「わかりやすい」「必見」等）、
+短すぎる出力は不採用にする。
+
+過剰帰属への対処は LMS-NG docs/09・20 の実測に基づく。素朴な単発プロンプトは
+根拠のない断定を混ぜるので、**2段構造を出力スキーマで強制**する — まず原文から
+読み取れた事実を列挙させ（`facts`）、その事実だけで要約を書かせ、情報が足りなければ
+`confidence: low` を返させる（書けないときは書かせない）。
+
+プロバイダは OpenAI 互換の `/chat/completions` を叩くだけなので、`--base-url` を
+差し替えればローカル LLM（Ollama・llama.cpp・vLLM）でも同じコードで動く。
+`--provider mock` は API 不要（パイプラインの試運転用）。
+
+モデル選択（2026-07 時点）: 無料枠が gpt-5.4-mini 等の小型モデル群で 10M トークン/日、
+gpt-5.4 等で 1M/日。413件の実測見積もりは最悪ケースでも約4.6M なので**小型モデル枠なら
+1日で完走**する（大型枠は現実シナリオで約97万トークンと上限すれすれ）。小型モデルで
+通るプロンプトはローカル LLM へも移植しやすい。
 
 ### 重複が出たときの調べ方（diagnose.py）
 
