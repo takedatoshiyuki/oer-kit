@@ -269,7 +269,12 @@ def main() -> int:
         if authors:
             front["author"] = authors
         if meta.get("datePublished"):
-            front["date"] = meta["datePublished"]
+            # 年のみ・年月のみの日付を Quarto が 1月1日 に補完して表示しないよう、
+            # 粒度に合わせて表示書式を指定する（精度を捏造しない。§5.2）
+            published = str(meta["datePublished"])
+            front["date"] = published
+            front["date-format"] = {4: "YYYY年", 7: "YYYY年M月"}.get(len(published),
+                                                                    "YYYY年M月D日")
         full_description = re.sub(r"\s+", " ", localized(meta["description"], lang)).strip()
         truncated = len(full_description) > 120
         front["description"] = full_description[:119] + "…" if truncated else full_description

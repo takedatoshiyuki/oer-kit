@@ -55,10 +55,15 @@ TITLE_SUFFIX = re.compile(r"[-‐−ー]((?:19|20)\d{2})$")
 ACADEMIC_TITLE = re.compile(r"[ 　]*(特任|客員|名誉|招へい)?(教授|准教授|講師|助教授|助教|助手)$")
 
 # 開講部局 → 主題分野 (ISCED-F ベースの vocabularies/subjects.yaml キー)。レビューで要確認
+# 上から順に部分一致で判定する。特定分野の学部ではない組織 (教養教育院・附属学校・
+# 社会連携) を先に置く — 「教養教育院」が「教育」に一致して education になる事故を防ぐ
+# (実測で126件が誤分類)。ISCED-F の generic は大学の教養科目群に対応する
 FACULTY_SUBJECT = [
+    ("教養教育", "generic"), ("附属", "generic"), ("社会連携", "generic"),
     ("情報", "ict"), ("工学", "engineering"), ("環境", "engineering"),
     ("法学", "business_law"), ("経済", "social_sciences"), ("国際開発", "social_sciences"),
-    ("教育", "education"), ("医学", "health_welfare"), ("創薬", "health_welfare"),
+    ("教育学", "education"), ("教育発達", "education"),
+    ("医学", "health_welfare"), ("創薬", "health_welfare"),
     ("農学", "agriculture"), ("理学", "natural_sciences_math"), ("数理", "natural_sciences_math"),
     ("文学", "arts_humanities"), ("人文", "arts_humanities"), ("言語文化", "arts_humanities"),
 ]

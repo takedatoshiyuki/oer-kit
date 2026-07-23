@@ -151,3 +151,22 @@ AI で metadata.yaml 下書き生成（[resource.schema.json](../schemas/resourc
 - `_site/` — ビルド成果物（jsonld/, catalog.json, sitemap.xml）。Git 管理外
 - `.cache/` — 取得キャッシュ・取得ログ・旧データの本文退避。Git 管理外
 - `drafts/` — レビュー前の下書き。Git 管理外
+
+## レビューの回し方
+
+413件を1件ずつ精読するのは現実的でないので、**機械が確認済みの項目は出さず**、
+人にしか判断できないものだけを一覧にする。
+
+```sh
+python3 tools/review_sheet.py --open       # レビュー支援ビュー (.cache/review.html)
+python3 tools/approve.py --by "氏名" --dry-run <slug>...   # 検査のみ (無変更)
+python3 tools/approve.py --by "氏名" <slug>...             # 承認 → resources/ へ移動
+python3 tools/approve.py --by "氏名" --from-file approved.txt
+```
+
+`review_sheet.py` は**部局 × 主題分野の対応表**を先頭に出す。1件ずつ見ていては
+気づけない機械推定の誤りが、面で見ると一目で分かる（実測: 「教養教育院」が
+「教育」に部分一致して 126件が education に誤分類されていたのを即座に検出）。
+
+`approve.py` は `reviewedBy` を記入 → 検査（スキーマ・語彙・横断重複）→ **通ったものだけ**
+`resources/` へ移動する。落ちたものは `drafts/` に残るので直して再実行すればよい。

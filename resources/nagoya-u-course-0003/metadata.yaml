@@ -1,0 +1,67 @@
+slug: nagoya-u-course-0003
+mode: referenced
+externalUrl: https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/
+type:
+- LearningResource
+- Course
+name:
+  ja: ジェンダーとセクシュアリティ
+description:
+  ja: 父・母・子の三角関係として成立するファミリー・ロマンスを手がかりに、家族の成り立ちを考察する講義である。レヴィ＝ストロースの家族構造論と精神分析理論を導入し、その後、脱構築、言説理論、クィア理論によって既存の家族像を問い直し、クィア・ファミリーという家族像を提示する。
+quotedDescription:
+  text:
+    ja: 父、母、子という三角関係によって成り立つファミリー・ロマンスは、どのようにして生まれたのか？なぜ、父、母、子でなければならないのか？そこに存在する法則とは何か？これらの問題を考えるために、授業では、まずレヴィ＝ストロースによる家族構造の考察と、精神分析理論における父、母、子の関係を紹介する。その後で、ファミリー・ロマンスの解体に向けて、脱構築と言説理論およびクィア理論の可能性をそれぞれ模索する。そうすることにより、脱ファミリー・ロマンス後の家族像を、新たに「クィア・ファミリー」として提示し、その可能性を考えてみたい。
+  source: https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/
+  note: 名大の授業 (NU OCW) 「授業の内容」より（同サイトの利用条件に基づく転載）
+inLanguage:
+- ja
+usageTerms:
+  url: https://ocw.nagoya-u.jp/about/
+  summary:
+    ja: 非営利の教育目的に限り、コピー・配布・翻訳・編集を含め利用可。クレジット「© 講義の年 教員の氏名（名大の授業）」の明記が条件。
+  reuse: allowed_with_conditions
+creator:
+- type: Person
+  name: 松下千雅子
+  affiliation:
+    name: 名古屋大学
+publisher:
+- type: Organization
+  name: 名古屋大学
+datePublished: '2011'
+dateAccessed: '2026-07-21'
+learningResourceType:
+- course
+- script
+- assessment
+about:
+- arts_humanities
+keywords:
+- 国際
+- 文学
+- 言語
+- 研究雑誌
+- ジェンダー
+audience:
+- student
+educationalLevel:
+- master
+materials:
+- name: 講義ノート
+  contentUrl: https://ocw.nagoya-u.jp/files/3/note07-2.pdf
+  page: https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/
+- name: 講義ノート：課題１
+  contentUrl: https://ocw.nagoya-u.jp/files/3/assignment15-1.pdf
+  page: https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/
+extensions:
+  faculty: 文学部／国際言語文化研究科
+  term: 通年
+  targetAudience: 国際言語文化研究科 国際多元文化専攻
+metadataProvenance:
+  method: ai_generated
+  generator: gpt-5.4-mini
+  generatedDate: '2026-07-21'
+  notes: tools/make_drafts.py + parsers による自動生成。about・educationalLevel は機械推定のため要確認。description は gpt-5.4-mini
+    が生成。
+  reviewedBy:
+  - 武田 俊之
