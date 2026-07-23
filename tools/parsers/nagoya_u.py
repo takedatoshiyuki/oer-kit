@@ -26,6 +26,9 @@ SITE_BOILERPLATE = re.compile(
     r"Nagoya University OpenCourseWare|「名大の授業」|NUOCW\s*では|"
     r"名古屋大学で行われている講義の教材")
 
+# og:description の末尾に付く省略記号 (" ...." / "…")。引用が原文と一致しなくなるため落とす
+TRAILING_ELLIPSIS = re.compile(r"[\s　]*(?:\.{2,}|…+|・{3,})[\s　]*$")
+
 # 説明文でなく見出し・ナビゲーションの羅列を弾くための語
 NAVIGATION_WORDS = ("履修に必要な知識", "履修の際のアドバイス", "授業の進め方", "講義の進め方",
                     "達成目標", "バックグラウンドとなる科目", "授業内容", "テキスト",
@@ -174,6 +177,10 @@ def parse_course(html: str, url: str):
         m = re.search(r'property="og:description"[^>]*content="([^"]*)"', html) or \
             re.search(r'content="([^"]*)"[^>]*property="og:description"', html)
         og = html_module.unescape(m.group(1)).strip() if m else ""
+        # og:description は本文を途中で切って省略記号 (" ....") を付す。
+        # そのままだと原文と一致しない引用になるので、末尾の省略記号を落とす
+        # (残る部分は原文どおりなので verbatim 検査を通る)
+        og = TRAILING_ELLIPSIS.sub("", og).strip()
         if len(og) >= 30 and not SITE_BOILERPLATE.search(og):
             quoted_parts.append(og)
             quoted_labels.append("og:description")

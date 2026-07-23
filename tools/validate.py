@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import collections
+import html as html_module
 import json
 import re
 import sys
@@ -55,8 +56,16 @@ def check_quote_verbatim(meta):
     if not cache_path.exists():
         return [], [f"引用の照合をスキップ（キャッシュ無し: {source} → tools/fetch.py で取得）"]
 
-    page_text = _squash("\n".join(visible_lines(cache_path.read_text(encoding="utf-8",
-                                                                     errors="ignore"))))
+    html = cache_path.read_text(encoding="utf-8", errors="ignore")
+    # 可視テキストに加えて meta 由来の説明文も照合対象にする。
+    # og:description / meta description から引いた引用は、本文と文言が異なることがあり
+    # (サイト側が要約して入れている)、可視テキストだけでは原理的に検証できない
+    haystack = visible_lines(html)
+    for pattern in (r'property=["\']og:description["\'][^>]*content=["\']([^"\']*)',
+                    r'content=["\']([^"\']*)["\'][^>]*property=["\']og:description',
+                    r'name=["\']description["\'][^>]*content=["\']([^"\']*)'):
+        haystack += [html_module.unescape(m) for m in re.findall(pattern, html, re.I)]
+    page_text = _squash("\n".join(haystack))
     errors = []
     for value in _text_values(quoted["text"]):
         # 原文が改行で分かれている場合があるので行ごとに照合する
