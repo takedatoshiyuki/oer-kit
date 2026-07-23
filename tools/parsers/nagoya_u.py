@@ -19,6 +19,12 @@ SECTION_LABELS = [
     "参考資料", "課題", "スケジュール", "講義ノート", "成績評価", "履修条件", "その他",
 ]
 
+# quotedDescription に採る見出し (この順に最大2つ)。SECTION_LABELS のうち
+# 説明として通用するものだけを選ぶ。「授業の目的」「講義目的」は当初漏れており、
+# 目的を明記した授業157件が引用なしになっていた
+QUOTE_LABELS = ("講義の概要", "授業の概要", "授業の目的", "講義目的", "授業のねらい",
+                "講義の内容", "授業の内容", "到達目標")
+
 MATERIAL_SECTION_WORDS = ("講義ノート", "課題", "スライド", "配布資料", "参考資料", "レポート")
 
 # サイト共通の案内文。説明文ではないので引用に使わない
@@ -169,7 +175,9 @@ def parse_course(html: str, url: str):
 
     sections = _sections(lines)
     quoted_parts, quoted_labels = [], []
-    for label in ("講義の概要", "講義の内容", "授業の概要", "授業の内容", "授業のねらい"):
+    # 概要 → 目的 → 内容 の順に採る。「目的」を書いている授業はそれが最も的確な
+    # 説明なので、要約に頼らず原文をそのまま見せる (レビューでの指摘に基づく)
+    for label in QUOTE_LABELS:
         if label in sections and len(sections[label]) >= 20:
             quoted_parts.append(sections[label])
             quoted_labels.append(label)
