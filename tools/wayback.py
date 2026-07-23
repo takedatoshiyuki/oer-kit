@@ -30,6 +30,22 @@ def availability(url: str, session: requests.Session) -> dict | None:
     return snapshot if snapshot and snapshot.get("available") else None
 
 
+def save_page_now(url: str, session: requests.Session):
+    """Wayback Machine の Save Page Now でスナップショットを作る。
+
+    個人サイトの資料は消えやすいので、目録化の時点で保存する (§7.5)。
+    成功すればスナップショット URL (archivedAt に記入する値) を返す。
+    """
+    r = session.get(f"https://web.archive.org/save/{url}", timeout=180, allow_redirects=True)
+    r.raise_for_status()
+    final = r.url
+    if "/web/" in final:
+        return final
+    # リダイレクトで snapshot URL にならない場合は availability で引き直す
+    snapshot = availability(url, session)
+    return snapshot["url"] if snapshot else None
+
+
 def head_status(url: str, session: requests.Session) -> str:
     try:
         r = session.head(url, timeout=30, allow_redirects=True)
@@ -64,6 +80,8 @@ def main() -> int:
     parser.add_argument("url", nargs="?", help="確認する URL")
     parser.add_argument("--check", action="store_true",
                         help="referenced リソース全件のリンク・スナップショット確認")
+    parser.add_argument("--save", action="store_true",
+                        help="URL のスナップショットを Save Page Now で作成 (archivedAt 用)")
     args = parser.parse_args()
 
     config = load_config()
@@ -77,6 +95,13 @@ def main() -> int:
 
     if not args.url:
         parser.error("URL か --check を指定")
+    if args.save:
+        saved = save_page_now(args.url, session)
+        if saved:
+            print(f"archivedAt: {saved}")
+            return 0
+        print("保存できなかった (レート制限の可能性。時間をおいて再試行)", file=sys.stderr)
+        return 1
     snapshot = availability(args.url, session)
     if snapshot:
         print(f"snapshot: {snapshot['url']} (timestamp {snapshot['timestamp']})")

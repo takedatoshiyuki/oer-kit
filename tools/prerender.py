@@ -44,10 +44,12 @@ PROVENANCE_METHOD_LABEL = {
 REUSE_LABEL = {
     "allowed_with_conditions": "条件付き再利用可（独自ライセンス）",
     "not_allowed": "再利用不可（視聴のみ）",
+    "unspecified": "利用条件の記載なし（原則閲覧のみ）",
 }
 REUSE_CATEGORY = {
     "allowed_with_conditions": "条件付き再利用可",
     "not_allowed": "再利用不可",
+    "unspecified": "利用条件記載なし",
 }
 
 
@@ -126,7 +128,7 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
 
     terms = meta.get("usageTerms")
     if terms:
-        kind = "warning" if terms["reuse"] == "not_allowed" else "note"
+        kind = "warning" if terms["reuse"] in ("not_allowed", "unspecified") else "note"
         lines += [f'::: {{.callout-{kind} title="{REUSE_LABEL[terms["reuse"]]}"}}',
                   f"{localized(terms['summary'], lang)}（[利用条件の原文]({terms['url']})）",
                   ":::", ""]
@@ -319,6 +321,9 @@ def main() -> int:
         # サイト名をカテゴリの先頭に置き、カタログでサイト別に絞り込めるようにする
         if meta.get("sourceCollection"):
             categories.insert(0, localized(meta["sourceCollection"]["name"], lang))
+            # 個人公開はまとめて絞り込めるようにする (個人サイトはサイト数が多く1件ずつのため)
+            if meta["sourceCollection"].get("kind") == "personal":
+                categories.insert(1, "個人公開")
         if categories:
             front["categories"] = categories
         image = meta.get("image")

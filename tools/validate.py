@@ -172,6 +172,12 @@ def validate_resource(slug, resource_dir, meta, validator, vocabs, check_quotes=
                     f"{field}: 語彙キー '{value}' が vocabularies/{VOCAB_FILES[field]} に無い"
                 )
 
+    # 個人サイトは組織サイトよりリンク切れが早い。アーカイブの確保を促す
+    collection = meta.get("sourceCollection") or {}
+    if collection.get("kind") == "personal" and not meta.get("archivedAt"):
+        warnings.append("個人サイトの資料は archivedAt (Webアーカイブ) を強く推奨 "
+                        "(tools/wayback.py --save <url> で保存できる。§7.5)")
+
     mode = meta.get("mode", "hosted")
     has_content = (resource_dir / "content").is_dir()
     if mode == "hosted" and not has_content:

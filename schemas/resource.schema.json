@@ -217,7 +217,11 @@
       "required": ["name"],
       "properties": {
         "name": { "$ref": "#/$defs/localizedText" },
-        "url": { "$ref": "#/$defs/httpUri" }
+        "url": { "$ref": "#/$defs/httpUri" },
+        "kind": {
+          "enum": ["organizational", "personal", "platform"],
+          "description": "出典の種別。organizational: 組織のサイト / personal: 個人のページ・研究室サイト / platform: スライド共有等のプラットフォーム。personal はリンク切れしやすいため archivedAt を強く推奨 (validate が警告)"
+        }
       }
     },
     "materials": {
@@ -257,8 +261,8 @@
         "url": { "$ref": "#/$defs/httpUri", "description": "利用条件ページの URL" },
         "summary": { "$ref": "#/$defs/localizedText", "description": "条件の要約 (人間可読)" },
         "reuse": {
-          "enum": ["allowed_with_conditions", "not_allowed"],
-          "description": "allowed_with_conditions: 条件付きで複製・改変・配布可 / not_allowed: 視聴のみ"
+          "enum": ["allowed_with_conditions", "not_allowed", "unspecified"],
+          "description": "allowed_with_conditions: 条件付きで複製・改変・配布可 / not_allowed: 視聴のみ (明示的禁止) / unspecified: 利用条件の記載なし (個人ページ等。著作権法上の原則により閲覧のみと扱う)"
         }
       }
     },

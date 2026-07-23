@@ -1,0 +1,46 @@
+# 個人公開資料の記入例 (docs/design.md §7.5)。実在の資料ではありません。
+# ポイント: sourceCollection.kind: personal / usageTerms.reuse: unspecified (利用条件の記載なし)
+#           / archivedAt (個人サイトはリンク切れしやすいため登録時に wayback.py --save で確保)
+
+slug: sample-personal-slides
+mode: referenced
+externalUrl: https://slides.example.net/taro-yamada/intro-data-analysis
+
+type: [LearningResource]
+name:
+  ja: データ分析入門（講義スライド）
+
+description:
+  ja: >-
+    表計算ソフトと Python によるデータ分析の導入を扱う講義スライド。
+    データの読み込みから基本統計量、可視化までを例題つきで説明する。
+
+inLanguage: [ja]
+
+# 利用条件の記載が無い個人ページ。著作権法上の原則により閲覧のみと扱う (明示的禁止とは区別)
+usageTerms:
+  url: https://slides.example.net/taro-yamada/intro-data-analysis
+  summary:
+    ja: ページ上にライセンス・利用条件の記載なし。著作権法上の原則により、閲覧以外の利用（複製・再配布等）には著作者の許諾が必要。
+  reuse: unspecified
+
+creator:
+  - type: Person
+    name: 山田 太郎        # 例
+sourceCollection:
+  name: 山田太郎のスライド置き場   # 例 (個人サイト名)
+  url: https://slides.example.net/taro-yamada/
+  kind: personal
+datePublished: "2024"
+dateAccessed: "2026-07-21"
+archivedAt: https://web.archive.org/web/20260721000000/https://slides.example.net/taro-yamada/intro-data-analysis
+
+learningResourceType: [slide]
+about: [natural_sciences_math]
+keywords: [データ分析, 統計, Python, 表計算]
+audience: [student, general_public]
+
+metadataProvenance:
+  method: manual
+  generatedDate: "2026-07-21"
+  notes: 記入例として手作業で作成

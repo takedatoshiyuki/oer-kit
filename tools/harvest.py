@@ -109,8 +109,10 @@ def harvest_resource(slug, meta, config, session, limit=0, force=False):
         return 0
 
     terms = meta.get("usageTerms") or {}
-    if terms.get("reuse") == "not_allowed":
-        print(f"[skip] {slug}: 利用条件が複製を禁止 (not_allowed) のため取得しない (§7.4)")
+    if terms.get("reuse") in ("not_allowed", "unspecified"):
+        reason = ("利用条件が複製を禁止 (not_allowed)" if terms["reuse"] == "not_allowed"
+                  else "利用条件の記載がなく複製の許諾がない (unspecified)")
+        print(f"[skip] {slug}: {reason} のため取得しない (§7.4)")
         return 0
 
     out_dir = archive_root(config) / slug
