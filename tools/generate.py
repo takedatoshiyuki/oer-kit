@@ -185,8 +185,10 @@ def check_output(result, meta):
             continue
         break
 
+    # 主観的な価値判断のみを弾く。「最適な」は「最適な投資額」のように数学・工学・
+    # 経済学で技術用語として正当に使われるため対象にしない (実測で誤検出2件)
     for word in ("わかりやすい", "分かりやすい", "充実した", "必見", "おすすめ",
-                 "最適な", "優れた", "人気の"):
+                 "優れた", "人気の"):
         if word in description:
             problems.append(f"評価語『{word}』を含む")
     return problems
