@@ -63,10 +63,10 @@ toc: true
 メタデータは [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) で提供して
 おり、許諾なしで自由に利用できます:
 
-- [catalog.json](/catalog.json) — 全教材の JSON-LD（schema.org / LRMI 準拠）を束ねた
+- [catalog.json](catalog.json) — 全教材の JSON-LD（schema.org / LRMI 準拠）を束ねた
   一括取得用ファイル
 - 各ページの `<head>` にも同じ JSON-LD を埋め込んでいます
-- [sitemap.xml](/sitemap.xml) — 全ページの一覧
+- [sitemap.xml](sitemap.xml) — 全ページの一覧
 
 検索サービスやアグリゲータからの収集を歓迎します。ただし、内容紹介の引用部分
 （「出典サイトの説明（原文）」）は CC0 の対象外のため `catalog.json` には含めていません。

@@ -1,0 +1,93 @@
+slug: lms-learning-analytics-for-education
+mode: hosted
+type: [LearningResource, Course]
+
+name:
+  ja: LMSログから学習と授業を読み解く
+  en: Reading Learning and Teaching Through LMS Logs
+alternateName:
+  ja: 教育改善のためのラーニングアナリティクス 初級・中級・修士発展
+description:
+  ja: >-
+    大学教員・教育支援者と心理・教育系修士1年を対象に、LMSログを授業改善、学生支援、
+    教育研究へ結びつける方法を学ぶ9時間の実習教材。
+    初級編では授業設計とログの対応、可視化、教育的解釈を扱い、中級編では構成概念、早期支援、
+    介入評価、公平性を扱う。修士発展編では理論、妥当性、研究質問、混合研究法、ロジックモデル、
+    評価デザイン、倫理・データ管理を扱う。合成データ、Rスクリプト、演習、解答例、講師ガイドを含む。
+  en: >-
+    A nine-hour practical course for higher-education instructors, educational support staff, and first-year
+    master's students in psychology and education. It connects LMS logs with course improvement, student support,
+    research design, construct validity, intervention logic, and evaluation. It includes synthetic data, R scripts,
+    exercises, suggested responses, and a facilitator guide.
+inLanguage: [ja]
+
+license: CC-BY-4.0
+creator:
+  - type: Organization
+    name: LMS-Analyticsプロジェクト
+publisher:
+  - type: Organization
+    name: LMS-Analyticsプロジェクト
+datePublished: "2026-07-26"
+version: "1.0.0"
+
+learningResourceType: [course, lesson_plan, worksheet, data, script]
+about: [education, ict]
+keywords:
+  - ラーニングアナリティクス
+  - LMSログ
+  - 大学教育
+  - 授業改善
+  - 学生支援
+  - R
+  - 教育データ
+audience: [teacher, professional, administrator]
+educationalLevel: [continuing_education]
+
+teaches:
+  - 教育課題を起点にLMSログ分析の問いを設定できる
+  - LMSログが観測する行動と観測しない学習過程を区別できる
+  - 授業設計、ログ、提出、成果、主観的情報を組み合わせて解釈できる
+  - Rを用いて学生×科目×週の指標を作成し、分布と時系列を可視化できる
+  - 早期支援の閾値を予測性能と支援可能件数の両面から検討できる
+  - 学生主体性、公平性、介入効果を含む教育改善計画を設計できる
+  - 研究質問、理論的構成概念、操作的定義、研究デザインを整合させられる
+  - 分析から教育的介入までのロジックモデルと評価計画を作成できる
+  - 倫理、データ管理、再現可能性を研究・実践計画へ組み込める
+assesses:
+  - LMSログの教育的解釈
+  - 授業改善案と学生支援案の設計
+  - 再現可能で倫理的な分析計画
+  - 理論と測定の妥当性を含む教育研究・実践計画
+competencyRequired:
+  - 表形式データの列と行を理解できる
+  - 初級編はR未経験でも受講できるが、R環境を事前に準備する
+  - 中級編は初級編修了またはdplyrとggplot2の基礎を前提とする
+  - 修士発展編は心理学・教育学の研究法と基礎統計の入門を修了していることが望ましい
+timeRequired: PT9H
+educationalUse:
+  - 大学教員・教育支援者向けFD研修
+  - ラーニングアナリティクス導入研修
+  - 個人またはグループでの自習
+interactivityType: mixed
+
+encoding:
+  - format: text/markdown
+  - format: text/x-r-source
+  - format: text/csv
+
+accessibility:
+  accessMode: [textual, visual]
+  accessModeSufficient: [[textual]]
+  accessibilityFeature: [readingOrder, tableOfContents]
+  accessibilityHazard: [noFlashingHazard, noMotionSimulationHazard, noSoundHazard]
+  accessibilitySummary:
+    ja: >-
+      見出しと表に構造を付け、図がなくても本文だけで学習できる。コード例と演習には文章による説明を併記している。
+
+metadataProvenance:
+  method: ai_assisted
+  generator: OpenAI Codex
+  generatedDate: "2026-07-26"
+  confidence: high
+  notes: LMS-Analyticsプロジェクトの文献レビューとMoodle・Canvas・Open edXソースコードレビューを基に作成。

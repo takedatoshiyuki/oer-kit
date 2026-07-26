@@ -249,8 +249,9 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
     lines += ["## 引用・帰属表示の例", "```", tasl_line(meta, cite_url, config, lang), "```", ""]
 
     lines.append("## このメタデータについて")
+    # サブパス配信 (GitHub Pages の user.github.io/repo/ 等) でも壊れないよう絶対URLにする
     lines.append("- メタデータは [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) で"
-                 f"提供します（[JSON-LD](/jsonld/{slug}.json)）。")
+                 f"提供します（[JSON-LD]({config['base_url']}/jsonld/{slug}.json)）。")
     if provenance:
         detail = PROVENANCE_METHOD_LABEL.get(provenance.get("method"), provenance.get("method", ""))
         if provenance.get("generator"):

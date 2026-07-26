@@ -8,7 +8,7 @@ title: "このリポジトリについて"
 
 ## ライセンス
 
-- **メタデータ**（各ページの書誌情報・[カタログデータ](/catalog.json)）は
+- **メタデータ**（各ページの書誌情報・[カタログデータ](catalog.json)）は
   [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) で提供します。
   許諾確認なしで自由に複製・加工・再配布できます。
 - **教材コンテンツ**は各リソースのページに表示されたライセンスに従ってください。
@@ -23,5 +23,5 @@ title: "このリポジトリについて"
 ## 機械可読メタデータ
 
 各ページには schema.org / LRMI（AMB プロファイル）準拠の JSON-LD を埋め込んでいます。
-全リソース分をまとめた [catalog.json](/catalog.json) と [sitemap.xml](/sitemap.xml) も
+全リソース分をまとめた [catalog.json](catalog.json) と [sitemap.xml](sitemap.xml) も
 公開しており、検索サービスやアグリゲータからの収集を歓迎します。

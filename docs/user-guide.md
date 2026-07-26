@@ -168,9 +168,34 @@ discover (sitemap からURL列挙)
 | `personal` | 本人の確認 | 自分で確認して `approve.py --by "自分の名前"` |
 
 公開は `make site` で `_site/` に生成される一式（HTML・JSON-LD・catalog.json・
-sitemap.xml）を任意の静的ホスティング（GitHub Pages 等）に置くだけです。
-GitHub を使う場合は同梱の CI（[.github/workflows/](../.github/workflows/)）が
-PR ごとの検証と週次のリンク切れ確認を行います。
+sitemap.xml）を任意の静的ホスティングに置くだけです。
+
+### GitHub Pages で公開する
+
+同梱のワークフロー（[.github/workflows/publish.yml](../.github/workflows/publish.yml)）が
+main への push ごとにサイトを生成して配信します。手順:
+
+```sh
+gh repo create <リポジトリ名> --public --source . --push   # リポジトリ作成 + push
+gh api repos/{owner}/{repo}/pages -X POST -f build_type=workflow   # Pages を有効化
+```
+
+（Web UI の場合: リポジトリ作成 → push → Settings → Pages → Source を
+「GitHub Actions」にする）
+
+その後 `config.yaml` の `base_url` を公開URL（例:
+`https://<ユーザー名>.github.io/<リポジトリ名>`）に変更して push します。
+**`base_url` が実際の公開URLと一致していないと、JSON-LD の ID・サイトマップ・
+ページ内の絶対リンクが壊れます。**
+
+補足:
+
+- 無料プランの Pages は**公開リポジトリ**が前提です（メタデータは CC0、`drafts/`・
+  `archive/`・`.cache/` は Git 管理外なので、公開されるのはレビュー済みリソースと
+  ツール・文書のみ）
+- `<ユーザー名>.github.io/<リポジトリ名>` はサブパス配信ですが、サイトは対応済みです。
+  独自ドメインを使う場合は Pages のカスタムドメイン設定後に `base_url` を差し替えます
+- あわせて PR ごとの検証（validate）と週次のリンク切れ確認も同梱の CI が行います
 
 ## 7. ライセンスの決まりごと
 
