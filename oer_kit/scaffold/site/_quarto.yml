@@ -1,0 +1,32 @@
+# ⚠ site/_quarto.yml は tools/prerender.py がこのテンプレートと config.yaml から生成する。
+# 設定を変えるときはこのファイルを編集して prerender を再実行すること ({{...}} は config.yaml の値)。
+project:
+  type: website
+  output-dir: ../_site
+
+# 教材ページのコード断片をビルド時に実行しない (公開物のビルドで任意コードを走らせない)
+execute:
+  enabled: false
+
+website:
+  title: "OER リポジトリ（仮称）"
+  site-url: "https://oer.example.ac.jp"
+  navbar:
+    left:
+      - href: index.qmd
+        text: カタログ
+      - href: guide.qmd
+        text: 使い方
+      - href: about.qmd
+        text: このリポジトリについて
+  page-footer:
+    left: "メタデータ: CC0 1.0 ／ 教材コンテンツ: 各リソースのライセンス表示に従う"
+  search:
+    location: navbar
+    type: overlay
+
+format:
+  html:
+    lang: "ja"
+    theme: cosmo
+    toc: true

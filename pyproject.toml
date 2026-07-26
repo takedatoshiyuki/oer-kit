@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oer-kit"
+version = "0.1.0"
+description = "OERカタログの構築キット — メタデータスキーマ (schema.org/LRMI・AMB準拠)・検証・収集・サイト生成"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["pyyaml", "jsonschema", "requests"]
+
+[project.optional-dependencies]
+legacy = ["pandas", "openpyxl"]
+
+[project.scripts]
+oer-kit = "oer_kit.cli:main"
+
+[tool.setuptools]
+packages = ["oer_kit"]
+
+[tool.setuptools.package-data]
+oer_kit = ["schema/*.json", "scaffold/**/*"]

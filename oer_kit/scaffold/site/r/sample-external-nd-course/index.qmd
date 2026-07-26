@@ -1,0 +1,55 @@
+---
+title: 線形代数学Ⅰ 講義ビデオ
+author:
+- △△大学 OCW
+date: '2025-04-01'
+date-format: YYYY年M月D日
+description: 行列演算・連立一次方程式・固有値問題を扱う全13回の講義ビデオ。 ベクトル空間の抽象的定義には立ち入らず、計算と応用に重点を置く。
+categories:
+- 動画
+- コース
+- 自然科学・数学・統計学
+- 学士課程（大学学部）
+format:
+  html:
+    include-in-header:
+      text: "<script type=\"application/ld+json\">\n{\n  \"@context\": [\n    \"https://w3id.org/kim/amb/context.jsonld\",\n    {\n      \"@language\": \"ja\"\n    }\n  ],\n  \"id\": \"https://ocw.example.ac.jp/courses/linear-algebra-2025/\",\n  \"type\": [\n    \"LearningResource\",\n    \"Course\"\n  ],\n  \"name\": \"線形代数学Ⅰ 講義ビデオ\",\n  \"description\": \"行列演算・連立一次方程式・固有値問題を扱う全13回の講義ビデオ。 ベクトル空間の抽象的定義には立ち入らず、計算と応用に重点を置く。\",\n  \"inLanguage\": [\n    \"ja\"\n  ],\n  \"license\": {\n    \"id\": \"https://creativecommons.org/licenses/by-nc-nd/4.0/\"\n  },\n  \"creator\": [\n    {\n      \"type\": \"Organization\",\n      \"name\": \"△△大学 OCW\"\n    }\n  ],\n  \"datePublished\": \"2025-04-01\",\n  \"learningResourceType\": [\n    {\n      \"id\": \"https://w3id.org/kim/hcrt/video\",\n      \"prefLabel\": {\n        \"ja\": \"動画\",\n        \"en\": \"Video\"\n      }\n    },\n    {\n      \"id\": \"https://w3id.org/kim/hcrt/course\",\n      \"prefLabel\": {\n        \"ja\": \"コース\",\n      \
+        \  \"en\": \"Course\"\n      }\n    }\n  ],\n  \"about\": [\n    {\n      \"id\": \"https://oer.example.ac.jp/vocab/subject/natural_sciences_math\",\n      \"prefLabel\": {\n        \"ja\": \"自然科学・数学・統計学\",\n        \"en\": \"Natural sciences, mathematics and statistics\"\n      }\n    }\n  ],\n  \"audience\": [\n    {\n      \"id\": \"http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/student\",\n      \"prefLabel\": {\n        \"ja\": \"学習者\",\n        \"en\": \"student\"\n      }\n    }\n  ],\n  \"educationalLevel\": [\n    {\n      \"id\": \"https://oer.example.ac.jp/vocab/educational-level/bachelor\",\n      \"prefLabel\": {\n        \"ja\": \"学士課程（大学学部）\",\n        \"en\": \"Bachelor's level\"\n      }\n    }\n  ],\n  \"keywords\": [\n    \"線形代数\",\n    \"行列\",\n    \"連立一次方程式\",\n    \"固有値\"\n  ],\n  \"archivedAt\": \"https://web.archive.org/web/20260721000000/https://ocw.example.ac.jp/courses/linear-algebra-2025/\",\n  \"isAccessibleForFree\": true,\n  \"mainEntityOfPage\"\
+        : [\n    {\n      \"id\": \"https://oer.example.ac.jp/r/sample-external-nd-course\",\n      \"provider\": {\n        \"type\": \"Organization\",\n        \"name\": \"OER リポジトリ（仮称）\"\n      },\n      \"dateModified\": \"2026-07-21\",\n      \"creator\": {\n        \"type\": \"SoftwareApplication\",\n        \"name\": \"claude-fable-5\"\n      },\n      \"description\": \"description は AI 生成。レビュー済み: 山田 太郎\"\n    }\n  ]\n}\n</script>"
+---
+
+::: {.callout-important title="外部教材の目録エントリ — 外部サイト"}
+教材本体は外部サイトにあります: <https://ocw.example.ac.jp/courses/linear-algebra-2025/>（最終確認: 2026-07-21）
+リンク切れの際は [Web アーカイブのスナップショット](https://web.archive.org/web/20260721000000/https://ocw.example.ac.jp/courses/linear-algebra-2025/) を参照してください。
+:::
+
+::: {.callout-note appearance='minimal' collapse='true' title='内容紹介の出所（AI 生成）'}
+上の内容紹介は AI（claude-fable-5）が生成したものです。山田 太郎が確認済み。教材そのものの文章ではありません。
+:::
+
+## 基本情報
+
+| 項目 | 内容 |
+|------|------|
+| 教材タイプ | 動画、コース |
+| 主題分野 | 自然科学・数学・統計学 |
+| 教育段階 | 学士課程（大学学部） |
+| 想定利用者 | 学習者 |
+| 言語 | ja |
+| ライセンス | [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) |
+| 公開日 | 2025-04-01 |
+
+## キーワード
+線形代数、行列、連立一次方程式、固有値
+
+## 教材へのアクセス
+[教材本体を開く](https://ocw.example.ac.jp/courses/linear-algebra-2025/){.btn .btn-primary}
+
+## 引用・帰属表示の例
+```
+△△大学 OCW「線形代数学Ⅰ 講義ビデオ」OER リポジトリ（仮称）. CC BY-NC-ND 4.0. https://ocw.example.ac.jp/courses/linear-algebra-2025/
+```
+
+## このメタデータについて
+- メタデータは [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) で提供します（[JSON-LD](https://oer.example.ac.jp/jsonld/sample-external-nd-course.json)）。
+- 作成方法: AI 生成（人手レビュー済み）／使用モデル: claude-fable-5／作成日: 2026-07-21／確からしさ: 通常／レビュー: 山田 太郎

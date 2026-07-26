@@ -1,0 +1,26 @@
+name: ci
+
+# モジュール自体のスモークテスト: 雛形からプロジェクトを作り、
+# 記入例を入れて検証・JSON-LD 生成まで通す。
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: 雛形からプロジェクト生成 → 記入例で検証
+        run: |
+          oer-kit init tmp-project
+          cp -r examples/resources/* tmp-project/resources/
+          cd tmp-project
+          oer-kit validate
+          oer-kit jsonld
+          oer-kit build-catalog

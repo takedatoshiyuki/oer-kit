@@ -1,0 +1,75 @@
+---
+title: ジェンダーとセクシュアリティ
+author:
+- 松下千雅子
+date: '2011'
+date-format: YYYY年
+description: 父・母・子の三角関係として成立するファミリー・ロマンスを手がかりに、家族の成り立ちを考察する講義である。レヴィ＝ストロースの家族構造論と精神分析理論を導入し、その後、脱構築、言説理論、クィア理論によって既存の家族像を問い直し、クィア・ファミリーという家族像を提示する。
+categories:
+- 名大の授業 (NU OCW)
+- コース
+- 講義資料・講義ノート
+- 評価・試験問題
+- 人文学・芸術
+- 修士課程
+- 条件付き再利用可
+format:
+  html:
+    include-in-header:
+      text: "<script type=\"application/ld+json\">\n{\n  \"@context\": [\n    \"https://w3id.org/kim/amb/context.jsonld\",\n    {\n      \"@language\": \"ja\"\n    }\n  ],\n  \"id\": \"https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/\",\n  \"type\": [\n    \"LearningResource\",\n    \"Course\"\n  ],\n  \"name\": \"ジェンダーとセクシュアリティ\",\n  \"description\": \"父・母・子の三角関係として成立するファミリー・ロマンスを手がかりに、家族の成り立ちを考察する講義である。レヴィ＝ストロースの家族構造論と精神分析理論を導入し、その後、脱構築、言説理論、クィア理論によって既存の家族像を問い直し、クィア・ファミリーという家族像を提示する。\",\n  \"inLanguage\": [\n    \"ja\"\n  ],\n  \"usageInfo\": {\n    \"id\": \"https://ocw.nagoya-u.jp/about/\",\n    \"description\": \"非営利の教育目的に限り、コピー・配布・翻訳・編集を含め利用可。クレジット「© 講義の年 教員の氏名（名大の授業）」の明記が条件。\"\n  },\n  \"creator\": [\n    {\n      \"type\": \"Person\",\n      \"name\": \"松下千雅子\",\n      \"affiliation\": {\n        \"type\": \"Organization\",\n        \"name\": \"名古屋大学\"\n      }\n\
+        \    }\n  ],\n  \"publisher\": [\n    {\n      \"type\": \"Organization\",\n      \"name\": \"名古屋大学\"\n    }\n  ],\n  \"datePublished\": \"2011\",\n  \"learningResourceType\": [\n    {\n      \"id\": \"https://w3id.org/kim/hcrt/course\",\n      \"prefLabel\": {\n        \"ja\": \"コース\",\n        \"en\": \"Course\"\n      }\n    },\n    {\n      \"id\": \"https://w3id.org/kim/hcrt/script\",\n      \"prefLabel\": {\n        \"ja\": \"講義資料・講義ノート\",\n        \"en\": \"Script\"\n      }\n    },\n    {\n      \"id\": \"https://w3id.org/kim/hcrt/assessment\",\n      \"prefLabel\": {\n        \"ja\": \"評価・試験問題\",\n        \"en\": \"Assessment\"\n      }\n    }\n  ],\n  \"about\": [\n    {\n      \"id\": \"https://oer.example.ac.jp/vocab/subject/arts_humanities\",\n      \"prefLabel\": {\n        \"ja\": \"人文学・芸術\",\n        \"en\": \"Arts and humanities\"\n      }\n    }\n  ],\n  \"audience\": [\n    {\n      \"id\": \"http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/student\",\n\
+        \      \"prefLabel\": {\n        \"ja\": \"学習者\",\n        \"en\": \"student\"\n      }\n    }\n  ],\n  \"educationalLevel\": [\n    {\n      \"id\": \"https://oer.example.ac.jp/vocab/educational-level/master\",\n      \"prefLabel\": {\n        \"ja\": \"修士課程\",\n        \"en\": \"Master's level\"\n      }\n    }\n  ],\n  \"keywords\": [\n    \"国際\",\n    \"文学\",\n    \"言語\",\n    \"研究雑誌\",\n    \"ジェンダー\"\n  ],\n  \"isPartOf\": [\n    {\n      \"type\": \"Collection\",\n      \"name\": \"名大の授業 (NU OCW)\",\n      \"id\": \"https://ocw.nagoya-u.jp/\"\n    }\n  ],\n  \"hasPart\": [\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"講義ノート\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/3/note07-2.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"講義ノート：課題１\",\n      \"encoding\": [\n        {\n\
+        \          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/3/assignment15-1.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    }\n  ],\n  \"isAccessibleForFree\": true,\n  \"mainEntityOfPage\": [\n    {\n      \"id\": \"https://oer.example.ac.jp/r/nagoya-u-course-0003\",\n      \"provider\": {\n        \"type\": \"Organization\",\n        \"name\": \"OER リポジトリ（仮称）\"\n      },\n      \"dateModified\": \"2026-07-21\",\n      \"creator\": {\n        \"type\": \"SoftwareApplication\",\n        \"name\": \"gpt-5.4-mini\"\n      },\n      \"description\": \"description は AI 生成\"\n    }\n  ]\n}\n</script>"
+---
+
+::: {.callout-important title="外部教材の目録エントリ — 「名大の授業 (NU OCW)」"}
+教材本体は「名大の授業 (NU OCW)」にあります: <https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/>（最終確認: 2026-07-21）
+:::
+
+::: {.callout-note title="条件付き再利用可（独自ライセンス）"}
+非営利の教育目的に限り、コピー・配布・翻訳・編集を含め利用可。クレジット「© 講義の年 教員の氏名（名大の授業）」の明記が条件。（[利用条件の原文](https://ocw.nagoya-u.jp/about/)）
+:::
+
+::: {.callout-note appearance='minimal' collapse='true' title='内容紹介の出所（AI 生成）'}
+上の内容紹介は AI（gpt-5.4-mini）が生成したものです（未確認）。教材そのものの文章ではありません。原文は下の引用を参照してください。
+:::
+
+## 出典サイトの説明（原文）
+
+> 父、母、子という三角関係によって成り立つファミリー・ロマンスは、どのようにして生まれたのか？なぜ、父、母、子でなければならないのか？そこに存在する法則とは何か？これらの問題を考えるために、授業では、まずレヴィ＝ストロースによる家族構造の考察と、精神分析理論における父、母、子の関係を紹介する。その後で、ファミリー・ロマンスの解体に向けて、脱構築と言説理論およびクィア理論の可能性をそれぞれ模索する。そうすることにより、脱ファミリー・ロマンス後の家族像を、新たに「クィア・ファミリー」として提示し、その可能性を考えてみたい。
+>
+> — 名大の授業 (NU OCW) 「授業の内容」より（同サイトの利用条件に基づく転載）: <https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/>
+
+## 基本情報
+
+| 項目 | 内容 |
+|------|------|
+| 出典サイト | [名大の授業 (NU OCW)](https://ocw.nagoya-u.jp/) |
+| 教材タイプ | コース、講義資料・講義ノート、評価・試験問題 |
+| 主題分野 | 人文学・芸術 |
+| 教育段階 | 修士課程 |
+| 想定利用者 | 学習者 |
+| 言語 | ja |
+| 利用条件 | [条件付き再利用可（独自ライセンス）](https://ocw.nagoya-u.jp/about/) |
+| 公開日 | 2011 |
+
+## キーワード
+国際、文学、言語、研究雑誌、ジェンダー
+
+## 教材へのアクセス
+[教材本体を開く](https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/){.btn .btn-primary}
+
+## 教材ファイル
+リンク先は外部サイト。利用は上記のライセンス・利用条件に従ってください。
+
+- [講義ノート](https://ocw.nagoya-u.jp/files/3/note07-2.pdf)（PDF）
+- [講義ノート：課題１](https://ocw.nagoya-u.jp/files/3/assignment15-1.pdf)（PDF）
+
+## 引用・帰属表示の例
+```
+松下千雅子「ジェンダーとセクシュアリティ」OER リポジトリ（仮称）. 条件付き再利用可（独自ライセンス）. https://ocw.nagoya-u.jp/courses/0003-%E3%82%B8%E3%82%A7%E3%83%B3%E3%83%80%E3%83%BC%E3%81%A8%E3%82%BB%E3%82%AF%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%AA%E3%83%86%E3%82%A3-2011/
+```
+
+## このメタデータについて
+- メタデータは [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) で提供します（[JSON-LD](https://oer.example.ac.jp/jsonld/nagoya-u-course-0003.json)）。
+- 作成方法: AI 生成（人手レビュー済み）／使用モデル: gpt-5.4-mini／作成日: 2026-07-21／確からしさ: 通常

@@ -1,0 +1,44 @@
+name: publish
+
+# main への push でサイトを生成し GitHub Pages へ配信する。
+# 事前に Settings → Pages → Source を「GitHub Actions」にしておくこと
+# (config.yaml の base_url も公開URLに合わせる。docs/user-guide.md §6)。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "oer-kit @ git+https://github.com/OWNER/oer-kit"  # ← 自分の oer-kit の場所に変更
+      - uses: quarto-dev/quarto-actions/setup@v2
+      - name: サイト生成（検証 → prerender → quarto render → catalog）
+        run: make site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

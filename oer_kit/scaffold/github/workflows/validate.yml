@@ -1,0 +1,23 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "oer-kit @ git+https://github.com/OWNER/oer-kit"  # ← 自分の oer-kit の場所に変更
+      - name: メタデータ検証（スキーマ・語彙・運用ポリシー）
+        run: python3 -m oer_kit.validate
+      - name: JSON-LD / catalog.json の生成確認
+        run: python3 -m oer_kit.build_catalog
+
+# 外部リンクの生存確認は外部サイトへアクセスするため、PR ごとには走らせない
+# （週1回の linkcheck.yml で実施）。

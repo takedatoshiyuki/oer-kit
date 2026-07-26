@@ -1,0 +1,27 @@
+# プロジェクト全体の設定。公開URLが確定したら base_url をここだけ変更する (docs/design.md §4.1)。
+site_name: （サイト名を設定してください）
+base_url: https://example.org/oer
+primary_language: ja
+
+# レビュー方針 (docs/design.md §9.1 の利用者3類型)。oer-kit validate が強制する
+#   aggregator:    収集・公開型。AI生成メタデータは機械検査+信頼度明示+
+#                  誤り報告窓口で公開可。人手レビューはシステム検証とサンプリングに充てる
+#   institutional: 組織公開型。公開前に組織のレビュー (reviewedBy) が必須
+#   personal:      個人公開型。本人による確認 (reviewedBy = 本人) が必須
+review_policy: institutional
+
+# 誤り報告・削除依頼の窓口 (aggregator 運用の前提)。GitHub Issues 等の URL を設定すると
+# 各ページの「このメタデータについて」に報告リンクが出る
+feedback_url: ""
+
+# クローラの礼儀設定 (discover / fetch / wayback が使用)
+crawler:
+  user_agent: oer-kit/0.1
+  sleep_seconds: 1.0
+
+# コーパス層 (取得した教材ファイル+権利情報マニフェスト) の置き場。Git 管理外。
+# 外部ディスク等に移す場合はここを変更 (絶対パス可)
+archive_dir: archive
+
+# 追加の Python ライブラリパス (JSレンダリング取得に common_knowledge.web を使う場合など)
+lib_paths: []

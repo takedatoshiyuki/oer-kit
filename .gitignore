@@ -1,23 +1,20 @@
-# ビルド成果物
-_site/
-
-# Quarto の生成物 (site/_quarto.yml は prerender が config.yaml から生成)
-site/_quarto.yml
-site/r/
-site/.quarto/
-
-# 取得キャッシュ・作業ファイル (公開物ではない)
-.cache/
-
-# コーパス層 (取得した教材ファイル。公開物ではない。docs/design.md §7.4)
-archive/
-
-# レビュー前の下書き
-drafts/
-
-# Python
+# Python パッケージ
 __pycache__/
 *.pyc
+dist/
+*.egg-info/
+
+# モジュール開発時の試験プロジェクト
+/tmp-project/
 
 # macOS
 .DS_Store
+
+# プロジェクト側データの誤コミット防止 (モジュール内では生成されない想定)
+_site/
+.cache/
+archive/
+drafts/
+site/_quarto.yml
+site/r/
+site/.quarto/

@@ -1,44 +1,54 @@
-# OER リポジトリ
+# oer-kit — OER カタログの構築キット
 
-教育資源（スライド・教科書・演習・動画・データ等）をオープンライセンスで公開・再利用可能にする
-リポジトリ。メタデータは schema.org / LRMI（AMB プロファイル）準拠。
+教育資源（OER）のカタログを作り、公開するための Python モジュールです。
+メタデータスキーマ（schema.org / LRMI・[AMB](https://dini-ag-kim.github.io/amb/latest/) 準拠）、
+検証、収集支援、Quarto によるサイト生成を提供します。
 
-| ドキュメント | 対象 |
-|--------------|------|
-| **[利用ガイド](docs/user-guide.md)** | このシステムを導入して使う人（収集公開・組織公開・個人公開） |
-| [サイトの使い方](site/guide.qmd) | 公開カタログの閲覧者（サイトに掲載） |
+3つの使い方を想定しています（[設計書 §9.1](docs/design.md)）:
+
+| 利用者 | 例 | 運用モード |
+|--------|-----|-----------|
+| 収集して公開する | 各大学の OCW や個人公開の教材を横断カタログ化 | `aggregator` |
+| 組織として公開する | 大学・機関が自組織の教材を公開 | `institutional` |
+| 個人で公開する | 自分の授業資料・スライドを公開 | `personal` |
+
+## インストールとプロジェクト作成
+
+```sh
+pip install "oer-kit @ git+https://github.com/OWNER/oer-kit"   # または pip install -e .
+oer-kit init my-oer && cd my-oer
+# config.yaml を編集 → resources/ に教材を追加 → oer-kit validate → make site
+```
+
+pip でインストールしない場合は、プロジェクト側から `PYTHONPATH` で参照できます:
+
+```sh
+make site OER_KIT=../oer-kit
+```
+
+## 何が入っているか
+
+```
+oer_kit/            Python パッケージ (validate / prerender / build_catalog /
+                    discover / fetch / extract / make_drafts / generate /
+                    review_sheet / approve / harvest / wayback / diagnose …)
+oer_kit/schema/     metadata.yaml の正規仕様 (JSON Schema 2020-12)
+oer_kit/scaffold/   プロジェクトの雛形 (config・語彙・サイトテンプレート・CI・Makefile)
+docs/               設計書・利用ガイド・レビュー チェックリスト・コマンド一覧
+examples/resources/ 記入例 (hosted / referenced ND / 個人公開)
+```
+
+## ドキュメント
+
+| 文書 | 内容 |
+|------|------|
+| [利用ガイド](docs/user-guide.md) | セットアップから公開までの手順（まずこれを読む） |
 | [設計書](docs/design.md) | 設計の全体像・根拠・決定の記録 |
-| [レビュー チェックリスト](docs/review-checklist.md) | レビュー担当者 |
-| [tools/README.md](tools/README.md) | コマンドリファレンスと運用ノート |
+| [コマンド一覧](docs/commands.md) | 全コマンドのリファレンスと運用ノート |
+| [レビュー チェックリスト](docs/review-checklist.md) | レビュー担当者向け |
 
-## 構造
+## ライセンス
 
-```
-docs/design.md      設計書（フォーマットとメタデータの仕様・根拠）
-config.yaml         公開URL等の設定（base_url はここだけで定義）
-schemas/            metadata.yaml の JSON Schema（正規仕様）
-vocabularies/       統制語彙（教材タイプ・利用者・教育段階・主題分野）
-tools/              検証・JSON-LD生成・カタログ構築・クロール補助（→ tools/README.md）
-resources/<slug>/   教材本体。1リソース = 1ディレクトリ
-  ├── metadata.yaml   メタデータ（正）
-  ├── content/        編集可能なソース（Markdown, pptx, ipynb …）
-  └── assets/         画像・データ・字幕など
-```
-
-## リソースの追加手順
-
-1. `resources/` に slug 名（小文字英数字とハイフン）のディレクトリを作る
-2. [記入例](resources/intro-statistics-slides/metadata.yaml) を参考に `metadata.yaml` を書く
-   （必須: name / description / inLanguage / license / creator / learningResourceType / about / datePublished）
-3. `content/` に編集可能なソースを、`assets/` に付随ファイルを置く
-4. `python3 tools/validate.py` を通す（スキーマ + 語彙キー + 運用ポリシーの検証）
-5. `make site` で公開一式（HTML + JSON-LD + catalog.json + sitemap.xml）を `_site/` に生成
-   （`make preview` でローカル確認。詳細は [tools/README.md](tools/README.md)）
-
-## ライセンス方針
-
-- **メタデータ・スキーマ・語彙・ドキュメント**: CC0 1.0（[LICENSE.md](LICENSE.md)）
-- **教材コンテンツ**: 各リソースの `metadata.yaml` の `license` に従う。自作の既定は CC0 推奨、
-  派生物は元素材の継承義務に従う。継承ルールは [docs/design.md](docs/design.md) §7.2。
-- **ND 系（改変禁止）**: 本体はホストしないが、`mode: referenced` のリンク参照エントリとして
-  メタデータと短い内容紹介のみを目録化できる（AI生成可・公開前の人手レビュー必須。同 §7.3）。
+コード・スキーマ・語彙・文書は [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)。
+このキットで作られる各プロジェクトのライセンス方針は雛形の
+[LICENSE.md](oer_kit/scaffold/LICENSE.md)（メタデータ CC0 / コンテンツは各リソースの表示）を参照。

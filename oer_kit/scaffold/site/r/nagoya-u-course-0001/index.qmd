@@ -1,0 +1,98 @@
+---
+title: 生命農学基礎講義
+author:
+- 岩崎雄吾
+date: '2005'
+date-format: YYYY年
+description: 脂質の生化学とバイオテクノロジーを、生物資源利用の観点から扱う講義である。教材は、脂質化学の基礎から、油脂の化学的・酵素的修飾、他の脂質の生体触媒変換、リパーゼを用いた有機合成までを章ごとに整理している。講義ノートと課題が公開されている。
+categories:
+- 名大の授業 (NU OCW)
+- コース
+- 講義資料・講義ノート
+- 評価・試験問題
+- 農林水産・獣医学
+- 修士課程
+- 条件付き再利用可
+format:
+  html:
+    include-in-header:
+      text: "<script type=\"application/ld+json\">\n{\n  \"@context\": [\n    \"https://w3id.org/kim/amb/context.jsonld\",\n    {\n      \"@language\": \"ja\"\n    }\n  ],\n  \"id\": \"https://ocw.nagoya-u.jp/courses/0001-%E7%94%9F%E5%91%BD%E8%BE%B2%E5%AD%A6%E5%9F%BA%E7%A4%8E%E8%AC%9B%E7%BE%A9-2005/\",\n  \"type\": [\n    \"LearningResource\",\n    \"Course\"\n  ],\n  \"name\": \"生命農学基礎講義\",\n  \"description\": \"脂質の生化学とバイオテクノロジーを、生物資源利用の観点から扱う講義である。教材は、脂質化学の基礎から、油脂の化学的・酵素的修飾、他の脂質の生体触媒変換、リパーゼを用いた有機合成までを章ごとに整理している。講義ノートと課題が公開されている。\",\n  \"inLanguage\": [\n    \"ja\",\n    \"en\"\n  ],\n  \"usageInfo\": {\n    \"id\": \"https://ocw.nagoya-u.jp/about/\",\n    \"description\": \"非営利の教育目的に限り、コピー・配布・翻訳・編集を含め利用可。クレジット「© 講義の年 教員の氏名（名大の授業）」の明記が条件。\"\n  },\n  \"creator\": [\n    {\n      \"type\": \"Person\",\n      \"name\": \"岩崎雄吾\",\n      \"affiliation\": {\n        \"type\": \"Organization\",\n        \"name\": \"名古屋大学\"\n      }\n    }\n  ],\n  \"publisher\": [\n    {\n      \"type\": \"Organization\"\
+        ,\n      \"name\": \"名古屋大学\"\n    }\n  ],\n  \"datePublished\": \"2005\",\n  \"learningResourceType\": [\n    {\n      \"id\": \"https://w3id.org/kim/hcrt/course\",\n      \"prefLabel\": {\n        \"ja\": \"コース\",\n        \"en\": \"Course\"\n      }\n    },\n    {\n      \"id\": \"https://w3id.org/kim/hcrt/script\",\n      \"prefLabel\": {\n        \"ja\": \"講義資料・講義ノート\",\n        \"en\": \"Script\"\n      }\n    },\n    {\n      \"id\": \"https://w3id.org/kim/hcrt/assessment\",\n      \"prefLabel\": {\n        \"ja\": \"評価・試験問題\",\n        \"en\": \"Assessment\"\n      }\n    }\n  ],\n  \"about\": [\n    {\n      \"id\": \"https://oer.example.ac.jp/vocab/subject/agriculture\",\n      \"prefLabel\": {\n        \"ja\": \"農林水産・獣医学\",\n        \"en\": \"Agriculture, forestry, fisheries and veterinary\"\n      }\n    }\n  ],\n  \"audience\": [\n    {\n      \"id\": \"http://purl.org/dcx/lrmi-vocabs/educationalAudienceRole/student\",\n      \"prefLabel\": {\n        \"ja\": \"学習者\"\
+        ,\n        \"en\": \"student\"\n      }\n    }\n  ],\n  \"educationalLevel\": [\n    {\n      \"id\": \"https://oer.example.ac.jp/vocab/educational-level/master\",\n      \"prefLabel\": {\n        \"ja\": \"修士課程\",\n        \"en\": \"Master's level\"\n      }\n    }\n  ],\n  \"keywords\": [\n    \"農学\",\n    \"タンパク質\"\n  ],\n  \"isPartOf\": [\n    {\n      \"type\": \"Collection\",\n      \"name\": \"名大の授業 (NU OCW)\",\n      \"id\": \"https://ocw.nagoya-u.jp/\"\n    }\n  ],\n  \"hasPart\": [\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"課題: Chapter 1. Basics On Lipid Chemistry\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/test_chap1.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"課題: Chapter 2. Production Of Lipids From Natural Sources\",\n      \"encoding\": [\n        {\n     \
+        \     \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/test_chap2.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"課題: Chapter 3. Chemical Modification Of Oils And Fats\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/test_chap3.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"課題: Chapter 4. Enzymatic Modification Of Oils And Fats (I), (II)\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/test_chap4.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"課題: Chapter 5. Enzymatic Modification\
+        \ Of Oils And Fats (III), (IV)\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/test_chap5.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"課題: Chapter 6. Biocatalytic Conversion Of Other Lipids\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/test_chap6.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"課題: Chapter 7. Use Of Lipases For Organic Syntheses\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/test_chap7.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\"\
+        ,\n      \"name\": \"講義ノート: Chapter 1. Basics On Lipid Chemistry\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/chap1.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"講義ノート: Chapter 2. Production Of Lipids From Natural Sources\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/chap2.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"講義ノート: Chapter 3. Chemical Modification Of Oils And Fats\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/chap3.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n\
+        \      \"type\": \"CreativeWork\",\n      \"name\": \"講義ノート: Chapter 4. Enzymatic Modification Of Oils And Fats (I), (II)\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/chap4.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"講義ノート: Chapter 5. Enzymatic Modification Of Oils And Fats (III), (IV)\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/chap5.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"講義ノート: Chapter 6. Biocatalytic Conversion Of Other Lipids\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/chap6.pdf\",\n          \"encodingFormat\"\
+        : \"application/pdf\"\n        }\n      ]\n    },\n    {\n      \"type\": \"CreativeWork\",\n      \"name\": \"講義ノート: Chapter 7. Use Of Lipases For Organic Syntheses\",\n      \"encoding\": [\n        {\n          \"type\": \"MediaObject\",\n          \"contentUrl\": \"https://ocw.nagoya-u.jp/files/1/chap7.pdf\",\n          \"encodingFormat\": \"application/pdf\"\n        }\n      ]\n    }\n  ],\n  \"isAccessibleForFree\": true,\n  \"mainEntityOfPage\": [\n    {\n      \"id\": \"https://oer.example.ac.jp/r/nagoya-u-course-0001\",\n      \"provider\": {\n        \"type\": \"Organization\",\n        \"name\": \"OER リポジトリ（仮称）\"\n      },\n      \"dateModified\": \"2026-07-21\",\n      \"creator\": {\n        \"type\": \"SoftwareApplication\",\n        \"name\": \"gpt-5.4-mini\"\n      },\n      \"description\": \"description は AI 生成\"\n    }\n  ]\n}\n</script>"
+---
+
+::: {.callout-important title="外部教材の目録エントリ — 「名大の授業 (NU OCW)」"}
+教材本体は「名大の授業 (NU OCW)」にあります: <https://ocw.nagoya-u.jp/courses/0001-%E7%94%9F%E5%91%BD%E8%BE%B2%E5%AD%A6%E5%9F%BA%E7%A4%8E%E8%AC%9B%E7%BE%A9-2005/>（最終確認: 2026-07-21）
+:::
+
+::: {.callout-note title="条件付き再利用可（独自ライセンス）"}
+非営利の教育目的に限り、コピー・配布・翻訳・編集を含め利用可。クレジット「© 講義の年 教員の氏名（名大の授業）」の明記が条件。（[利用条件の原文](https://ocw.nagoya-u.jp/about/)）
+:::
+
+::: {.callout-note appearance='minimal' collapse='true' title='内容紹介の出所（AI 生成）'}
+上の内容紹介は AI（gpt-5.4-mini）が生成したものです（未確認）。教材そのものの文章ではありません。原文は下の引用を参照してください。
+:::
+
+## 出典サイトの説明（原文）
+
+> 脂質関連の生化学・バイオテクノロジーについて、生物資源利用という観点から概説する。
+> Biochemistry and biotechnology of lipids are outlined from the view point of bio-resource utilization.
+> 生命農学分野に関連した特定のトピックについて基礎的な講義を行う。
+> 本年度は糖質・蛋白質と並ぶ三大栄養素である脂質関連の生化学・バイオテクノロジーについて、生物資源利用という観点から概説する。
+> 授業には主として英語を用い、WEB システムを介した履修システムを活用する。
+> This course offers some topics related to the field of Bioagricultural Sciences.
+> In this year, biochemistry and biotechnology of lipids, which are one of the three main classes of nutrient along with carbohydrates and proteins, are outlined from the view oint of bio-resource utilization.
+> The class is given mainly in English with the help of WEB learning system.
+>
+> — 名大の授業 (NU OCW) 「講義の概要」・「講義の内容」より（同サイトの利用条件に基づく転載）: <https://ocw.nagoya-u.jp/courses/0001-%E7%94%9F%E5%91%BD%E8%BE%B2%E5%AD%A6%E5%9F%BA%E7%A4%8E%E8%AC%9B%E7%BE%A9-2005/>
+
+## 基本情報
+
+| 項目 | 内容 |
+|------|------|
+| 出典サイト | [名大の授業 (NU OCW)](https://ocw.nagoya-u.jp/) |
+| 教材タイプ | コース、講義資料・講義ノート、評価・試験問題 |
+| 主題分野 | 農林水産・獣医学 |
+| 教育段階 | 修士課程 |
+| 想定利用者 | 学習者 |
+| 言語 | ja、en |
+| 利用条件 | [条件付き再利用可（独自ライセンス）](https://ocw.nagoya-u.jp/about/) |
+| 公開日 | 2005 |
+
+## キーワード
+農学、タンパク質
+
+## 教材へのアクセス
+[教材本体を開く](https://ocw.nagoya-u.jp/courses/0001-%E7%94%9F%E5%91%BD%E8%BE%B2%E5%AD%A6%E5%9F%BA%E7%A4%8E%E8%AC%9B%E7%BE%A9-2005/){.btn .btn-primary}
+
+## 教材ファイル
+リンク先は外部サイト。利用は上記のライセンス・利用条件に従ってください。
+
+- [課題: Chapter 1. Basics On Lipid Chemistry](https://ocw.nagoya-u.jp/files/1/test_chap1.pdf)（PDF）
+- [課題: Chapter 2. Production Of Lipids From Natural Sources](https://ocw.nagoya-u.jp/files/1/test_chap2.pdf)（PDF）
+- [課題: Chapter 3. Chemical Modification Of Oils And Fats](https://ocw.nagoya-u.jp/files/1/test_chap3.pdf)（PDF）
+- [課題: Chapter 4. Enzymatic Modification Of Oils And Fats (I), (II)](https://ocw.nagoya-u.jp/files/1/test_chap4.pdf)（PDF）
+- [課題: Chapter 5. Enzymatic Modification Of Oils And Fats (III), (IV)](https://ocw.nagoya-u.jp/files/1/test_chap5.pdf)（PDF）
+- [課題: Chapter 6. Biocatalytic Conversion Of Other Lipids](https://ocw.nagoya-u.jp/files/1/test_chap6.pdf)（PDF）
+- [課題: Chapter 7. Use Of Lipases For Organic Syntheses](https://ocw.nagoya-u.jp/files/1/test_chap7.pdf)（PDF）
+- [講義ノート: Chapter 1. Basics On Lipid Chemistry](https://ocw.nagoya-u.jp/files/1/chap1.pdf)（PDF）
+- [講義ノート: Chapter 2. Production Of Lipids From Natural Sources](https://ocw.nagoya-u.jp/files/1/chap2.pdf)（PDF）
+- [講義ノート: Chapter 3. Chemical Modification Of Oils And Fats](https://ocw.nagoya-u.jp/files/1/chap3.pdf)（PDF）
+- [講義ノート: Chapter 4. Enzymatic Modification Of Oils And Fats (I), (II)](https://ocw.nagoya-u.jp/files/1/chap4.pdf)（PDF）
+- [講義ノート: Chapter 5. Enzymatic Modification Of Oils And Fats (III), (IV)](https://ocw.nagoya-u.jp/files/1/chap5.pdf)（PDF）
+- [講義ノート: Chapter 6. Biocatalytic Conversion Of Other Lipids](https://ocw.nagoya-u.jp/files/1/chap6.pdf)（PDF）
+- [講義ノート: Chapter 7. Use Of Lipases For Organic Syntheses](https://ocw.nagoya-u.jp/files/1/chap7.pdf)（PDF）
+
+## 引用・帰属表示の例
+```
+岩崎雄吾「生命農学基礎講義」OER リポジトリ（仮称）. 条件付き再利用可（独自ライセンス）. https://ocw.nagoya-u.jp/courses/0001-%E7%94%9F%E5%91%BD%E8%BE%B2%E5%AD%A6%E5%9F%BA%E7%A4%8E%E8%AC%9B%E7%BE%A9-2005/
+```
+
+## このメタデータについて
+- メタデータは [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) で提供します（[JSON-LD](https://oer.example.ac.jp/jsonld/nagoya-u-course-0001.json)）。
+- 作成方法: AI 生成（人手レビュー済み）／使用モデル: gpt-5.4-mini／作成日: 2026-07-21／確からしさ: 通常

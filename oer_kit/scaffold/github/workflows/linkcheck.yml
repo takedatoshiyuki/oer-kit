@@ -1,0 +1,20 @@
+name: linkcheck
+
+# referenced エントリの外部リンクは切れる。週1回まとめて確認する
+# （PR ごとに外部サイトを叩かないよう validate とは分けている）。
+on:
+  schedule:
+    - cron: "0 3 * * 1"   # 毎週月曜 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "oer-kit[legacy] @ git+https://github.com/OWNER/oer-kit"  # ← 自分の oer-kit の場所に変更
+      - name: リンク生存・Wayback スナップショット確認
+        run: python3 -m oer_kit.wayback --check
