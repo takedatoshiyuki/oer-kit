@@ -15,7 +15,7 @@
 ## インストールとプロジェクト作成
 
 ```sh
-pip install "oer-kit @ git+https://github.com/OWNER/oer-kit"   # または pip install -e .
+pip install "oer-kit @ git+https://github.com/takedatoshiyuki/oer-kit"   # または pip install -e .
 oer-kit init my-oer && cd my-oer
 # config.yaml を編集 → resources/ に教材を追加 → oer-kit validate → make site
 ```
