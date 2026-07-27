@@ -84,6 +84,10 @@ def fetch_html(url: str, engine: str = "auto", force: bool = False,
     if html is None:
         r = requests.get(url, headers={"User-Agent": user_agent}, timeout=60)
         r.raise_for_status()
+        # サーバが charset を明示しないと requests は ISO-8859-1 を仮定し、
+        # 日本語ページが二重符号化で壊れる (九大 QOCW で実害) → 本文から推定する
+        if "charset" not in (r.headers.get("Content-Type") or "").lower():
+            r.encoding = r.apparent_encoding
         html = r.text
 
     cache_path.parent.mkdir(parents=True, exist_ok=True)
