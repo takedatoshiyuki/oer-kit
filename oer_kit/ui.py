@@ -385,6 +385,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400 if result.get("error") else 200, result)
             if path == "/api/demote":
                 return self._send(200, demote_slugs(body.get("slugs") or []))
+            if path == "/api/ingest":
+                from .ingest import ingest as run_ingest
+                result = run_ingest(body.get("source") or "",
+                                    prefix=body.get("prefix") or "",
+                                    kind=body.get("kind") or "personal")
+                return self._send(400 if result.get("error") else 200, result)
             if path == "/api/create":
                 result = self.api.create(body)
                 return self._send(400 if result.get("error") else 200, result)

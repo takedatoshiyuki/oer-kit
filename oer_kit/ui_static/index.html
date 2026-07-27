@@ -69,6 +69,7 @@
 
   <div class="bar">
     <button id="btnNew">＋ 新規教材</button>
+    <button id="btnIngest">⇄ 取り込み</button>
     <select id="scope">
       <option value="drafts">レビュー待ち（drafts）</option>
       <option value="resources">公開済み（resources）</option>
@@ -312,6 +313,21 @@ $('btnNew').addEventListener('click', () => {
   panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
 });
 $('btnCancelCreate').addEventListener('click', () => $('createPanel').style.display = 'none');
+
+$('btnIngest').addEventListener('click', async () => {
+  const source = prompt(
+    '取り込み元を入力してください:\n- GitHub リポジトリ URL (例 https://github.com/taro/my-oer)\n- 公開サイト URL (catalog.json を読みます)\n- ローカルパス');
+  if (!source || !source.trim()) return;
+  toast('取り込み中…');
+  const r = await (await fetch('/api/ingest',
+    {method:'POST', headers:{'Content-Type':'application/json'},
+     body: JSON.stringify({source: source.trim()})})).json();
+  if (r.error) { toast('エラー: ' + r.error); return; }
+  toast(`${r.site || r.origin} から ${r.created.length} 件を下書きに取り込みました`
+    + (r.skipped.length ? `\nスキップ ${r.skipped.length} 件` : '')
+    + '\nレビュー待ちから確認 → 承認してください');
+  await loadAll();
+});
 
 const multi = id => [...$(id).selectedOptions].map(o => o.value);
 $('btnCreate').addEventListener('click', async () => {

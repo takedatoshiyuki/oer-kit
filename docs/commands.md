@@ -70,6 +70,9 @@ python3 tools/extract.py <html|url> --materials [--base-url <url>]
 python3 tools/extract.py <コースURL> --materials --follow              # コースURL配下を各回とみなす (京大 ?video_id= 型)
 python3 tools/extract.py <コースURL> --materials --follow "/content/"  # 別パス型は正規表現で指定 (UTokyo Channel /content/?id= 型)
 
+# 他の oer-kit プロジェクトからの取り込み (連合。§7.6)。GitHub URL / サイトURL / ローカルパス
+oer-kit ingest https://github.com/taro/my-oer [--prefix taro] [--kind personal]
+
 # 教材ファイルの収集 (コーパス層 → archive_dir。権利ゲート・sha256・manifest付き)
 python3 tools/harvest.py drafts/<slug> [--limit N] [--force]
 ```

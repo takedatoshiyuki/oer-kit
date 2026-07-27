@@ -21,7 +21,7 @@ from pathlib import Path
 COMMANDS = [
     "ui",
     "validate", "jsonld", "prerender", "build-catalog",
-    "discover", "fetch", "extract", "make-drafts", "generate",
+    "discover", "fetch", "extract", "make-drafts", "generate", "ingest",
     "review-sheet", "approve", "withdraw", "diagnose",
     "harvest", "wayback", "convert-legacy",
 ]
