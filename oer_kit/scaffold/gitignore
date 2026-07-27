@@ -21,3 +21,6 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# 恒久取り下げの保管 (記録は withdrawn.yaml が git 管理)
+withdrawn/

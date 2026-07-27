@@ -13,6 +13,7 @@
 - レビュー: 下書き（と公開済み）を一覧し、内容紹介と引用原文を並べて確認 →
   選択して承認（drafts/ → resources/ へ移動。検証と横断重複チェック付き）
 - 検証の実行（スキーマ・語彙・運用ポリシー・横断重複。引用照合は CLI で）
+- 取り下げ: 公開済みを差し戻し (drafts へ) / 恒久取り下げ (withdrawn.yaml に記録し再収集を防止)
 - ビルド済みならページプレビュー（_site/ を配信）
 
 収集・生成などの長時間処理は対象外（CLI を使う。docs/commands.md）。
@@ -34,6 +35,7 @@ from urllib.parse import parse_qs, urlparse
 import jsonschema
 
 from .approve import with_reviewer, write_meta
+from .withdraw import demote as demote_slugs, withdraw as withdraw_slugs
 from .common import (
     DRAFTS_DIR,
     RESOURCES_DIR,
@@ -291,6 +293,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, self.api.validate())
             if path == "/api/approve":
                 result = self.api.approve(body.get("slugs") or [], body.get("by") or "")
+                return self._send(400 if result.get("error") else 200, result)
+            if path == "/api/demote":
+                return self._send(200, demote_slugs(body.get("slugs") or []))
+            if path == "/api/withdraw":
+                result = withdraw_slugs(body.get("slugs") or [],
+                                        body.get("reason") or "", body.get("by") or "")
                 return self._send(400 if result.get("error") else 200, result)
             return self._send(404, {"error": "not found"})
         except Exception as error:

@@ -69,6 +69,8 @@
     <button id="btnValidate">検証を実行</button>
     <span id="who"></span>
     <button class="primary" id="btnApprove" disabled>選択を承認</button>
+    <button id="btnDemote" disabled style="display:none">下書きへ差し戻し</button>
+    <button id="btnWithdraw" disabled style="display:none">取り下げ…</button>
   </div>
 
   <div id="findings"></div>
@@ -127,7 +129,7 @@ function renderRows() {
   const scope = $('scope').value;
   $('rows').innerHTML = visible().map(i => `
     <tr data-slug="${i.slug}">
-      <td>${scope==='drafts' ? `<input type="checkbox" class="pick">` : ''}</td>
+      <td><input type="checkbox" class="pick"></td>
       <td class="meta">${i.slug.replace('nagoya-u-course-','#')}<br>${i.source}
         ${i.confidence==='low' ? '<span class="flag low">低信頼</span>' : ''}
         ${!i.quoted ? '<span class="flag noq">引用なし</span>' : ''}
@@ -149,9 +151,14 @@ function selected() {
   return [...document.querySelectorAll('.pick:checked')].map(c => c.closest('tr').dataset.slug);
 }
 function updateApprove() {
-  const n = selected().length;
-  $('btnApprove').disabled = !n;
+  const n = selected().length, scope = $('scope').value;
+  $('btnApprove').style.display = scope === 'drafts' ? '' : 'none';
+  $('btnDemote').style.display = scope === 'resources' ? '' : 'none';
+  $('btnWithdraw').style.display = scope === 'resources' ? '' : 'none';
+  $('btnApprove').disabled = $('btnDemote').disabled = $('btnWithdraw').disabled = !n;
   $('btnApprove').textContent = n ? `選択を承認 (${n})` : '選択を承認';
+  $('btnDemote').textContent = n ? `下書きへ差し戻し (${n})` : '下書きへ差し戻し';
+  $('btnWithdraw').textContent = n ? `取り下げ… (${n})` : '取り下げ…';
 }
 function esc(s) { return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function toast(message) { const r=$('result'); r.textContent=message; r.style.display='block';
@@ -195,6 +202,31 @@ $('btnApprove').addEventListener('click', async () => {
     await loadAll();
   }
   updateApprove();
+});
+
+$('btnDemote').addEventListener('click', async () => {
+  const slugs = selected();
+  if (!confirm(`${slugs.length} 件を drafts/ へ差し戻します（再公開前提の一時取り下げ）。よろしいですか？`)) return;
+  const r = await (await fetch('/api/demote',
+    {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({slugs})})).json();
+  toast(`差し戻し ${r.moved.length} 件` + (r.held.length ? ` / 保留 ${r.held.length} 件` : ''));
+  await loadAll();
+});
+
+$('btnWithdraw').addEventListener('click', async () => {
+  const slugs = selected();
+  const reason = prompt(
+    `${slugs.length} 件を恒久的に取り下げます。\n理由を入力してください（withdrawn.yaml に記録され、以後の収集から除外されます）:`);
+  if (reason === null) return;
+  if (!reason.trim()) { toast('理由が必要です'); return; }
+  const byField = $('byName');
+  const r = await (await fetch('/api/withdraw',
+    {method:'POST', headers:{'Content-Type':'application/json'},
+     body: JSON.stringify({slugs, reason, by: byField ? byField.value.trim() : ''})})).json();
+  if (r.error) { toast('エラー: ' + r.error); return; }
+  toast(`取り下げ ${r.moved.length} 件（withdrawn.yaml に記録。make site で公開サイトから消えます）`
+    + (r.held.length ? `\n保留 ${r.held.length} 件` : ''));
+  await loadAll();
 });
 
 loadAll();

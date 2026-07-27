@@ -135,6 +135,13 @@ def main() -> int:
 
     urls = [l.strip() for l in open(args.urls, encoding="utf-8")
             if l.strip() and l.strip() != "url"]
+    from .withdraw import withdrawn_urls
+    blocked = withdrawn_urls()
+    if blocked:
+        before = len(urls)
+        urls = [u for u in urls if u not in blocked]
+        if before != len(urls):
+            print(f"取り下げ済み (withdrawn.yaml) のため {before - len(urls)} 件をスキップ")
     if args.limit:
         urls = urls[:args.limit]
 

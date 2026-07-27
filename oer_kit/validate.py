@@ -159,6 +159,11 @@ def validate_resource(slug, resource_dir, meta, validator, vocabs, check_quotes=
 
     errors += review_policy_findings(meta, policy)
 
+    # 取り下げ済み (withdrawn.yaml) の URL の再登録を防ぐ — 再クロールで復活させない
+    from .withdraw import withdrawn_urls
+    if meta.get("externalUrl") and meta["externalUrl"] in withdrawn_urls():
+        errors.append("取り下げ済み (withdrawn.yaml) の URL。再登録するには記録の削除が必要 (§7.5)")
+
     for e in sorted(validator.iter_errors(meta), key=lambda e: e.json_path):
         errors.append(f"schema {e.json_path}: {e.message}")
 

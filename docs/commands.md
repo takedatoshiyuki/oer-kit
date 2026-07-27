@@ -14,8 +14,13 @@
 ## コマンド一覧
 
 ```sh
-# 管理UI (ダッシュボード + レビュー/承認)。ブラウザが開く。127.0.0.1 のみ・追加依存なし
+# 管理UI (ダッシュボード + レビュー/承認/取り下げ)。ブラウザが開く。127.0.0.1 のみ・追加依存なし
 oer-kit ui   # または python3 -m oer_kit.ui --port 8765
+
+# 公開の取り下げ。差し戻し (--demote: drafts へ戻す) と恒久取り下げ (--reason 必須) を区別。
+# 恒久取り下げは withdrawn.yaml に記録され、以後の収集 (make-drafts) から除外・再登録は validate がエラー
+oer-kit withdraw <slug>... --reason "本人からの削除依頼 (Issues #12)" [--by 氏名]
+oer-kit withdraw <slug>... --demote
 
 # 検証 (スキーマ + 語彙キー + 運用ポリシー + 横断重複)。CI で必須にする
 # 対象を絞って指定しても、重複検査は既存リソース全件と突き合わせる

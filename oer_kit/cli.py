@@ -22,7 +22,7 @@ COMMANDS = [
     "ui",
     "validate", "jsonld", "prerender", "build-catalog",
     "discover", "fetch", "extract", "make-drafts", "generate",
-    "review-sheet", "approve", "diagnose",
+    "review-sheet", "approve", "withdraw", "diagnose",
     "harvest", "wayback", "convert-legacy",
 ]
 
