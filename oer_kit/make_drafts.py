@@ -62,10 +62,15 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
 
     if parsed.get("quoted"):
         labels = "・".join(f"「{l}」" for l in parsed.get("quoted_labels", []))
+        # 再利用可のサイトは規約に基づく転載、視聴のみ (no_reuse) のサイトは
+        # 著作権法32条の引用として扱う (東大の試作エントリで確定した書式)
+        basis = ("同サイトの利用条件に基づく転載"
+                 if site["license_status"] in ("cc", "custom_reuse")
+                 else "著作権法32条の引用")
         meta["quotedDescription"] = {
             "text": {"ja": parsed["quoted"]},
             "source": url,
-            "note": f"{site['name']} {labels}より（同サイトの利用条件に基づく転載）",
+            "note": f"{site['name']} {labels}より（{basis}）",
         }
 
     meta["inLanguage"] = parsed.get("inLanguage") or ["ja"]
@@ -149,6 +154,16 @@ def main() -> int:
         urls = [u for u in urls if u not in blocked]
         if before != len(urls):
             print(f"取り下げ済み (withdrawn.yaml) のため {before - len(urls)} 件をスキップ")
+
+    # 既に別 slug で公開済みの URL は重複を作らない (手作業の先行エントリなど)
+    from .common import RESOURCES_DIR
+    published = {m.get("externalUrl") for d in RESOURCES_DIR.iterdir() if d.is_dir()
+                 for m in [load_yaml(d / "metadata.yaml")] if m and m.get("externalUrl")} \
+        if RESOURCES_DIR.is_dir() else set()
+    overlap = published & set(urls)
+    if overlap:
+        urls = [u for u in urls if u not in overlap]
+        print(f"公開済みリソースと同じ URL のため {len(overlap)} 件をスキップ")
     if args.limit:
         urls = urls[:args.limit]
 
