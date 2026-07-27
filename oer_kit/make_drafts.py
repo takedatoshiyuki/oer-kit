@@ -63,9 +63,12 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
     if parsed.get("quoted"):
         labels = "・".join(f"「{l}」" for l in parsed.get("quoted_labels", []))
         # 再利用可のサイトは規約に基づく転載、視聴のみ (no_reuse) のサイトは
-        # 著作権法32条の引用として扱う (東大の試作エントリで確定した書式)
+        # 著作権法32条の引用として扱う (東大の試作エントリで確定した書式)。
+        # 規約が教材のみを対象としページ本文に及ばないサイト (例: 北大) は
+        # sites.yaml の quote_basis: quotation で引用扱いを強制できる
         basis = ("同サイトの利用条件に基づく転載"
                  if site["license_status"] in ("cc", "custom_reuse")
+                 and site.get("quote_basis") != "quotation"
                  else "著作権法32条の引用")
         meta["quotedDescription"] = {
             "text": {"ja": parsed["quoted"]},
@@ -78,13 +81,23 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
         # コースページに CC 表記がある場合はそれが正 (例: 京大はコンテンツごとに CC が異なる)
         meta["license"] = parsed["license"]
     else:
+        # reuse はサイト既定 (license_status から導出)。ページ単位でマークが違う
+        # サイト (例: 北大の 制限資料/無表記) はパーサが usage_reuse で上書きする
+        default_reuse = ("allowed_with_conditions"
+                         if site["license_status"] == "custom_reuse" else "not_allowed")
         meta["usageTerms"] = {
             "url": site["license_url"],
             "summary": {"ja": site["usage_summary"]},
-            "reuse": "allowed_with_conditions" if site["license_status"] == "custom_reuse" else "not_allowed",
+            "reuse": parsed.get("usage_reuse") or default_reuse,
         }
 
-    if parsed.get("lecturers"):
+    if parsed.get("creators"):
+        # 所属付きの講師リスト (外部講師が多いサイト向け。無い所属はサイトの機関名)
+        meta["creator"] = [{"type": "Person", "name": c["name"],
+                            "affiliation": {"name": c.get("affiliation")
+                                            or site["organization"]}}
+                           for c in parsed["creators"]]
+    elif parsed.get("lecturers"):
         meta["creator"] = [{"type": "Person", "name": person,
                             "affiliation": {"name": site["organization"]}}
                            for person in parsed["lecturers"]]
