@@ -128,12 +128,16 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
     if extensions:
         meta["extensions"] = extensions
 
+    notes = ("oer_kit.make_drafts + parsers による自動生成。"
+             "description は未作成。about・educationalLevel は機械推定のため要確認")
+    if parsed.get("provenance_note"):
+        # パーサ固有の由来注記 (例: datePublished は Wayback 初出年)
+        notes += "。" + parsed["provenance_note"]
     meta["metadataProvenance"] = {
         "method": "ai_generated",
         "generator": "claude-fable-5",
         "generatedDate": today,
-        "notes": ("oer_kit.make_drafts + parsers による自動生成。"
-                  "description は未作成。about・educationalLevel は機械推定のため要確認"),
+        "notes": notes,
     }
     return meta
 
