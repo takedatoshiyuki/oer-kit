@@ -69,11 +69,15 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
         }
 
     meta["inLanguage"] = parsed.get("inLanguage") or ["ja"]
-    meta["usageTerms"] = {
-        "url": site["license_url"],
-        "summary": {"ja": site["usage_summary"]},
-        "reuse": "allowed_with_conditions" if site["license_status"] == "custom_reuse" else "not_allowed",
-    }
+    if parsed.get("license"):
+        # コースページに CC 表記がある場合はそれが正 (例: 京大はコンテンツごとに CC が異なる)
+        meta["license"] = parsed["license"]
+    else:
+        meta["usageTerms"] = {
+            "url": site["license_url"],
+            "summary": {"ja": site["usage_summary"]},
+            "reuse": "allowed_with_conditions" if site["license_status"] == "custom_reuse" else "not_allowed",
+        }
 
     if parsed.get("lecturers"):
         meta["creator"] = [{"type": "Person", "name": person,
@@ -90,10 +94,11 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
     meta["dateAccessed"] = today
 
     meta["learningResourceType"] = parsed.get("learningResourceType") or ["course"]
-    meta["about"] = [parsed.get("about") or "generic"]
+    about = parsed.get("about") or "generic"
+    meta["about"] = about if isinstance(about, list) else [about]
     if parsed.get("tags"):
         meta["keywords"] = parsed["tags"]
-    meta["audience"] = ["student"]
+    meta["audience"] = parsed.get("audience") or ["student"]
     if parsed.get("educationalLevel"):
         meta["educationalLevel"] = [parsed["educationalLevel"]]
     if parsed.get("materials"):
@@ -133,6 +138,8 @@ def main() -> int:
     site = site_entry(args.site)
     today = datetime.date.today().isoformat()
 
+    slugger = getattr(module, "slug_for", None) or (lambda u: slug_for(args.site, u))
+
     urls = [l.strip() for l in open(args.urls, encoding="utf-8")
             if l.strip() and l.strip() != "url"]
     from .withdraw import withdrawn_urls
@@ -153,7 +160,7 @@ def main() -> int:
     # (パーサ個別のルールでは拾いきれない案内文を頻度で落とす。extract.py と同じ原理)
     parsed_all = {}
     for url in urls:
-        slug = slug_for(args.site, url)
+        slug = slugger(url)
         cache_path = cache_path_for(url) if slug else None
         if not slug or not cache_path.exists():
             continue
@@ -169,7 +176,7 @@ def main() -> int:
     # 2周目: 下書きを書き出す
     with open(digest_path, "w", encoding="utf-8") as digest:
         for url in urls:
-            slug = slug_for(args.site, url)
+            slug = slugger(url)
             if not slug:
                 stats["no_slug"] += 1
                 continue
