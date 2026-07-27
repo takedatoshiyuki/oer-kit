@@ -40,6 +40,19 @@
   details.findings { background:#fff; border:1px solid var(--line); border-radius:8px; padding:.6rem .9rem;
                      margin:.6rem 0; font-size:.83rem }
   .err { color:var(--bad) } .wrn { color:var(--warn) }
+  #createPanel { background:#fff; border:1px solid var(--line); border-radius:8px;
+    padding:1rem 1.2rem; margin:.8rem 0; display:none }
+  #createPanel h2 { font-size:.95rem; margin:.2rem 0 .8rem }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:.7rem }
+  .field { display:flex; flex-direction:column; gap:.25rem; font-size:.8rem; color:#3f3f46 }
+  .field input, .field select, .field textarea { padding:.4rem .5rem; border:1px solid var(--line);
+    border-radius:6px; font-size:.85rem; font-family:inherit }
+  .field textarea { min-height:4.2rem }
+  .hint { font-size:.72rem; color:var(--muted) }
+  #licenseHint { background:#f0f6ff; border-left:3px solid var(--accent); padding:.4rem .6rem;
+    font-size:.76rem; margin-top:.3rem }
+  #uploadZone { border:2px dashed var(--line); border-radius:8px; padding:1rem; margin-top:.8rem;
+    text-align:center; color:var(--muted); font-size:.85rem }
   td a { color:var(--accent) }
 </style>
 
@@ -55,6 +68,7 @@
   <div class="cards" id="cards"></div>
 
   <div class="bar">
+    <button id="btnNew">＋ 新規教材</button>
     <select id="scope">
       <option value="drafts">レビュー待ち（drafts）</option>
       <option value="resources">公開済み（resources）</option>
@@ -73,6 +87,51 @@
     <button id="btnWithdraw" disabled style="display:none">取り下げ…</button>
   </div>
 
+  <div id="createPanel">
+    <h2>新規教材の作成（自作教材の公開・hosted）</h2>
+    <div class="grid">
+      <label class="field">ID (slug) <input id="f_slug" placeholder="intro-statistics-2026">
+        <span class="hint">小文字英数字とハイフン。公開後は変えない</span></label>
+      <label class="field">教材の名称 * <input id="f_name" placeholder="統計学入門スライド"></label>
+      <label class="field">著者名 * <input id="f_creator"></label>
+      <label class="field">所属 <input id="f_affil" placeholder="○○大学（任意）"></label>
+      <label class="field">言語 <select id="f_lang"><option value="ja">日本語</option>
+        <option value="en">英語</option></select></label>
+      <label class="field">公開日 <input id="f_date" type="date"></label>
+    </div>
+    <label class="field" style="margin-top:.7rem">概要（2〜3文で何をどこまで扱うか）*
+      <textarea id="f_desc"></textarea></label>
+    <div class="grid" style="margin-top:.7rem">
+      <label class="field">ライセンス *
+        <select id="f_license">
+          <option value="CC0-1.0">CC0 — 権利を保持しない（最大限の再利用）</option>
+          <option value="CC-BY-4.0" selected>CC BY — 帰属表示のみ求める（推奨）</option>
+          <option value="CC-BY-SA-4.0">CC BY-SA — 帰属表示＋派生物も同条件</option>
+          <option value="CC-BY-NC-4.0">CC BY-NC — 非営利限定（非推奨）</option>
+          <option value="CC-BY-NC-SA-4.0">CC BY-NC-SA — 非営利＋同条件（非推奨）</option>
+        </select>
+        <div id="licenseHint"></div></label>
+      <label class="field">教材タイプ *（複数可）<select id="f_types" multiple size="6"></select></label>
+      <label class="field">主題分野 *（複数可）<select id="f_about" multiple size="6"></select></label>
+      <label class="field">教育段階 <select id="f_level"><option value="">（指定しない）</option></select>
+        <span class="hint">想定利用者 <select id="f_audience" multiple size="3" style="width:100%"></select></span></label>
+    </div>
+    <label class="field" style="margin-top:.7rem">キーワード（カンマ区切り）
+      <input id="f_keywords" placeholder="統計, 仮説検定, 表計算"></label>
+    <div class="bar" style="margin-bottom:0">
+      <button class="primary" id="btnCreate">下書きを作成</button>
+      <button id="btnCancelCreate">閉じる</button>
+      <span class="meta">作成後にファイルを追加 → レビュー待ちから承認すると公開されます</span>
+    </div>
+    <div id="uploadZone" style="display:none">
+      <b id="uploadSlug"></b> にファイルを追加:
+      <select id="u_dest"><option value="content">content（教材本体・ソース）</option>
+        <option value="assets">assets（画像・データ）</option></select>
+      <input type="file" id="u_files" multiple>
+      <button id="btnUpload">アップロード</button>
+      <div class="hint">PDF だけでなく編集可能なソース（Markdown・スライド原稿・ipynb）も置くのが OER の流儀です</div>
+    </div>
+  </div>
   <div id="findings"></div>
   <table>
     <thead><tr>
@@ -229,5 +288,65 @@ $('btnWithdraw').addEventListener('click', async () => {
   await loadAll();
 });
 
+const LICENSE_HINTS = {
+  'CC0-1.0': '著作権を放棄し、誰でも許諾なしに利用できます。学術慣行としての出典明示は期待されます。',
+  'CC-BY-4.0': '氏名・出典の表示を条件に、複製・改変・再配布（営利含む）を許します。OER の標準的な選択です。',
+  'CC-BY-SA-4.0': 'BY の条件に加え、改変版にも同じライセンスを求めます（コピーレフト）。',
+  'CC-BY-NC-4.0': '営利利用を禁じます。営利形態の教育機関・研修でも使えなくなるため非推奨です。',
+  'CC-BY-NC-SA-4.0': '非営利限定＋同条件。再利用の範囲が最も狭くなります。'
+};
+function licenseHint() { $('licenseHint').textContent = LICENSE_HINTS[$('f_license').value] || ''; }
+
+async function setupCreate() {
+  const v = await (await fetch('/api/vocab')).json();
+  const fill = (id, list) => { $(id).innerHTML += list.map(o =>
+    `<option value="${o.key}">${esc(o.label)}</option>`).join(''); };
+  fill('f_types', v.learningResourceType); fill('f_about', v.about);
+  fill('f_level', v.educationalLevel); fill('f_audience', v.audience);
+  $('f_date').value = new Date().toISOString().slice(0,10);
+  licenseHint();
+}
+$('f_license')?.addEventListener('change', licenseHint);
+$('btnNew').addEventListener('click', () => {
+  const panel = $('createPanel');
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+});
+$('btnCancelCreate').addEventListener('click', () => $('createPanel').style.display = 'none');
+
+const multi = id => [...$(id).selectedOptions].map(o => o.value);
+$('btnCreate').addEventListener('click', async () => {
+  const payload = {
+    slug: $('f_slug').value, name: $('f_name').value, description: $('f_desc').value,
+    creatorName: $('f_creator').value, affiliation: $('f_affil').value,
+    language: $('f_lang').value, license: $('f_license').value,
+    types: multi('f_types'), about: multi('f_about'),
+    level: $('f_level').value, audience: multi('f_audience'),
+    keywords: $('f_keywords').value, datePublished: $('f_date').value,
+  };
+  const r = await (await fetch('/api/create',
+    {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)})).json();
+  if (r.error) { toast('エラー: ' + r.error + (r.details ? '\n' + r.details.join('\n') : '')); return; }
+  toast(`下書き '${r.created}' を作成しました。ファイルを追加してください`);
+  $('uploadZone').style.display = 'block';
+  $('uploadSlug').textContent = r.created;
+  $('uploadZone').dataset.slug = r.created;
+  await loadAll();
+});
+
+$('btnUpload').addEventListener('click', async () => {
+  const files = $('u_files').files;
+  if (!files.length) { toast('ファイルを選択してください'); return; }
+  const fd = new FormData();
+  for (const f of files) fd.append('files', f, f.name);
+  const slug = $('uploadZone').dataset.slug, dest = $('u_dest').value;
+  const r = await (await fetch(`/api/upload?slug=${encodeURIComponent(slug)}&dest=${dest}`,
+    {method:'POST', body: fd})).json();
+  if (r.error) { toast('エラー: ' + r.error); return; }
+  toast(`保存 ${r.saved.length} 件: ${r.saved.join(', ')}`
+    + (r.skipped.length ? '\nスキップ:\n' + r.skipped.join('\n') : ''));
+  $('u_files').value = '';
+});
+
+setupCreate();
 loadAll();
 </script>

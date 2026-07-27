@@ -22,8 +22,10 @@
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import mimetypes
+import re
 import shutil
 import sys
 import threading
@@ -190,6 +192,84 @@ class Api:
                 "ok": not any(r["errors"] for r in results)
                 and not any(c["level"] == "ERROR" for c in cross)}
 
+    def vocab_options(self):
+        """作成フォーム用: 語彙の選択肢 (key + 日本語ラベル)。"""
+        out = {}
+        for field, vocab in self.vocabs.items():
+            out[field] = [{"key": key, "label": localized(c["prefLabel"], "ja") or key}
+                          for key, c in vocab.items()]
+        return out
+
+    def create(self, form):
+        """フォーム入力から hosted の下書きを作る (personal/institutional の作成支援)。"""
+        slug = (form.get("slug") or "").strip()
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", slug):
+            return {"error": "slug は小文字英数字とハイフン (例: intro-statistics-2026)"}
+        if (DRAFTS_DIR / slug).exists() or (RESOURCES_DIR / slug).exists():
+            return {"error": f"slug '{slug}' は既に使われています"}
+
+        creator = {"type": "Person", "name": (form.get("creatorName") or "").strip()}
+        if (form.get("affiliation") or "").strip():
+            creator["affiliation"] = {"name": form["affiliation"].strip()}
+        meta = {
+            "slug": slug,
+            "name": {"ja": (form.get("name") or "").strip()},
+            "description": {"ja": (form.get("description") or "").strip()},
+            "inLanguage": [form.get("language") or "ja"],
+            "license": form.get("license") or "",
+            "creator": [creator],
+            "learningResourceType": form.get("types") or [],
+            "about": form.get("about") or [],
+            "datePublished": form.get("datePublished") or datetime.date.today().isoformat(),
+            "metadataProvenance": {"method": "manual",
+                                   "generatedDate": datetime.date.today().isoformat()},
+        }
+        if form.get("level"):
+            meta["educationalLevel"] = [form["level"]]
+        if form.get("audience"):
+            meta["audience"] = form["audience"]
+        keywords = [k.strip() for k in (form.get("keywords") or "").replace("、", ",").split(",")
+                    if k.strip()]
+        if keywords:
+            meta["keywords"] = keywords
+
+        directory = DRAFTS_DIR / slug
+        errors, _w = validate_resource(slug, directory, meta, self.validator,
+                                       self.vocabs, policy=self.config["review_policy"])
+        if errors:
+            return {"error": "入力に問題があります", "details": errors}
+        directory.mkdir(parents=True)
+        (directory / "content").mkdir()
+        (directory / "assets").mkdir()
+        import yaml as _yaml
+        (directory / "metadata.yaml").write_text(
+            "# oer-kit ui で作成した下書き。content/ にソース、assets/ に画像等を置く。\n"
+            + _yaml.safe_dump(meta, allow_unicode=True, sort_keys=False, width=100),
+            encoding="utf-8")
+        return {"created": slug}
+
+    def upload(self, slug, dest, files):
+        """作成済みの下書きへファイルを保存する (content / assets)。"""
+        base = DRAFTS_DIR / slug
+        if not (base / "metadata.yaml").exists():
+            base = RESOURCES_DIR / slug
+            if not (base / "metadata.yaml").exists():
+                return {"error": f"'{slug}' が見つかりません"}
+        if dest not in ("content", "assets"):
+            return {"error": "dest は content か assets"}
+        target_dir = base / dest
+        target_dir.mkdir(exist_ok=True)
+        saved, skipped = [], []
+        for filename, data in files:
+            name = re.sub(r"[/\\\x00]", "_", Path(filename).name).strip() or "file"
+            if len(data) > 100 * 1024 * 1024:
+                skipped.append(f"{name}: 100MB 超はリポジトリに置かない設計 "
+                               "(Git LFS か外部URL参照。design.md §4.2)")
+                continue
+            (target_dir / name).write_bytes(data)
+            saved.append(name)
+        return {"saved": saved, "skipped": skipped}
+
     def approve(self, slugs, by):
         policy = self.config["review_policy"]
         if policy != "aggregator" and not by:
@@ -263,6 +343,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, html, "text/html; charset=utf-8")
             if path == "/api/state":
                 return self._send(200, self.api.state())
+            if path == "/api/vocab":
+                return self._send(200, self.api.vocab_options())
             if path == "/api/items":
                 return self._send(200, self.api.items())
             if path.startswith("/api/item/"):
@@ -288,6 +370,13 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         length = int(self.headers.get("Content-Length") or 0)
         try:
+            if path == "/api/upload":
+                query = parse_qs(urlparse(self.path).query)
+                files = _parse_multipart(self.headers.get("Content-Type", ""),
+                                         self.rfile.read(length))
+                result = self.api.upload((query.get("slug") or [""])[0],
+                                         (query.get("dest") or ["content"])[0], files)
+                return self._send(400 if result.get("error") else 200, result)
             body = json.loads(self.rfile.read(length) or b"{}")
             if path == "/api/validate":
                 return self._send(200, self.api.validate())
@@ -296,6 +385,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400 if result.get("error") else 200, result)
             if path == "/api/demote":
                 return self._send(200, demote_slugs(body.get("slugs") or []))
+            if path == "/api/create":
+                result = self.api.create(body)
+                return self._send(400 if result.get("error") else 200, result)
             if path == "/api/withdraw":
                 result = withdraw_slugs(body.get("slugs") or [],
                                         body.get("reason") or "", body.get("by") or "")
@@ -303,6 +395,31 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(404, {"error": "not found"})
         except Exception as error:
             return self._send(500, {"error": f"{type(error).__name__}: {error}"})
+
+
+def _parse_multipart(content_type: str, body: bytes):
+    """multipart/form-data からファイル部を取り出す。(filename, bytes) のリストを返す。"""
+    match = re.search(r'boundary="?([^\s";]+)"?', content_type)
+    if not match:
+        return []
+    boundary = b"--" + match.group(1).encode()
+    files = []
+    for part in body.split(boundary):
+        part = part.strip(b"\r\n")
+        if not part or part == b"--":
+            continue
+        if b"\r\n\r\n" not in part:
+            continue
+        raw_headers, data = part.split(b"\r\n\r\n", 1)
+        disposition = ""
+        for line in raw_headers.decode("utf-8", errors="replace").splitlines():
+            if line.lower().startswith("content-disposition"):
+                disposition = line
+        found = re.search(r'filename="([^"]*)"', disposition)
+        if not found or not found.group(1):
+            continue
+        files.append((found.group(1), data.rstrip(b"\r\n").removesuffix(b"--").rstrip(b"\r\n")))
+    return files
 
 
 def main() -> int:

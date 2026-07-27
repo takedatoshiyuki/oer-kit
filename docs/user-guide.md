@@ -43,7 +43,9 @@ feedback_url: https://github.com/.../issues   # 誤り報告・削除依頼の�
 
 ## 3. 自作の教材を公開する（hosted）
 
-`personal` / `institutional` の基本形です。1教材=1ディレクトリを作ります:
+`personal` / `institutional` の基本形です。**`oer-kit ui` の「＋ 新規教材」フォームを使えば、
+メタデータの記入（ライセンス選択の説明つき）とファイルのアップロードまで画面上で完結します**。
+以下は手作業（またはフォームが作るもの）の説明です。1教材=1ディレクトリを作ります:
 
 ```
 resources/intro-statistics/
