@@ -9,8 +9,8 @@
 ## 手順
 
 ```sh
-python3 tools/fetch.py <externalUrl>            # 原ページを取得（照合の材料）
-python3 tools/validate.py --check-quotes drafts/<slug>
+python tools/fetch.py <externalUrl>            # 原ページを取得（照合の材料）
+python tools/validate.py --check-quotes drafts/<slug>
 ```
 
 機械で確認できることは機械に任せ、レビューでは**人にしか判断できない項目**に集中する。

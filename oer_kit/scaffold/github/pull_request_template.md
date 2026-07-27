@@ -20,4 +20,4 @@
 - [ ] `description` は自分の言葉による要約（引用の丸写しでない）
 - [ ] 分類（`about` / `educationalLevel` / `learningResourceType`）が妥当
 - [ ] `metadataProvenance.reviewedBy` にレビュー者を記入
-- [ ] `python3 tools/validate.py --check-quotes` が通る
+- [ ] `python tools/validate.py --check-quotes` が通る

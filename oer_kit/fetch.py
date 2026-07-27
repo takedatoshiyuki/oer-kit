@@ -6,11 +6,11 @@
 - 取得履歴を .cache/access_log.tsv に記録する (dateAccessed の根拠)
 
 使い方:
-    python3 tools/fetch.py <url> [--engine auto|requests|playwright] [--force]
-    python3 tools/fetch.py --batch urls.tsv [--concurrency 2]   # 一括 (ブラウザ使い回し)
+    python tools/fetch.py <url> [--engine auto|requests|playwright] [--force]
+    python tools/fetch.py --batch urls.tsv [--concurrency 2]   # 一括 (ブラウザ使い回し)
 
 備考: Playwright は genai-activities 環境に入っている。JSレンダリングが要る場合:
-    ~/Dropbox/Projects/genai_activities/.venv/bin/python3 tools/fetch.py <url>
+    ~/Dropbox/Projects/genai_activities/.venv/bin/python tools/fetch.py <url>
 """
 
 from __future__ import annotations

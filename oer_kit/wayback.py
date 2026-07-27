@@ -6,8 +6,8 @@
   スナップショット確認を行い、TSV で報告する (読み取り専用。metadata.yaml は変更しない)
 
 使い方:
-    python3 tools/wayback.py https://example.org/some/page
-    python3 tools/wayback.py --check
+    python tools/wayback.py https://example.org/some/page
+    python tools/wayback.py --check
 """
 
 from __future__ import annotations

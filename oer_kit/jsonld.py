@@ -5,8 +5,8 @@
 hosted は自リポジトリURLを id に、referenced は externalUrl を id にする。
 
 使い方:
-    python3 tools/jsonld.py --print <slug>   # 1件を標準出力へ
-    python3 tools/jsonld.py                  # 全件を _site/jsonld/<slug>.json へ
+    python tools/jsonld.py --print <slug>   # 1件を標準出力へ
+    python tools/jsonld.py                  # 全件を _site/jsonld/<slug>.json へ
 """
 
 from __future__ import annotations

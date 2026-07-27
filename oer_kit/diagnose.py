@@ -11,9 +11,9 @@
 `extract.py` のラベル辞書・定型文しきい値か、生成プロンプト。
 
 使い方:
-    python3 tools/diagnose.py                    # 重複が出た群すべて
-    python3 tools/diagnose.py --slugs a b c      # 指定した群だけ
-    python3 tools/diagnose.py --out report.md
+    python tools/diagnose.py                    # 重複が出た群すべて
+    python tools/diagnose.py --slugs a b c      # 指定した群だけ
+    python tools/diagnose.py --out report.md
 """
 
 from __future__ import annotations

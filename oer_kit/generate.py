@@ -14,10 +14,10 @@
 情報が足りなければ confidence=low を返させ、**書けないときは書かせない**。
 
 使い方:
-    python3 tools/generate.py --provider mock drafts/nagoya-u-course-0003   # API不要の試運転
-    python3 tools/generate.py --limit 10                                   # まず10件で実測
-    OPENAI_API_KEY=... python3 tools/generate.py --model gpt-5.4-mini drafts/nagoya-u-course-*
-    python3 tools/generate.py --base-url http://localhost:11434/v1 --model qwen3 --api-key dummy
+    python tools/generate.py --provider mock drafts/nagoya-u-course-0003   # API不要の試運転
+    python tools/generate.py --limit 10                                   # まず10件で実測
+    OPENAI_API_KEY=... python tools/generate.py --model gpt-5.4-mini drafts/nagoya-u-course-*
+    python tools/generate.py --base-url http://localhost:11434/v1 --model qwen3 --api-key dummy
 """
 
 from __future__ import annotations
@@ -290,7 +290,7 @@ def main() -> int:
     if low_confidence:
         print(f"confidence=low（要確認）{len(low_confidence)} 件: "
               + "、".join(low_confidence[:8]) + ("…" if len(low_confidence) > 8 else ""))
-    print("次: python3 tools/validate.py --check-quotes drafts/<slug> でレビューへ")
+    print("次: python tools/validate.py --check-quotes drafts/<slug> でレビューへ")
     return 1 if failed else 0
 
 

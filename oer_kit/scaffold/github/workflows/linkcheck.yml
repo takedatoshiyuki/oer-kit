@@ -17,4 +17,4 @@ jobs:
           python-version: "3.12"
       - run: pip install "oer-kit[legacy] @ git+https://github.com/OWNER/oer-kit"  # ← 自分の oer-kit の場所に変更
       - name: リンク生存・Wayback スナップショット確認
-        run: python3 -m oer_kit.wayback --check
+        run: python -m oer_kit.wayback --check

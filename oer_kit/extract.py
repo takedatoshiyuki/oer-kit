@@ -11,9 +11,9 @@
 3. ラベル付きセクション（概要／講義の概要／授業の内容／Course Description …）
 
 使い方:
-    python3 tools/extract.py <html ファイル|URL>            # 候補を列挙
-    python3 tools/extract.py <ファイル> --corpus <ディレクトリ>  # 定型文を除外して列挙
-    python3 tools/extract.py --survey <ディレクトリ>          # コーパス全体の的中率を測る
+    python tools/extract.py <html ファイル|URL>            # 候補を列挙
+    python tools/extract.py <ファイル> --corpus <ディレクトリ>  # 定型文を除外して列挙
+    python tools/extract.py --survey <ディレクトリ>          # コーパス全体の的中率を測る
 """
 
 from __future__ import annotations

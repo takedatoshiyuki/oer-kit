@@ -80,7 +80,7 @@ datePublished: "2026-07-24"     # 年のみ ("2026") でも可
 検証してからサイトを生成します:
 
 ```sh
-python3 tools/validate.py          # スキーマ + 語彙 + 運用ポリシーの検査
+python tools/validate.py          # スキーマ + 語彙 + 運用ポリシーの検査
 make preview                       # ローカルで表示確認
 make site                          # 公開一式を _site/ へ生成
 ```
@@ -131,11 +131,11 @@ metadataProvenance:
 ### 便利なツール
 
 ```sh
-python3 tools/fetch.py <url>                        # ページ取得 (キャッシュ・取得日記録)
-python3 tools/extract.py <url>                      # 説明文の候補を抽出 (引用の下ごしらえ)
-python3 tools/extract.py <url> --materials          # 教材ファイルリンクを抽出
-python3 tools/wayback.py --save <url>               # Web アーカイブに保存 → archivedAt に記入
-python3 tools/validate.py --check-quotes            # 引用が原文のままかを機械照合
+python tools/fetch.py <url>                        # ページ取得 (キャッシュ・取得日記録)
+python tools/extract.py <url>                      # 説明文の候補を抽出 (引用の下ごしらえ)
+python tools/extract.py <url> --materials          # 教材ファイルリンクを抽出
+python tools/wayback.py --save <url>               # Web アーカイブに保存 → archivedAt に記入
+python tools/validate.py --check-quotes            # 引用が原文のままかを機械照合
 ```
 
 出典の説明文をそのまま見せたい場合は `quotedDescription` に入れます（ページに引用として

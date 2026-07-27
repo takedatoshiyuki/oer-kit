@@ -6,7 +6,7 @@
 - _site/sitemap.xml         目録ページの URL 一覧
 
 使い方:
-    python3 tools/build_catalog.py
+    python tools/build_catalog.py
 """
 
 from __future__ import annotations

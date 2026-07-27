@@ -20,7 +20,7 @@ def find_project_root() -> Path:
             return candidate
     raise SystemExit(
         "config.yaml が見つかりません。OER プロジェクトのディレクトリ内で実行してください。\n"
-        "新しいプロジェクトを作るには: python3 -m oer_kit.cli init <ディレクトリ>")
+        "新しいプロジェクトを作るには: python -m oer_kit.cli init <ディレクトリ>")
 
 
 PROJECT_ROOT = find_project_root()

@@ -10,9 +10,9 @@ JSON Schema 検証に加え、スキーマでは表現しない運用ポリシ�
 - リポジトリ横断の重複 (同じ externalUrl の二重登録、description の使い回し)
 
 使い方:
-    python3 tools/validate.py                # resources/ 全件
-    python3 tools/validate.py resources/xxx  # 指定ディレクトリのみ
-    python3 tools/validate.py --check-quotes # 引用文が原文のままかキャッシュと照合
+    python tools/validate.py                # resources/ 全件
+    python tools/validate.py resources/xxx  # 指定ディレクトリのみ
+    python tools/validate.py --check-quotes # 引用文が原文のままかキャッシュと照合
 終了コード: エラーがあれば 1 (警告のみなら 0)
 """
 

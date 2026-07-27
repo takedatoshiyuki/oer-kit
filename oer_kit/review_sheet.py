@@ -14,7 +14,7 @@
 チェックした slug をコピーして tools/approve.py に渡すと承認できる。
 
 使い方:
-    python3 tools/review_sheet.py [--out .cache/review.html] [--open]
+    python tools/review_sheet.py [--out .cache/review.html] [--open]
 """
 
 from __future__ import annotations

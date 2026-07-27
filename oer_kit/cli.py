@@ -6,7 +6,7 @@
     oer-kit prerender      metadata.yaml → Quarto サイト入力
     ...                    (一覧は oer-kit --help)
 
-インストールしていない場合は `PYTHONPATH=<oer-kitの場所> python3 -m oer_kit.cli ...`。
+インストールしていない場合は `PYTHONPATH=<oer-kitの場所> python -m oer_kit.cli ...`。
 """
 
 from __future__ import annotations

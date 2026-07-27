@@ -6,7 +6,7 @@
 - hosted リソースは content/ と assets/ をページ配下へコピーし、Quarto にレンダリングさせる
 
 使い方:
-    python3 tools/prerender.py
+    python tools/prerender.py
     quarto render site        # → _site/
 """
 

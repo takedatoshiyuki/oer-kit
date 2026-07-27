@@ -12,7 +12,7 @@
   下流 (LLM 学習データ・LMS) が権利で絞り込めるようにする
 
 使い方:
-    python3 tools/harvest.py drafts/nagoya-u-course-0001 [--limit 2] [--force]
+    python tools/harvest.py drafts/nagoya-u-course-0001 [--limit 2] [--force]
 """
 
 from __future__ import annotations

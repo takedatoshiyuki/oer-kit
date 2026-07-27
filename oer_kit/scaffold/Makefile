@@ -2,7 +2,7 @@
 # oer-kit を pip インストールしていない場合はパスを指定する:
 #   make site OER_KIT=../oer-kit
 OER_KIT ?=
-PY = $(if $(OER_KIT),PYTHONPATH=$(OER_KIT) )python3 -m
+PY = $(if $(OER_KIT),PYTHONPATH=$(OER_KIT) )python -m
 QUARTO ?= quarto
 
 .PHONY: validate prerender render catalog site preview clean

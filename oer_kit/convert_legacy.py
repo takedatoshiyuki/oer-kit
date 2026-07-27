@@ -9,7 +9,7 @@ course 単位の行を mode: referenced の metadata.yaml 下書きにする。�
   (AI 生成の入力用。公開物ではない)
 
 使い方:
-    python3 tools/convert_legacy.py <output/ocw_xxx.xlsx> [--out drafts] [--limit 10]
+    python tools/convert_legacy.py <output/ocw_xxx.xlsx> [--out drafts] [--limit 10]
         [--all] [--with-source]
 """
 

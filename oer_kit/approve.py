@@ -10,9 +10,9 @@
 検査に落ちたものは drafts/ に残るので、直して再実行すればよい。
 
 使い方:
-    python3 tools/approve.py --by "山田 太郎" nagoya-u-course-0001 nagoya-u-course-0002
-    python3 tools/approve.py --by "山田 太郎" --from-file approved.txt
-    python3 tools/approve.py --by "山田 太郎" --all --dry-run
+    python tools/approve.py --by "山田 太郎" nagoya-u-course-0001 nagoya-u-course-0002
+    python tools/approve.py --by "山田 太郎" --from-file approved.txt
+    python tools/approve.py --by "山田 太郎" --all --dry-run
 """
 
 from __future__ import annotations

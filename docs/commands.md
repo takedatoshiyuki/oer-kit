@@ -7,9 +7,9 @@
 
 | 用途 | 環境 |
 |------|------|
-| validate / jsonld / build_catalog / convert_legacy | `python3`（pyyaml, jsonschema, pandas） |
+| validate / jsonld / build_catalog / convert_legacy | `python`（pyyaml, jsonschema, pandas） |
 | discover / wayback / fetch(requests) | 上記 + requests |
-| fetch --engine playwright（JSレンダリング） | `~/Dropbox/Projects/genai_activities/.venv/bin/python3`（playwright 入り。取得層の正本 `common_knowledge.web` を config.yaml の lib_paths 経由で使用） |
+| fetch --engine playwright（JSレンダリング） | `~/Dropbox/Projects/genai_activities/.venv/bin/python`（playwright 入り。取得層の正本 `common_knowledge.web` を config.yaml の lib_paths 経由で使用） |
 
 ## コマンド一覧
 
@@ -17,7 +17,7 @@
 # 管理UI (ダッシュボード + 新規教材の作成/レビュー/承認/取り下げ)。127.0.0.1 のみ・追加依存なし
 # 「＋ 新規教材」: フォームでメタデータ作成 (ライセンス選択の説明つき) → ファイルを
 # アップロードして content/ ・assets/ に組織化 → 下書きとしてレビュー/承認フローへ
-oer-kit ui   # または python3 -m oer_kit.ui --port 8765
+oer-kit ui   # または python -m oer_kit.ui --port 8765
 
 # 公開の取り下げ。差し戻し (--demote: drafts へ戻す) と恒久取り下げ (--reason 必須) を区別。
 # 恒久取り下げは withdrawn.yaml に記録され、以後の収集 (make-drafts) から除外・再登録は validate がエラー
@@ -26,55 +26,55 @@ oer-kit withdraw <slug>... --demote
 
 # 検証 (スキーマ + 語彙キー + 運用ポリシー + 横断重複)。CI で必須にする
 # 対象を絞って指定しても、重複検査は既存リソース全件と突き合わせる
-python3 tools/validate.py [resources/<slug> ...]
+python tools/validate.py [resources/<slug> ...]
 
 # レビュー支援: 引用文が原文のままかキャッシュと照合する (改変・要約の混入を検出)
-python3 tools/validate.py --check-quotes [resources/<slug> ...]
+python tools/validate.py --check-quotes [resources/<slug> ...]
 
 # JSON-LD 生成 (1件を標準出力 / 全件を _site/jsonld/ へ)
-python3 tools/jsonld.py --print <slug>
-python3 tools/jsonld.py
+python tools/jsonld.py --print <slug>
+python tools/jsonld.py
 
 # catalog.json + sitemap.xml + 全 JSON-LD (§8.1 の配信物一式)
-python3 tools/build_catalog.py
+python tools/build_catalog.py
 
 # sitemap から URL 列挙 (robots.txt → sitemap.xml 再帰)
-python3 tools/discover.py https://ocw.kyoto-u.ac.jp/ --limit 100 --out urls.tsv
+python tools/discover.py https://ocw.kyoto-u.ac.jp/ --limit 100 --out urls.tsv
 
 # ページ取得 (キャッシュ付き。.cache/pages/ へ保存、取得日を access_log.tsv に記録)
-python3 tools/fetch.py <url> [--force]
+python tools/fetch.py <url> [--force]
 
 # Wayback スナップショット確認 / referenced 全件のリンク生存確認
-python3 tools/wayback.py <url>
-python3 tools/wayback.py --check
+python tools/wayback.py <url>
+python tools/wayback.py --check
 
 # 旧クローラ収集データ (科研STOER output/*.xlsx) → referenced 下書き
-python3 tools/convert_legacy.py "<path>/output/ocw_kyoto_u.xlsx" --limit 10 --with-source
+python tools/convert_legacy.py "<path>/output/ocw_kyoto_u.xlsx" --limit 10 --with-source
 
 # ページから説明文の候補を抽出 (quotedDescription の下ごしらえ)
-python3 tools/extract.py <html|url> [--corpus <同一サイトのディレクトリ>]
-python3 tools/extract.py --survey <コーパス>   # サイト別の的中率を測る
+python tools/extract.py <html|url> [--corpus <同一サイトのディレクトリ>]
+python tools/extract.py --survey <コーパス>   # サイト別の的中率を測る
 
 # 重複の原因調査: 各リソースの出力と原ページの抽出候補を1つの Markdown に集める
-python3 tools/diagnose.py [--slugs a b c] [--out report.md]
+python tools/diagnose.py [--slugs a b c] [--out report.md]
 
 # description (CC0の自作要約) の一括生成。quotedDescription には触れない
-python3 tools/generate.py --provider mock drafts/<slug>      # API不要の試運転
-python3 tools/generate.py --limit 10                         # まず10件で実測 (要 OPENAI_API_KEY)
-python3 tools/generate.py --base-url http://localhost:11434/v1 --model qwen3 --api-key dummy  # ローカルLLM
+python tools/generate.py --provider mock drafts/<slug>      # API不要の試運転
+python tools/generate.py --limit 10                         # まず10件で実測 (要 OPENAI_API_KEY)
+python tools/generate.py --base-url http://localhost:11434/v1 --model qwen3 --api-key dummy  # ローカルLLM
 
 # 教材ファイルリンクの抽出 (metadata.yaml の materials に貼れる YAML で出力)
-python3 tools/extract.py <html|url> --materials [--base-url <url>]
+python tools/extract.py <html|url> --materials [--base-url <url>]
 
 # 各回が別ページの講座は --follow で深さ1巡回 (由来が materials[].page に入る)
-python3 tools/extract.py <コースURL> --materials --follow              # コースURL配下を各回とみなす (京大 ?video_id= 型)
-python3 tools/extract.py <コースURL> --materials --follow "/content/"  # 別パス型は正規表現で指定 (UTokyo Channel /content/?id= 型)
+python tools/extract.py <コースURL> --materials --follow              # コースURL配下を各回とみなす (京大 ?video_id= 型)
+python tools/extract.py <コースURL> --materials --follow "/content/"  # 別パス型は正規表現で指定 (UTokyo Channel /content/?id= 型)
 
 # 他の oer-kit プロジェクトからの取り込み (連合。§7.6)。GitHub URL / サイトURL / ローカルパス
 oer-kit ingest https://github.com/taro/my-oer [--prefix taro] [--kind personal]
 
 # 教材ファイルの収集 (コーパス層 → archive_dir。権利ゲート・sha256・manifest付き)
-python3 tools/harvest.py drafts/<slug> [--limit N] [--force]
+python tools/harvest.py drafts/<slug> [--limit N] [--force]
 ```
 
 ### 説明文の抽出方針（extract.py）
@@ -171,10 +171,10 @@ AI で metadata.yaml 下書き生成（[resource.schema.json](../schemas/resourc
 人にしか判断できないものだけを一覧にする。
 
 ```sh
-python3 tools/review_sheet.py --open       # レビュー支援ビュー (.cache/review.html)
-python3 tools/approve.py --by "氏名" --dry-run <slug>...   # 検査のみ (無変更)
-python3 tools/approve.py --by "氏名" <slug>...             # 承認 → resources/ へ移動
-python3 tools/approve.py --by "氏名" --from-file approved.txt
+python tools/review_sheet.py --open       # レビュー支援ビュー (.cache/review.html)
+python tools/approve.py --by "氏名" --dry-run <slug>...   # 検査のみ (無変更)
+python tools/approve.py --by "氏名" <slug>...             # 承認 → resources/ へ移動
+python tools/approve.py --by "氏名" --from-file approved.txt
 ```
 
 `review_sheet.py` は**部局 × 主題分野の対応表**を先頭に出す。1件ずつ見ていては

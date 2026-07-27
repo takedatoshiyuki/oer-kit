@@ -5,7 +5,7 @@ robots.txt の Sitemap: 行 → 無ければ /sitemap.xml を起点に、
 sitemapindex を再帰的にたどって URL を列挙する。
 
 使い方:
-    python3 tools/discover.py https://ocw.kyoto-u.ac.jp/ [--limit 100] [--out urls.tsv]
+    python tools/discover.py https://ocw.kyoto-u.ac.jp/ [--limit 100] [--out urls.tsv]
 """
 
 from __future__ import annotations

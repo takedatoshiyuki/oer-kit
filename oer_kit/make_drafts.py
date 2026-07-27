@@ -7,7 +7,7 @@ TODO のまま出力し、別途 (AI生成 → 人手レビュー) で埋める�
 あわせて description 作成用のダイジェストを .cache/<site>_digest.jsonl に書く。
 
 使い方:
-    python3 tools/make_drafts.py --site nagoya_u --urls .cache/urls_nagoya_courses_ja.tsv
+    python tools/make_drafts.py --site nagoya_u --urls .cache/urls_nagoya_courses_ja.tsv
         [--limit N] [--overwrite]
 """
 
