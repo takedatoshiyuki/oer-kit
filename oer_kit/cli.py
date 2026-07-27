@@ -1,6 +1,7 @@
 """oer-kit コマンド: サブコマンドで各ツールを呼ぶ。
 
     oer-kit init <dir>     新しい OER プロジェクトを作る (雛形の展開)
+    oer-kit ui             管理UI (ダッシュボード + レビュー/承認) をブラウザで開く
     oer-kit validate       検証 (スキーマ・語彙・運用ポリシー・横断重複)
     oer-kit prerender      metadata.yaml → Quarto サイト入力
     ...                    (一覧は oer-kit --help)
@@ -18,6 +19,7 @@ from pathlib import Path
 
 # サブコマンド → oer_kit 内のモジュール名
 COMMANDS = [
+    "ui",
     "validate", "jsonld", "prerender", "build-catalog",
     "discover", "fetch", "extract", "make-drafts", "generate",
     "review-sheet", "approve", "diagnose",

@@ -20,4 +20,4 @@ oer-kit = "oer_kit.cli:main"
 packages = ["oer_kit"]
 
 [tool.setuptools.package-data]
-oer_kit = ["schema/*.json", "scaffold/**/*"]
+oer_kit = ["schema/*.json", "scaffold/**/*", "ui_static/*"]

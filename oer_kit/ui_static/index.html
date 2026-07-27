@@ -1,0 +1,201 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>oer-kit 管理UI</title>
+<style>
+  :root { --line:#e3e3e6; --muted:#71717a; --accent:#1a6b52; --warn:#b45309; --bad:#b91c1c; }
+  * { box-sizing:border-box }
+  body { font-family:system-ui,"Hiragino Sans",sans-serif; margin:0; color:#18181b; background:#fafafa }
+  header { display:flex; align-items:baseline; gap:1rem; padding:.8rem 1.2rem; background:#fff;
+           border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5 }
+  header h1 { font-size:1.05rem; margin:0 }
+  .pill { font-size:.72rem; padding:.15rem .5rem; border-radius:999px; background:#eef2f0; color:var(--accent) }
+  header .grow { flex:1 } header a { color:var(--muted); font-size:.8rem }
+  main { max-width:1180px; margin:0 auto; padding:1rem 1.2rem 4rem }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.7rem; margin:.8rem 0 }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:.7rem .9rem }
+  .card b { font-size:1.5rem; display:block } .card span { color:var(--muted); font-size:.78rem }
+  .card.warn b { color:var(--warn) }
+  .bar { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin:.8rem 0 }
+  button { padding:.42rem .8rem; border:1px solid var(--line); background:#fff; border-radius:6px;
+           cursor:pointer; font-size:.85rem }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff }
+  button:disabled { opacity:.45; cursor:default }
+  input[type=text] { padding:.4rem .6rem; border:1px solid var(--line); border-radius:6px; font-size:.85rem }
+  select { padding:.38rem .4rem; border:1px solid var(--line); border-radius:6px; font-size:.85rem }
+  table { border-collapse:collapse; width:100%; background:#fff; border:1px solid var(--line);
+          border-radius:8px; overflow:hidden; font-size:.83rem }
+  th,td { padding:.5rem .6rem; border-bottom:1px solid var(--line); text-align:left; vertical-align:top }
+  th { background:#f4f4f5; font-size:.76rem; color:var(--muted) }
+  tr.sel { background:#f0faf6 }
+  .flag { display:inline-block; font-size:.7rem; padding:.05rem .4rem; border-radius:4px; margin-left:.3rem }
+  .flag.low { background:#fef3c7; color:var(--warn) } .flag.noq { background:#f4f4f5; color:var(--muted) }
+  .flag.na { background:#fee2e2; color:var(--bad) }
+  .meta { color:var(--muted); font-size:.76rem }
+  .desc { max-width:34rem }
+  .quote { color:#52525b; background:#fafafa; border-left:3px solid var(--line); padding:.3rem .5rem;
+           margin-top:.35rem; font-size:.78rem; white-space:pre-wrap }
+  #result { position:fixed; right:1rem; bottom:1rem; max-width:30rem; background:#18181b; color:#fafafa;
+            padding:.7rem 1rem; border-radius:8px; font-size:.82rem; display:none; white-space:pre-wrap }
+  details.findings { background:#fff; border:1px solid var(--line); border-radius:8px; padding:.6rem .9rem;
+                     margin:.6rem 0; font-size:.83rem }
+  .err { color:var(--bad) } .wrn { color:var(--warn) }
+  td a { color:var(--accent) }
+</style>
+
+<header>
+  <h1 id="siteName">…</h1>
+  <span class="pill" id="policy"></span>
+  <span class="meta" id="baseUrl"></span>
+  <div class="grow"></div>
+  <a href="#" id="feedback" target="_blank" rel="noopener" style="display:none">誤り報告窓口</a>
+</header>
+
+<main>
+  <div class="cards" id="cards"></div>
+
+  <div class="bar">
+    <select id="scope">
+      <option value="drafts">レビュー待ち（drafts）</option>
+      <option value="resources">公開済み（resources）</option>
+    </select>
+    <select id="filter">
+      <option value="">すべて</option>
+      <option value="low">低信頼のみ</option>
+      <option value="noq">引用なしのみ</option>
+    </select>
+    <input type="text" id="search" placeholder="検索（名称・部局・紹介文）" size="28">
+    <div class="grow"></div>
+    <button id="btnValidate">検証を実行</button>
+    <span id="who"></span>
+    <button class="primary" id="btnApprove" disabled>選択を承認</button>
+  </div>
+
+  <div id="findings"></div>
+  <table>
+    <thead><tr>
+      <th style="width:2rem"><input type="checkbox" id="selAll"></th>
+      <th>ID / 出典</th><th>講義</th><th>分類</th><th class="desc">内容紹介と引用</th><th></th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</main>
+<div id="result"></div>
+
+<script>
+let STATE = null, ITEMS = [];
+const $ = id => document.getElementById(id);
+
+async function loadAll() {
+  STATE = await (await fetch('/api/state')).json();
+  ITEMS = (await (await fetch('/api/items')).json()).items;
+  renderHeader(); renderCards(); renderRows();
+}
+
+function renderHeader() {
+  $('siteName').textContent = STATE.siteName;
+  $('policy').textContent = 'review_policy: ' + STATE.reviewPolicy;
+  $('baseUrl').textContent = STATE.baseUrl;
+  if (STATE.feedbackUrl) { const a = $('feedback'); a.href = STATE.feedbackUrl; a.style.display=''; }
+  if (STATE.reviewPolicy !== 'aggregator')
+    $('who').innerHTML = 'レビュー者: <input type="text" id="byName" size="10" placeholder="氏名 (必須)">';
+  else
+    $('who').innerHTML = '<span class="meta">aggregator: 未レビュー承認可</span> <input type="text" id="byName" size="10" placeholder="氏名 (任意)">';
+}
+
+function renderCards() {
+  const d = STATE.drafts, r = STATE.resources;
+  const srcs = Object.entries(r.bySource).map(([k,v])=>`${k} ${v}`).join(' / ') || '—';
+  $('cards').innerHTML = `
+    <div class="card"><b>${d.total}</b><span>レビュー待ち</span></div>
+    <div class="card ${d.low+r.low?'warn':''}"><b>${d.low + r.low}</b><span>低信頼（要注意）</span></div>
+    <div class="card"><b>${r.total}</b><span>公開済みリソース</span></div>
+    <div class="card"><b>${r.unreviewedAi}</b><span>未レビューのAI生成（公開済み）</span></div>
+    <div class="card" style="grid-column:span 2"><b style="font-size:.95rem;line-height:1.8">${srcs}</b><span>出典の内訳</span></div>`;
+}
+
+function visible() {
+  const scope = $('scope').value, f = $('filter').value,
+        q = $('search').value.trim().toLowerCase();
+  return ITEMS.filter(i => i.scope === scope)
+    .filter(i => f !== 'low' || i.confidence === 'low')
+    .filter(i => f !== 'noq' || !i.quoted)
+    .filter(i => !q || (i.name + i.faculty + i.description).toLowerCase().includes(q));
+}
+
+function renderRows() {
+  const scope = $('scope').value;
+  $('rows').innerHTML = visible().map(i => `
+    <tr data-slug="${i.slug}">
+      <td>${scope==='drafts' ? `<input type="checkbox" class="pick">` : ''}</td>
+      <td class="meta">${i.slug.replace('nagoya-u-course-','#')}<br>${i.source}
+        ${i.confidence==='low' ? '<span class="flag low">低信頼</span>' : ''}
+        ${!i.quoted ? '<span class="flag noq">引用なし</span>' : ''}
+        ${i.reuse==='再利用不可' ? '<span class="flag na">再利用不可</span>' : ''}</td>
+      <td><b>${esc(i.name)}</b><div class="meta">${esc(i.faculty)} / ${i.year}年
+        / 教材${i.materials}件 ${i.reviewedBy.length? '/ ✓'+esc(i.reviewedBy.join('、')) : ''}</div></td>
+      <td class="meta">${esc(i.types)}<br>${esc(i.about)}<br>${esc(i.level)}</td>
+      <td class="desc">${esc(i.description)}
+        ${i.quoted ? `<div class="quote">${esc(i.quoted.slice(0,300))}${i.quoted.length>300?'…':''}</div>` : ''}</td>
+      <td class="meta">${i.url ? `<a href="${i.url}" target="_blank" rel="noopener">原典</a>` : ''}
+        ${i.hasPage ? ` <a href="/site/r/${i.slug}/" target="_blank">頁</a>` : ''}</td>
+    </tr>`).join('');
+  document.querySelectorAll('.pick').forEach(c =>
+    c.addEventListener('change', e => { e.target.closest('tr').classList.toggle('sel', e.target.checked); updateApprove(); }));
+  updateApprove();
+}
+
+function selected() {
+  return [...document.querySelectorAll('.pick:checked')].map(c => c.closest('tr').dataset.slug);
+}
+function updateApprove() {
+  const n = selected().length;
+  $('btnApprove').disabled = !n;
+  $('btnApprove').textContent = n ? `選択を承認 (${n})` : '選択を承認';
+}
+function esc(s) { return (s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function toast(message) { const r=$('result'); r.textContent=message; r.style.display='block';
+  clearTimeout(r._t); r._t=setTimeout(()=>r.style.display='none', 6000); }
+
+$('selAll').addEventListener('change', e => {
+  document.querySelectorAll('.pick').forEach(c => { c.checked = e.target.checked;
+    c.closest('tr').classList.toggle('sel', c.checked); });
+  updateApprove();
+});
+['scope','filter'].forEach(id => $(id).addEventListener('change', renderRows));
+$('search').addEventListener('input', renderRows);
+
+$('btnValidate').addEventListener('click', async () => {
+  $('btnValidate').disabled = true; $('btnValidate').textContent = '検証中…';
+  const v = await (await fetch('/api/validate', {method:'POST'})).json();
+  $('btnValidate').disabled = false; $('btnValidate').textContent = '検証を実行';
+  const rows = v.findings.map(f =>
+    `<div><b>${f.slug}</b> ${f.errors.map(e=>`<div class="err">ERROR: ${esc(e)}</div>`).join('')}
+     ${f.warnings.map(w=>`<div class="wrn">warn: ${esc(w)}</div>`).join('')}</div>`).join('');
+  const cross = v.cross.map(c =>
+    `<div class="${c.level==='ERROR'?'err':'wrn'}">${c.level}: ${esc(c.message)}</div>`).join('');
+  $('findings').innerHTML = `<details class="findings" open><summary>検証結果: ${
+    v.ok ? '✅ エラーなし' : '❌ エラーあり'}（指摘 ${v.findings.length} 件）</summary>${rows}${cross}</details>`;
+});
+
+$('btnApprove').addEventListener('click', async () => {
+  const slugs = selected();
+  const byField = $('byName');
+  const by = byField ? byField.value.trim() : '';
+  if (STATE.reviewPolicy !== 'aggregator' && !by) { toast('レビュー者名を入力してください'); return; }
+  if (!confirm(`${slugs.length} 件を resources/ へ承認します。よろしいですか？`)) return;
+  $('btnApprove').disabled = true;
+  const r = await (await fetch('/api/approve',
+    {method:'POST', headers:{'Content-Type':'application/json'},
+     body: JSON.stringify({slugs, by})})).json();
+  if (r.error) { toast('エラー: ' + r.error); }
+  else {
+    toast(`承認 ${r.approved.length} 件` + (r.held.length ?
+      `\n保留 ${r.held.length} 件:\n` + r.held.map(h=>`${h.slug}: ${h.reasons[0]}`).join('\n') : ''));
+    await loadAll();
+  }
+  updateApprove();
+});
+
+loadAll();
+</script>

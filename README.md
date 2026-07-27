@@ -18,6 +18,7 @@
 pip install "oer-kit @ git+https://github.com/takedatoshiyuki/oer-kit"   # または pip install -e .
 oer-kit init my-oer && cd my-oer
 # config.yaml を編集 → resources/ に教材を追加 → oer-kit validate → make site
+oer-kit ui        # 管理UI (ダッシュボード + レビュー/承認) をブラウザで開く
 ```
 
 pip でインストールしない場合は、プロジェクト側から `PYTHONPATH` で参照できます:
@@ -29,7 +30,7 @@ make site OER_KIT=../oer-kit
 ## 何が入っているか
 
 ```
-oer_kit/            Python パッケージ (validate / prerender / build_catalog /
+oer_kit/            Python パッケージ (ui / validate / prerender / build_catalog /
                     discover / fetch / extract / make_drafts / generate /
                     review_sheet / approve / harvest / wayback / diagnose …)
 oer_kit/schema/     metadata.yaml の正規仕様 (JSON Schema 2020-12)
