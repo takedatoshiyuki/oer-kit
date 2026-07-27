@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import shutil
 import sys
 from xml.sax.saxutils import escape
 
@@ -101,9 +102,24 @@ def main() -> int:
         sitemap_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         sitemap_note = f"sitemap: {sitemap_path}"
 
+    # 取り下げ・差し戻し後の残骸掃除: Quarto は増分レンダリングのため、
+    # resources/ から消えたリソースの出力 (_site/r/<slug>/, jsonld) が残り続ける
+    orphans = 0
+    for stale in jsonld_dir.glob("*.json"):
+        if stale.stem not in metas:
+            stale.unlink()
+            orphans += 1
+    r_dir = SITE_DIR / "r"
+    if r_dir.is_dir():
+        for stale in r_dir.iterdir():
+            if stale.is_dir() and stale.name not in metas:
+                shutil.rmtree(stale)
+                orphans += 1
+
     enriched = enrich_search_index(metas)
     print(f"{len(docs)} 件 → {catalog_path}, {jsonld_dir}/ / {sitemap_note}"
-          + (f" / 検索索引を補強 {enriched} 件" if enriched else ""))
+          + (f" / 検索索引を補強 {enriched} 件" if enriched else "")
+          + (f" / 公開済みでなくなった残骸を削除 {orphans} 件" if orphans else ""))
     return 0
 
 
