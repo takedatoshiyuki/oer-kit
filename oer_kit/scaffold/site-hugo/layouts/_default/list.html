@@ -7,7 +7,7 @@
     <a href="{{ .RelPermalink }}">{{ .Title }}</a>
     {{ with .Params.author }}<span class="authors">{{ delimit . "、" }}</span>{{ end }}
     {{ with .Params.dateDisplay }}<span class="date">{{ . }}</span>{{ end }}
-    {{ with .Description }}<p class="desc">{{ . | truncate 120 }}</p>{{ end }}
+    {{ with .Description }}<p class="desc">{{ . | truncate 120 | $.Page.RenderString }}</p>{{ end }}
   </li>
   {{ end }}
 </ul>

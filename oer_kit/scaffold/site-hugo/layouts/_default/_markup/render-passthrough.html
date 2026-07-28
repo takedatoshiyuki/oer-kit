@@ -1,0 +1,6 @@
+{{- /* 数式: LaTeX をビルド時に MathML へ変換 (Hugo 0.132+ の transform.ToMath) */ -}}
+{{- if eq .Type "block" -}}
+{{- transform.ToMath .Inner (dict "displayMode" true) -}}
+{{- else -}}
+{{- transform.ToMath .Inner -}}
+{{- end -}}

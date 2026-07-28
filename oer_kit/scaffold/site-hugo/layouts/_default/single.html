@@ -5,7 +5,7 @@
     {{ with .Params.author }}{{ delimit . "、" }}{{ end }}
     {{ with .Params.dateDisplay }}<span class="date">{{ . }}</span>{{ end }}
   </p>
-  {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
+  {{ with .Description }}<p class="lead">{{ . | $.Page.RenderString }}</p>{{ end }}
   {{ .Content }}
   {{ with .Params.categories }}
   <p class="categories">

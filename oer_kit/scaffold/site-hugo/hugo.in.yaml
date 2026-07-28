@@ -14,6 +14,14 @@ markup:
   goldmark:
     renderer:
       unsafe: true      # prerender 生成の Markdown のみをビルドする前提 (任意入力は通さない)
+    extensions:
+      # 数式 (LaTeX)。render-passthrough フックが transform.ToMath で
+      # ビルド時に MathML へ変換する (クライアント JS 不要)
+      passthrough:
+        enable: true
+        delimiters:
+          block: [['\[', '\]'], ['$$', '$$']]
+          inline: [['\(', '\)'], ['$', '$']]
 
 outputs:
   home: [HTML, searchindex]
