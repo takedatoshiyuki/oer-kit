@@ -9,7 +9,7 @@
   {{ .Content }}
   {{ with .Params.categories }}
   <p class="categories">
-    {{ range . }}<a class="tag" href="{{ printf "/categories/%s/" (. | urlize) | relURL }}">{{ . }}</a> {{ end }}
+    {{ range . }}<a class="tag" href="{{ printf "categories/%s/" (. | urlize) | relURL }}">{{ . }}</a> {{ end }}
   </p>
   {{ end }}
 </article>

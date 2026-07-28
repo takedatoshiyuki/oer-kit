@@ -85,10 +85,10 @@ def main() -> int:
     catalog_path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n",
                             encoding="utf-8")
 
-    # sitemap.xml は Quarto (quarto render site) の生成物を優先し、無いときだけ作る
+    # sitemap.xml はサイトエンジン (Quarto/Hugo) の生成物を優先し、無いときだけ作る
     sitemap_path = SITE_DIR / "sitemap.xml"
     if sitemap_path.exists():
-        sitemap_note = "sitemap.xml は既存 (Quarto 生成) を維持"
+        sitemap_note = "sitemap.xml は既存 (サイトエンジン生成) を維持"
     else:
         lines = ['<?xml version="1.0" encoding="UTF-8"?>',
                  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
