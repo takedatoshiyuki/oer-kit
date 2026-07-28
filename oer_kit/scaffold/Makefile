@@ -13,8 +13,10 @@ validate:            ## metadata.yaml の検証
 prerender:           ## metadata.yaml → site/r/ のページ生成 (+ _quarto.yml)
 	$(PY) oer_kit.prerender
 
-render: prerender    ## Quarto で _site/ へレンダリング
+render: prerender    ## Quarto で site/_site へレンダリング → _site/ へ同期
 	$(QUARTO) render site
+	rsync -a --delete --exclude catalog.json --exclude jsonld --exclude .nojekyll \
+	  site/_site/ _site/
 
 catalog:             ## catalog.json + JSON-LD 全件 (+ sitemap は Quarto 優先)
 	$(PY) oer_kit.build_catalog
@@ -25,4 +27,4 @@ preview: prerender   ## ローカルプレビュー
 	$(QUARTO) preview site
 
 clean:
-	rm -rf _site site/r site/_quarto.yml site/.quarto
+	rm -rf _site site/_site site/r site/_quarto.yml site/.quarto

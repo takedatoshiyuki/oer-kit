@@ -2,7 +2,9 @@
 # 設定を変えるときはこのファイルを編集して prerender を再実行すること ({{...}} は config.yaml の値)。
 project:
   type: website
-  output-dir: ../_site
+  # プロジェクト内 (site/_site) に出力し、Makefile の render で _site/ へ同期する。
+  # ../_site を直接指すと Quarto がプロジェクト外出力を警告し site_libs を掃除できない
+  output-dir: _site
 
 # 教材ページのコード断片をビルド時に実行しない (公開物のビルドで任意コードを走らせない)
 execute:

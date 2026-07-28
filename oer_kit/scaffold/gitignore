@@ -24,3 +24,6 @@ __pycache__/
 
 # 恒久取り下げの保管 (記録は withdrawn.yaml が git 管理)
 withdrawn/
+
+# Quarto のプロジェクト内出力 (render 後に _site/ へ同期される)
+site/_site/
