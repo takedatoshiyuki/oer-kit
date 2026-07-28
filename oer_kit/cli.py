@@ -27,12 +27,34 @@ COMMANDS = [
 ]
 
 
+ENGINE_GUIDE = """サイトエンジンを選んでください (docs/design.md §8.4):
+
+  教材ページに次のいずれかを含めたい場合は quarto を選んでください:
+  数式 (LaTeX 記法)・文献リスト (BibTeX からの引用・参考文献の自動生成)・
+  実行可能なコード例 (実行結果や図表をビルド時に生成)・章や図表への相互参照。
+
+  上記が不要で、目録や資料ファイル (PDF・docx・xlsx・動画リンク) を配るのが
+  目的なら hugo を選んでください。ビルドが速く、件数が増えても破綻しません。
+"""
+
+
 def init(argv: list[str]) -> int:
     import argparse
     parser = argparse.ArgumentParser(
         prog="oer-kit init", description="新しい OER プロジェクトを雛形から作る")
     parser.add_argument("directory", nargs="?", default=".")
+    parser.add_argument("--engine", choices=["quarto", "hugo"],
+                        help="サイトエンジン (未指定なら対話で選択)")
     args = parser.parse_args(argv)
+
+    engine = args.engine
+    if not engine:
+        if sys.stdin.isatty():
+            print(ENGINE_GUIDE)
+            answer = input("engine [quarto/hugo] (既定 quarto): ").strip().lower()
+            engine = answer if answer in ("quarto", "hugo") else "quarto"
+        else:
+            engine = "quarto"
 
     destination = Path(args.directory).resolve()
     if (destination / "config.yaml").exists():
@@ -41,20 +63,37 @@ def init(argv: list[str]) -> int:
 
     destination.mkdir(parents=True, exist_ok=True)
     for item in scaffold.iterdir():
+        if item.name == "site-hugo":
+            continue                     # エンジン固有 (下で処理)
+        if engine == "hugo" and item.name in ("site", "Makefile"):
+            continue                     # Quarto 固有は使わない
         name = {"github": ".github", "gitignore": ".gitignore"}.get(item.name, item.name)
         target = destination / name
         if item.is_dir():
             shutil.copytree(item, target, dirs_exist_ok=True)
         else:
             shutil.copy2(item, target)
+    if engine == "hugo":
+        hugo_src = scaffold / "site-hugo"
+        shutil.copy2(hugo_src / "Makefile", destination / "Makefile")
+        shutil.copytree(hugo_src, destination / "site", dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns("Makefile"))
+        # config.yaml にエンジンを記録する (既定は quarto)
+        config_path = destination / "config.yaml"
+        config_path.write_text(
+            config_path.read_text(encoding="utf-8").replace(
+                "site_engine: quarto", "site_engine: hugo"),
+            encoding="utf-8")
     (destination / "resources").mkdir(exist_ok=True)
     (destination / "parsers").mkdir(exist_ok=True)
 
-    print(f"プロジェクトを作成しました: {destination}")
+    print(f"プロジェクトを作成しました: {destination} (engine: {engine})")
     print("次にやること:")
     print("  1. config.yaml を編集 (site_name / base_url / review_policy)")
     print("  2. resources/ に教材を追加 (docs/user-guide.md 参照)")
     print("  3. oer-kit validate → make site")
+    if engine == "hugo":
+        print("  ※ hugo コマンドが必要です (例: brew install hugo)")
     return 0
 
 

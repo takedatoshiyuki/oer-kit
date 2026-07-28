@@ -555,7 +555,7 @@ AIメタデータ生成パイプライン（`tools/` 実装時の想定）:
 - 内容が変わる大改訂: `version` を上げ（`1.0.0` → `2.0.0`）、Git タグ `res/<slug>/v2.0.0` を打つ。旧版PDF等を残す場合は `assets/archive/` へ。
 - 他教材の翻案として作った場合は必ず `isBasedOn` に元のURLを書く（リミックス系譜の保存）。
 
-### 8.4 サイトエンジンの選択制（方針決定 2026-07-28・実装は未着手）
+### 8.4 サイトエンジンの選択制（方針決定・v1 実装 2026-07-28）
 
 プロジェクト初期化時に **Quarto / Hugo をオプションで選ぶ**（1プロジェクト1エンジン。
 両対応の同時維持はしない）。初期化時に示す選択案内は、利用者が自分で判定できる
@@ -582,9 +582,18 @@ AIメタデータ生成パイプライン（`tools/` 実装時の想定）:
 実装の境界: メタデータ層（validate / jsonld / build_catalog / ingest / UI）は
 エンジン非依存を維持する。**連合（§7.6）は catalog.json を交換形式とするため、
 相手プロジェクトのエンジンに関係なく取り込める**。エンジン固有なのは
-scaffold のサイト雛形と prerender（ページ生成）のみ。config.yaml に
-`site_engine: quarto | hugo`（既定 quarto）を追加し、scaffold と Makefile を
-選択に応じて分ける。
+scaffold のサイト雛形と prerender（ページ生成）のみ。
+
+v1 実装（2026-07-28）:
+- `config.yaml` の `site_engine: quarto | hugo`（既定 quarto）。`oer-kit init --engine hugo`
+  または対話選択（上記の案内文を表示）
+- prerender がエンジンで分岐: 本文 Markdown は共通、注意枠は Quarto = callout /
+  Hugo = 太字見出し付き引用ブロック（純 Markdown）。JSON-LD は Hugo では front matter
+  の `jsonld` を layouts/partials/head.html が `<head>` に埋め込む
+- Hugo 雛形（`scaffold/site-hugo/`）: hugo.in.yaml（publishDir site/_site → rsync 同期は
+  Quarto と同じ）・最小レイアウト・categories タクソノミ・依存なしの簡易クライアント
+  検索（Hugo が searchindex.json を生成）。大規模カタログで検索を強化する場合は
+  Pagefind への置き換えを検討
 
 ## 9. 検証とCI
 

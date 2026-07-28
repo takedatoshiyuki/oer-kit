@@ -1,0 +1,14 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+{{ .Content }}
+<ul class="resource-list">
+  {{ range .Pages.ByTitle }}
+  <li>
+    <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+    {{ with .Params.author }}<span class="authors">{{ delimit . "、" }}</span>{{ end }}
+    {{ with .Params.dateDisplay }}<span class="date">{{ . }}</span>{{ end }}
+    {{ with .Description }}<p class="desc">{{ . | truncate 120 }}</p>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+{{ end }}

@@ -10,6 +10,11 @@ primary_language: ja
 #   personal:      個人公開型。本人による確認 (reviewedBy = 本人) が必須
 review_policy: institutional
 
+# サイトエンジン (docs/design.md §8.4)。oer-kit init が選択を書き込む
+#   quarto: 数式 (LaTeX)・文献リスト (BibTeX)・実行可能コード・相互参照を含む教材の執筆向け
+#   hugo:   目録・資料ファイル配布向け (ビルドが速く、件数が増えても破綻しない)
+site_engine: quarto
+
 # 誤り報告・削除依頼の窓口 (aggregator 運用の前提)。GitHub Issues 等の URL を設定すると
 # 各ページの「このメタデータについて」に報告リンクが出る
 feedback_url: ""

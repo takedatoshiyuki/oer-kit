@@ -78,6 +78,9 @@ def load_config() -> dict:
     # レビュー方針 (docs/design.md §9.1)。未設定なら最も厳格な institutional
     config.setdefault("review_policy", "institutional")
     config.setdefault("feedback_url", "")
+    # サイトエンジン (docs/design.md §8.4)。quarto = 数式・文献リスト・実行可能コード
+    # を含む教材の執筆向け / hugo = 目録・ファイル配布向け (速い・規模に強い)
+    config.setdefault("site_engine", "quarto")
     return config
 
 

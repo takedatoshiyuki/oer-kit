@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="{{ site.LanguageCode }}">
+<head>
+  {{ partial "head.html" . }}
+</head>
+<body>
+  <header class="site-header">
+    <a class="site-title" href="{{ "/" | relURL }}">{{ site.Title }}</a>
+    <nav>
+      <a href="{{ "/r/" | relURL }}">教材一覧</a>
+      <a href="{{ "/categories/" | relURL }}">カテゴリ</a>
+    </nav>
+  </header>
+  <main class="site-main">
+    {{ block "main" . }}{{ end }}
+  </main>
+  <footer class="site-footer">
+    <p>メタデータは <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0 1.0</a> で提供
+      （<a href="{{ "/catalog.json" | relURL }}">catalog.json</a>）。
+      教材本体のライセンスは各ページの表示に従ってください。</p>
+  </footer>
+</body>
+</html>

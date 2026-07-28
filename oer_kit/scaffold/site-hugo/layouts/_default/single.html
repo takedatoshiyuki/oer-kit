@@ -1,0 +1,16 @@
+{{ define "main" }}
+<article class="resource">
+  <h1>{{ .Title }}</h1>
+  <p class="meta-line">
+    {{ with .Params.author }}{{ delimit . "、" }}{{ end }}
+    {{ with .Params.dateDisplay }}<span class="date">{{ . }}</span>{{ end }}
+  </p>
+  {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
+  {{ .Content }}
+  {{ with .Params.categories }}
+  <p class="categories">
+    {{ range . }}<a class="tag" href="{{ printf "/categories/%s/" (. | urlize) | relURL }}">{{ . }}</a> {{ end }}
+  </p>
+  {{ end }}
+</article>
+{{ end }}

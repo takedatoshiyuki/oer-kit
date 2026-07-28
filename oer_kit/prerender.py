@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Quarto サイト入力の生成 (docs/design.md §8.1)。
+"""サイト入力の生成 (docs/design.md §8.1・§8.4)。エンジンは config.yaml の site_engine。
 
-- site/_quarto.in.yml + config.yaml → site/_quarto.yml (base_url の単一ソース維持)
-- resources/*/metadata.yaml → site/r/<slug>/index.qmd (JSON-LD を <head> に埋め込み)
-- hosted リソースは content/ と assets/ をページ配下へコピーし、Quarto にレンダリングさせる
+- quarto: site/_quarto.in.yml → site/_quarto.yml、resources → site/r/<slug>/index.qmd
+- hugo:   site/hugo.in.yaml → site/hugo.yaml、resources → site/content/r/<slug>/index.md
+  (本文は共通の Markdown。注意枠は Quarto では callout、Hugo では太字見出し付き
+   引用ブロックとして出す。JSON-LD は front matter 経由でレイアウトが埋め込む)
+- hosted リソースは content/ と assets/ をページ配下へコピーする
 
 使い方:
-    python tools/prerender.py
-    quarto render site        # → _site/
+    python -m oer_kit.prerender
+    make render               # → _site/
 """
 
 from __future__ import annotations
@@ -23,7 +25,29 @@ from .common import PROJECT_ROOT, expand_license, iter_resources, load_all_vocab
 from .jsonld import build_jsonld
 
 SITE_SRC = PROJECT_ROOT / "site"
-R_DIR = SITE_SRC / "r"
+R_DIR = SITE_SRC / "r"                       # quarto の出力先
+HUGO_R_DIR = SITE_SRC / "content" / "r"      # hugo の出力先
+
+# main() が config から設定する (build_body の注意枠の書式が変わる)
+ENGINE = "quarto"
+
+
+def callout(kind: str, title: str, body_lines: list[str],
+            collapse: bool | None = None, minimal: bool = False) -> list[str]:
+    """注意枠。Quarto は callout ブロック、Hugo は太字見出し付き引用ブロック
+    (純 Markdown なのでどのレンダラでも壊れない。CSS は blockquote に当てる)。"""
+    if ENGINE == "quarto":
+        attrs = [f".callout-{kind}"]
+        if minimal:
+            attrs.append("appearance='minimal'")
+        if collapse is not None:
+            attrs.append(f"collapse=\"{'true' if collapse else 'false'}\"")
+        head = f"::: {{{' '.join(attrs)} title=\"{title}\"}}"
+        return [head, *body_lines, ":::", ""]
+    quoted = [f"> **{title}**", ">"]
+    for line in body_lines:
+        quoted.append(f"> {line}")
+    return [*quoted, ""]
 
 SPDX_LABEL = {
     "CC0-1.0": "CC0 1.0",
@@ -119,19 +143,18 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
         access = f"（最終確認: {meta['dateAccessed']}）" if meta.get("dateAccessed") else ""
         collection = meta.get("sourceCollection")
         site = (f"「{localized(collection['name'], lang)}」" if collection else "外部サイト")
-        lines += [f'::: {{.callout-important title="外部教材の目録エントリ — {site}"}}',
-                  f"教材本体は{site}にあります: <{meta['externalUrl']}>{access}"]
+        body = [f"教材本体は{site}にあります: <{meta['externalUrl']}>{access}"]
         if meta.get("archivedAt"):
-            lines.append(f"リンク切れの際は [Web アーカイブのスナップショット]({meta['archivedAt']}) を"
-                         "参照してください。")
-        lines += [":::", ""]
+            body.append(f"リンク切れの際は [Web アーカイブのスナップショット]({meta['archivedAt']}) を"
+                        "参照してください。")
+        lines += callout("important", f"外部教材の目録エントリ — {site}", body)
 
     terms = meta.get("usageTerms")
     if terms:
         kind = "warning" if terms["reuse"] in ("not_allowed", "unspecified") else "note"
-        lines += [f'::: {{.callout-{kind} title="{REUSE_LABEL[terms["reuse"]]}"}}',
-                  f"{localized(terms['summary'], lang)}（[利用条件の原文]({terms['url']})）",
-                  ":::", ""]
+        lines += callout(kind, REUSE_LABEL[terms["reuse"]],
+                         [f"{localized(terms['summary'], lang)}"
+                          f"（[利用条件の原文]({terms['url']})）"])
 
     # 概要はタイトル直下 (front matter の description) に全文が出るので本文には書かない。
     # 検索インデックスへは build_catalog.py が別途追記する
@@ -143,16 +166,16 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
         reviewers = provenance.get("reviewedBy") or []
         origin += f"。{'、'.join(reviewers)}が確認済み" if reviewers else "（未確認）"
         if provenance.get("confidence") == "low":
-            lines += [f'::: {{.callout-caution collapse="false" title="内容紹介の確からしさ: 低"}}',
-                      f"{origin}。もとになる情報が少ないため、正確な内容は"
-                      + ("下の引用と" if meta.get("quotedDescription") else "")
-                      + "教材本体で確認してください。", ":::", ""]
+            lines += callout("caution", "内容紹介の確からしさ: 低",
+                             [f"{origin}。もとになる情報が少ないため、正確な内容は"
+                              + ("下の引用と" if meta.get("quotedDescription") else "")
+                              + "教材本体で確認してください。"], collapse=False)
         else:
-            lines += [f"::: {{.callout-note appearance='minimal' collapse='true' "
-                      f"title='内容紹介の出所（AI 生成）'}}",
-                      f"{origin}。教材そのものの文章ではありません。"
-                      + ("原文は下の引用を参照してください。"
-                         if meta.get("quotedDescription") else ""), ":::", ""]
+            lines += callout("note", "内容紹介の出所（AI 生成）",
+                             [f"{origin}。教材そのものの文章ではありません。"
+                              + ("原文は下の引用を参照してください。"
+                                 if meta.get("quotedDescription") else "")],
+                             collapse=True, minimal=True)
 
     quoted = meta.get("quotedDescription")
     if quoted:
@@ -217,8 +240,9 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
                     lines.append(f"- [{rel}]({rel})")
             lines.append("")
     else:
-        lines += ["## 教材へのアクセス",
-                  f"[教材本体を開く]({meta['externalUrl']}){{.btn .btn-primary}}", ""]
+        button = (f"[教材本体を開く]({meta['externalUrl']}){{.btn .btn-primary}}"
+                  if ENGINE == "quarto" else f"[教材本体を開く]({meta['externalUrl']})")
+        lines += ["## 教材へのアクセス", button, ""]
 
     if meta.get("materials"):
         lines.append("## 教材ファイル")
@@ -271,27 +295,33 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
     return "\n".join(lines) + "\n"
 
 
-def render_quarto_config(config):
-    template = (SITE_SRC / "_quarto.in.yml").read_text(encoding="utf-8")
+def render_site_config(config, engine):
+    names = {"quarto": ("_quarto.in.yml", "_quarto.yml"),
+             "hugo": ("hugo.in.yaml", "hugo.yaml")}[engine]
+    template = (SITE_SRC / names[0]).read_text(encoding="utf-8")
     out = (template.replace("{{site_name}}", config["site_name"])
            .replace("{{base_url}}", config["base_url"])
-           .replace("{{lang}}", config["primary_language"]))
-    (SITE_SRC / "_quarto.yml").write_text(out, encoding="utf-8")
+           .replace("{{lang}}", config["primary_language"])
+           .replace("{{feedback_url}}", config.get("feedback_url", "")))
+    (SITE_SRC / names[1]).write_text(out, encoding="utf-8")
 
 
 def main() -> int:
+    global ENGINE
     config = load_config()
+    ENGINE = config["site_engine"]
     vocabs = load_all_vocabs(config)
-    render_quarto_config(config)
+    render_site_config(config, ENGINE)
 
-    if R_DIR.exists():
-        shutil.rmtree(R_DIR)
+    out_dir = R_DIR if ENGINE == "quarto" else HUGO_R_DIR
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
 
     count = 0
     for slug, resource_dir, meta in iter_resources():
         lang = meta["inLanguage"][0]
         mode = meta.get("mode", "hosted")
-        page_dir = R_DIR / slug
+        page_dir = out_dir / slug
         page_dir.mkdir(parents=True)
 
         if mode == "hosted":
@@ -306,12 +336,22 @@ def main() -> int:
         if authors:
             front["author"] = authors
         if meta.get("datePublished"):
-            # 年のみ・年月のみの日付を Quarto が 1月1日 に補完して表示しないよう、
-            # 粒度に合わせて表示書式を指定する（精度を捏造しない。§5.2）
+            # 年のみ・年月のみの日付を 1月1日 に補完して表示しない（精度を捏造しない。§5.2）
             published = str(meta["datePublished"])
-            front["date"] = published
-            front["date-format"] = {4: "YYYY年", 7: "YYYY年M月"}.get(len(published),
-                                                                    "YYYY年M月D日")
+            if ENGINE == "quarto":
+                front["date"] = published
+                front["date-format"] = {4: "YYYY年", 7: "YYYY年M月"}.get(len(published),
+                                                                        "YYYY年M月D日")
+            else:
+                # Hugo の date は完全な日付のみ。粒度つき表示文字列を params で渡す
+                if len(published) == 10:
+                    front["date"] = published
+                    front["dateDisplay"] = published
+                elif len(published) == 7:
+                    year, month = published.split("-")
+                    front["dateDisplay"] = f"{year}年{int(month)}月"
+                else:
+                    front["dateDisplay"] = f"{published}年"
         # カタログ一覧では Quarto が自動で切り詰めるので、ここでは全文を渡す
         front["description"] = re.sub(r"\s+", " ", localized(meta["description"], lang)).strip()
         categories = (concept_labels(meta, "learningResourceType", vocabs, lang)
@@ -330,16 +370,23 @@ def main() -> int:
         image = meta.get("image")
         if image and (image.startswith("http") or (page_dir / image).exists()):
             front["image"] = image
-        front["format"] = {"html": {"include-in-header": {"text": jsonld_script(doc)}}}
+        if ENGINE == "quarto":
+            front["format"] = {"html": {"include-in-header": {"text": jsonld_script(doc)}}}
+            filename = "index.qmd"
+        else:
+            # レイアウト (partials/head.html) が params.jsonld を <head> に埋め込む
+            front["jsonld"] = json.dumps(doc, ensure_ascii=False).replace("</", "<\\/")
+            filename = "index.md"
 
         body = build_body(slug, meta, config, vocabs, lang, mode, page_dir)
         page = ("---\n"
                 + yaml.safe_dump(front, allow_unicode=True, sort_keys=False, width=1000)
                 + "---\n\n" + body)
-        (page_dir / "index.qmd").write_text(page, encoding="utf-8")
+        (page_dir / filename).write_text(page, encoding="utf-8")
         count += 1
 
-    print(f"{count} 件のページ → {R_DIR}/  (次: quarto render site)")
+    next_step = "quarto render site" if ENGINE == "quarto" else "make render (hugo)"
+    print(f"{count} 件のページ → {out_dir}/  (次: {next_step})")
     return 0
 
 

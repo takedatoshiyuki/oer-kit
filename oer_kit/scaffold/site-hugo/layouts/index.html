@@ -1,0 +1,55 @@
+{{ define "main" }}
+<h1>{{ site.Title }}</h1>
+{{ .Content }}
+
+<div class="search-box">
+  <input type="search" id="q" placeholder="教材を検索（題名・紹介・キーワード・著者）" autocomplete="off">
+  <div id="search-results"></div>
+</div>
+
+{{ $resources := where site.RegularPages "Section" "r" }}
+<p class="count">全 {{ len $resources }} 件</p>
+<ul class="resource-list" id="all-list">
+  {{ range $resources.ByTitle }}
+  <li>
+    <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+    {{ with .Params.author }}<span class="authors">{{ delimit . "、" }}</span>{{ end }}
+    {{ with .Params.dateDisplay }}<span class="date">{{ . }}</span>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+
+<script>
+// 依存なしの簡易検索。searchindex.json (Hugo が生成) を初回入力時に読み込む
+(function () {
+  const input = document.getElementById("q");
+  const out = document.getElementById("search-results");
+  const all = document.getElementById("all-list");
+  let index = null;
+  async function load() {
+    if (!index) {
+      const res = await fetch("{{ "searchindex.json" | relURL }}");
+      index = await res.json();
+    }
+    return index;
+  }
+  input.addEventListener("input", async () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { out.innerHTML = ""; all.style.display = ""; return; }
+    const items = await load();
+    const terms = q.split(/\s+/);
+    const hits = items.filter(it => {
+      const hay = (it.title + " " + (it.desc || "") + " "
+        + (it.authors || []).join(" ") + " "
+        + (it.categories || []).join(" ")).toLowerCase();
+      return terms.every(t => hay.includes(t));
+    }).slice(0, 100);
+    all.style.display = "none";
+    out.innerHTML = "<p class='count'>" + hits.length + " 件</p><ul class='resource-list'>"
+      + hits.map(it => "<li><a href='" + it.url + "'>" + it.title + "</a>"
+        + (it.authors && it.authors.length ? "<span class='authors'>" + it.authors.join("、") + "</span>" : "")
+        + "</li>").join("") + "</ul>";
+  });
+})();
+</script>
+{{ end }}
