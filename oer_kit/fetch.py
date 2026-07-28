@@ -25,10 +25,31 @@ from urllib.parse import urlparse
 
 import requests
 
-from .common import CACHE_DIR, add_lib_paths, load_config
+from .common import CACHE_DIR, add_lib_paths, crawler_settings, load_config
 
 PAGES_DIR = CACHE_DIR / "pages"
 ACCESS_LOG = CACHE_DIR / "access_log.tsv"
+
+# ホストごとの robots.txt (プロセス内キャッシュ)
+_robots_cache: dict[str, "urllib.robotparser.RobotFileParser"] = {}
+
+
+def robots_allows(url: str, user_agent: str) -> bool:
+    """robots.txt を確認する (収集の礼儀。取得失敗・不存在は許可扱い)。"""
+    import urllib.robotparser
+    parsed = urlparse(url)
+    origin = f"{parsed.scheme}://{parsed.netloc}"
+    rp = _robots_cache.get(origin)
+    if rp is None:
+        rp = urllib.robotparser.RobotFileParser()
+        try:
+            r = requests.get(f"{origin}/robots.txt",
+                             headers={"User-Agent": user_agent}, timeout=15)
+            rp.parse(r.text.splitlines() if r.status_code == 200 else [])
+        except requests.RequestException:
+            rp.parse([])
+        _robots_cache[origin] = rp
+    return rp.can_fetch(user_agent, url)
 
 
 def _safe_segment(segment: str) -> str:
@@ -69,7 +90,9 @@ def fetch_html(url: str, engine: str = "auto", force: bool = False,
     if cache_path.exists() and not force:
         return cache_path.read_text(encoding="utf-8"), True
 
-    user_agent = config["crawler"]["user_agent"]
+    user_agent, _sleep = crawler_settings(config)
+    if not robots_allows(url, user_agent):
+        raise SystemExit(f"robots.txt が {url} の取得を許可していません")
     html = None
     if engine in ("auto", "playwright"):
         try:
@@ -103,9 +126,15 @@ def batch_fetch(urls, engine="auto", force=False, concurrency=2,
     キャッシュ済みは飛ばす (再開可能)。戻り値は失敗数。
     """
     config = config or load_config()
+    user_agent, _sleep = crawler_settings(config)
     todo = [u for u in urls if force or not cache_path_for(u).exists()]
     print(f"{len(urls)} URL 中 {len(urls) - len(todo)} 件はキャッシュ済み → {len(todo)} 件を取得",
           flush=True)
+    allowed = [u for u in todo if robots_allows(u, user_agent)]
+    if len(allowed) != len(todo):
+        print(f"robots.txt が許可しないため {len(todo) - len(allowed)} 件をスキップ",
+              flush=True)
+    todo = allowed
     if not todo:
         return 0
 

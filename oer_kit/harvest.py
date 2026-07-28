@@ -135,11 +135,18 @@ def harvest_resource(slug, meta, config, session, limit=0, force=False):
     }
 
     count = 0
-    sleep_seconds = config["crawler"]["sleep_seconds"]
+    from .common import crawler_settings
+    from .fetch import robots_allows
+    user_agent, sleep_seconds = crawler_settings(config)
     for material in materials[: limit or len(materials)]:
         url = material["contentUrl"]
         dest = out_dir / safe_filename(url)
         entry = {"name": material["name"], "url": url, "file": dest.name}
+        if not robots_allows(url, user_agent):
+            entry["skipped"] = "robots.txt が許可していない"
+            print(f"  - {dest.name} (robots.txt)")
+            manifest["files"].append(entry)
+            continue
         if dest.exists() and not force:
             entry["skipped"] = "既存"
             print(f"  = {dest.name} (既存)")

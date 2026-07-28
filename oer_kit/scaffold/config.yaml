@@ -19,9 +19,11 @@ site_engine: quarto
 # 各ページの「このメタデータについて」に報告リンクが出る
 feedback_url: ""
 
-# クローラの礼儀設定 (discover / fetch / wayback が使用)
+# クローラの礼儀設定 (discover / fetch / harvest が使用。docs/design.md §7.7)
+# user_agent に連絡先 (メールアドレスか URL) を含めるまで収集コマンドは動かない。
+# sleep_seconds は最低1秒 (それ未満は1秒に丸められる)
 crawler:
-  user_agent: oer-kit/0.1
+  user_agent: "oer-kit/0.1 (連絡先を追記してください 例: +https://example.org/contact)"
   sleep_seconds: 1.0
 
 # コーパス層 (取得した教材ファイル+権利情報マニフェスト) の置き場。Git 管理外。

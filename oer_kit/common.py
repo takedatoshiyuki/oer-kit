@@ -84,6 +84,29 @@ def load_config() -> dict:
     return config
 
 
+def crawler_settings(config: dict) -> tuple[str, float]:
+    """クローラ設定を検証して (user_agent, sleep_seconds) を返す (収集の礼儀。§7.7)。
+
+    - User-Agent に連絡先 (メールアドレスか URL) が無ければ実行を拒否する。
+      収集先サイトの管理者が発信元に連絡できることが収集の前提条件
+    - リクエスト間隔は最低1秒。それ未満が設定されていたら警告して1秒に丸める
+    """
+    crawler = config.get("crawler", {})
+    user_agent = crawler.get("user_agent", "")
+    if ("連絡先" in user_agent
+            or not ("@" in user_agent or "http" in user_agent)):
+        raise SystemExit(
+            "config.yaml の crawler.user_agent に連絡先 (メールアドレスまたは URL) を"
+            "含めてください。収集先サイトの管理者が連絡できることが収集の前提です。\n"
+            '  例: user_agent: "my-oer-project/0.1 (+https://example.org/contact)"')
+    sleep_seconds = float(crawler.get("sleep_seconds", 1.0))
+    if sleep_seconds < 1.0:
+        print(f"note: crawler.sleep_seconds={sleep_seconds} は短すぎるため 1.0 に"
+              "丸めます (収集の礼儀)", file=sys.stderr)
+        sleep_seconds = 1.0
+    return user_agent, sleep_seconds
+
+
 def add_lib_paths(config: dict) -> None:
     """config.lib_paths (common_knowledge 等) を sys.path に加える。"""
     for p in config.get("lib_paths", []):

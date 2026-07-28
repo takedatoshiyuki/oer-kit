@@ -69,8 +69,9 @@ def main() -> int:
 
     config = load_config()
     session = requests.Session()
-    session.headers["User-Agent"] = config["crawler"]["user_agent"]
-    sleep_seconds = config["crawler"]["sleep_seconds"]
+    from .common import crawler_settings
+    user_agent, sleep_seconds = crawler_settings(config)
+    session.headers["User-Agent"] = user_agent
 
     sitemaps = robots_sitemaps(args.site_url, session)
     print(f"sitemap: {sitemaps}", file=sys.stderr)
