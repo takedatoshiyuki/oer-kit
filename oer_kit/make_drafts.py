@@ -80,6 +80,13 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
     if parsed.get("license"):
         # コースページに CC 表記がある場合はそれが正 (例: 京大はコンテンツごとに CC が異なる)
         meta["license"] = parsed["license"]
+    elif parsed.get("usage_terms"):
+        # エントリ単位で利用条件が異なるサイト (例: MIコンソーシアムは提供大学ごと、
+        # MDSC はデータセットごと)。{url, summary(str|dict), reuse} をそのまま使う
+        terms = dict(parsed["usage_terms"])
+        if isinstance(terms.get("summary"), str):
+            terms["summary"] = {"ja": terms["summary"]}
+        meta["usageTerms"] = terms
     else:
         # reuse はサイト既定 (license_status から導出)。ページ単位でマークが違う
         # サイト (例: 北大の 制限資料/無表記) はパーサが usage_reuse で上書きする
@@ -91,7 +98,11 @@ def build_metadata(parsed: dict, url: str, site: dict, slug: str, today: str) ->
             "reuse": parsed.get("usage_reuse") or default_reuse,
         }
 
-    if parsed.get("creators"):
+    if parsed.get("creator_organizations"):
+        # 提供元が組織のエントリ (データセット・大学提供教材など)
+        meta["creator"] = [{"type": "Organization", "name": n}
+                           for n in parsed["creator_organizations"]]
+    elif parsed.get("creators"):
         # 所属付きの講師リスト (外部講師が多いサイト向け。無い所属はサイトの機関名)
         meta["creator"] = [{"type": "Person", "name": c["name"],
                             "affiliation": {"name": c.get("affiliation")
@@ -190,8 +201,21 @@ def main() -> int:
 
     # 1周目: 全ページを解析し、サイト内で繰り返す引用文＝定型文を洗い出す
     # (パーサ個別のルールでは拾いきれない案内文を頻度で落とす。extract.py と同じ原理)
+    # パーサが parse_many を持つ場合は「1ページ複数エントリ」(一覧型サイト向け):
+    # 各要素は parsed dict に slug と externalUrl を含めて返す
+    parse_many = getattr(module, "parse_many", None)
     parsed_all = {}
     for url in urls:
+        if parse_many:
+            cache_path = cache_path_for(url)
+            if not cache_path.exists():
+                continue
+            for entry in parse_many(
+                    cache_path.read_text(encoding="utf-8", errors="ignore"), url):
+                key = entry["externalUrl"]
+                if key not in blocked and key not in published:
+                    parsed_all[key] = (entry["slug"], entry)
+            continue
         slug = slugger(url)
         cache_path = cache_path_for(url) if slug else None
         if not slug or not cache_path.exists():
@@ -205,26 +229,30 @@ def main() -> int:
     if boilerplate:
         print(f"サイト内で繰り返す引用文 {len(boilerplate)} 種を定型文として除外")
 
-    # 2周目: 下書きを書き出す
+    # 2周目: 下書きを書き出す (parse_many の場合は解析済みエントリ列を回す)
+    targets = list(parsed_all.keys()) if parse_many else urls
     with open(digest_path, "w", encoding="utf-8") as digest:
-        for url in urls:
-            slug = slugger(url)
-            if not slug:
-                stats["no_slug"] += 1
-                continue
-            cache_path = cache_path_for(url)
-            if not cache_path.exists():
-                stats["no_cache"] += 1
-                continue
+        for url in targets:
+            if parse_many:
+                slug, parsed = parsed_all[url]
+            else:
+                slug = slugger(url)
+                if not slug:
+                    stats["no_slug"] += 1
+                    continue
+                cache_path = cache_path_for(url)
+                if not cache_path.exists():
+                    stats["no_cache"] += 1
+                    continue
+                if url not in parsed_all:
+                    stats["parse_failed"] += 1
+                    print(f"  ! parse失敗: {url}")
+                    continue
+                _slug, parsed = parsed_all[url]
             draft_dir = DRAFTS_DIR / slug
             if (draft_dir / "metadata.yaml").exists() and not args.overwrite:
                 stats["exists"] += 1
                 continue
-            if url not in parsed_all:
-                stats["parse_failed"] += 1
-                print(f"  ! parse失敗: {url}")
-                continue
-            _slug, parsed = parsed_all[url]
 
             if parsed.get("quoted") and re.sub(r"\s+", "", parsed["quoted"])[:200] in boilerplate:
                 parsed = dict(parsed, quoted="", quoted_labels=[])
