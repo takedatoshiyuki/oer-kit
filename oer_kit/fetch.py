@@ -20,6 +20,7 @@ import datetime
 import hashlib
 import re
 import sys
+import time
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -35,7 +36,12 @@ _robots_cache: dict[str, "urllib.robotparser.RobotFileParser"] = {}
 
 
 def robots_allows(url: str, user_agent: str) -> bool:
-    """robots.txt を確認する (収集の礼儀。取得失敗・不存在は許可扱い)。"""
+    """robots.txt を確認する (収集の礼儀)。
+
+    RFC 9309 に沿い、不存在 (404/410) は許可、サーバ障害 (5xx)・接続失敗は
+    規則が確認できないため**不許可**として扱う (取得側の都合で規則を無視しない)。
+    判定結果はホスト単位でプロセス内キャッシュする。
+    """
     import urllib.robotparser
     parsed = urlparse(url)
     origin = f"{parsed.scheme}://{parsed.netloc}"
@@ -45,9 +51,18 @@ def robots_allows(url: str, user_agent: str) -> bool:
         try:
             r = requests.get(f"{origin}/robots.txt",
                              headers={"User-Agent": user_agent}, timeout=15)
-            rp.parse(r.text.splitlines() if r.status_code == 200 else [])
-        except requests.RequestException:
-            rp.parse([])
+            if r.status_code == 200:
+                rp.parse(r.text.splitlines())
+            elif r.status_code >= 500:
+                print(f"note: {origin}/robots.txt がサーバエラー ({r.status_code}) のため"
+                      "取得を見送ります", file=sys.stderr)
+                rp.disallow_all = True
+            else:                      # 404 等 = robots.txt 無し → 制限なし
+                rp.parse([])
+        except requests.RequestException as error:
+            print(f"note: {origin}/robots.txt に接続できないため取得を見送ります"
+                  f" ({type(error).__name__})", file=sys.stderr)
+            rp.disallow_all = True
         _robots_cache[origin] = rp
     return rp.can_fetch(user_agent, url)
 
@@ -63,7 +78,21 @@ def _safe_segment(segment: str) -> str:
     return segment
 
 
-def cache_path_for(url: str) -> Path:
+def _cache_parts(url: str) -> tuple[list[str], str]:
+    """(ディレクトリ要素列, 表示用ファイル名の幹) を返す。"""
+    parsed = urlparse(url, allow_fragments=False)
+    segments = [s for s in parsed.path.split("/") if s]
+    if segments and re.search(r"\.html?$", segments[-1]):
+        stem = re.sub(r"\.html?$", "", segments.pop())
+    elif parsed.query:
+        stem = parsed.query
+    else:
+        stem = "index"
+    return [_safe_segment(s) for s in [parsed.netloc, *segments]], _safe_segment(stem)
+
+
+def _legacy_cache_path(url: str) -> Path:
+    """旧形式 (〜2026-07-30) のパス。移行のためだけに残す。"""
     parsed = urlparse(url, allow_fragments=False)
     segments = [s for s in parsed.path.split("/") if s]
     if segments and re.search(r"\.html?$", segments[-1]):
@@ -74,6 +103,28 @@ def cache_path_for(url: str) -> Path:
         filename = "index.html"
     parts = [_safe_segment(s) for s in [parsed.netloc, *segments, filename]]
     return PAGES_DIR.joinpath(*parts)
+
+
+def cache_path_for(url: str) -> Path:
+    """URL ごとに一意なキャッシュパス。
+
+    パス要素の無害化は非可逆 (日本語→ _、クエリ・スキーム落ち) で異なる URL が
+    衝突しうるため、フラグメントを除いた正規化 URL 全体の短縮ハッシュを
+    ファイル名に含めて一意性を保証する (外部レビュー 2026-07-30 P1)。
+    旧形式のキャッシュが残っていれば新パスへ移動して引き継ぐ。
+    """
+    parsed = urlparse(url, allow_fragments=False)
+    normalized = f"{parsed.scheme}://{parsed.netloc}{parsed.path}" \
+        + (f"?{parsed.query}" if parsed.query else "")
+    digest = hashlib.sha256(normalized.encode()).hexdigest()[:10]
+    dirs, stem = _cache_parts(url)
+    new_path = PAGES_DIR.joinpath(*dirs, f"{stem}.{digest}.html")
+    if not new_path.exists():
+        legacy = _legacy_cache_path(url)
+        if legacy.exists():
+            new_path.parent.mkdir(parents=True, exist_ok=True)
+            legacy.rename(new_path)
+    return new_path
 
 
 def _log_access(url: str, engine: str) -> None:
@@ -126,7 +177,7 @@ def batch_fetch(urls, engine="auto", force=False, concurrency=2,
     キャッシュ済みは飛ばす (再開可能)。戻り値は失敗数。
     """
     config = config or load_config()
-    user_agent, _sleep = crawler_settings(config)
+    user_agent, sleep_seconds = crawler_settings(config)
     todo = [u for u in urls if force or not cache_path_for(u).exists()]
     print(f"{len(urls)} URL 中 {len(urls) - len(todo)} 件はキャッシュ済み → {len(todo)} 件を取得",
           flush=True)
@@ -165,7 +216,7 @@ def batch_fetch(urls, engine="auto", force=False, concurrency=2,
                         print(f"  {done}/{len(todo)}", flush=True)
 
             render_pages(todo, concurrency=concurrency,
-                         sleep_seconds=config["crawler"]["sleep_seconds"],
+                         sleep_seconds=sleep_seconds,
                          retries=1, extra_wait=1.0,
                          user_agent=config["crawler"]["user_agent"],
                          on_result=save, keep_results=False)
@@ -176,12 +227,16 @@ def batch_fetch(urls, engine="auto", force=False, concurrency=2,
                 raise
             print(f"note: render_pages 不可のため逐次 requests ({error})", file=sys.stderr)
 
-    for url in todo:
+    for i, url in enumerate(todo):
         try:
             fetch_html(url, engine="requests", force=force, config=config)
         except Exception as error:
             failures.append(url)
             print(f"  ! {url}: {type(error).__name__}", flush=True)
+        if (i + 1) % 50 == 0:
+            print(f"  {i + 1}/{len(todo)}", flush=True)
+        if i + 1 < len(todo):
+            time.sleep(sleep_seconds)     # 未キャッシュURL間の待機 (礼儀の本体)
     print(f"完了: 失敗 {len(failures)} 件", flush=True)
     return len(failures)
 
