@@ -3,7 +3,7 @@
     oer-kit init <dir>     新しい OER プロジェクトを作る (雛形の展開)
     oer-kit ui             管理UI (ダッシュボード + レビュー/承認) をブラウザで開く
     oer-kit validate       検証 (スキーマ・語彙・運用ポリシー・横断重複)
-    oer-kit prerender      metadata.yaml → Quarto サイト入力
+    oer-kit prerender      metadata.yaml → サイト入力 (Quarto / Hugo)
     ...                    (一覧は oer-kit --help)
 
 インストールしていない場合は `PYTHONPATH=<oer-kitの場所> python -m oer_kit.cli ...`。

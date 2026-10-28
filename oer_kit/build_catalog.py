@@ -6,11 +6,12 @@
 - _site/sitemap.xml         目録ページの URL 一覧
 
 使い方:
-    python tools/build_catalog.py
+    oer-kit build-catalog
 """
 
 from __future__ import annotations
 
+import argparse
 import datetime
 import json
 import shutil
@@ -56,6 +57,8 @@ def enrich_search_index(metas) -> int:
 
 
 def main() -> int:
+    argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     config = load_config()
     vocabs = load_all_vocabs(config)
 

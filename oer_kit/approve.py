@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """レビュー承認の反映 — reviewedBy を記入し、drafts/ から resources/ へ移す。
 
-`tools/review_sheet.py` で確認した slug をここに渡す。承認は次の順で行う:
+`oer-kit review-sheet` で確認した slug をここに渡す。承認は次の順で行う:
 
 1. `metadataProvenance.reviewedBy` にレビュー者名を記入
-2. `tools/validate.py` 相当の検査（スキーマ・語彙・横断重複）を通す
+2. `oer-kit validate` 相当の検査（スキーマ・語彙・横断重複）を通す
 3. **通ったものだけ** resources/ へ移動する
 
 検査に落ちたものは drafts/ に残るので、直して再実行すればよい。
 
 使い方:
-    python tools/approve.py --by "山田 太郎" nagoya-u-course-0001 nagoya-u-course-0002
-    python tools/approve.py --by "山田 太郎" --from-file approved.txt
-    python tools/approve.py --by "山田 太郎" --all --dry-run
+    oer-kit approve --by "山田 太郎" nagoya-u-course-0001 nagoya-u-course-0002
+    oer-kit approve --by "山田 太郎" --from-file approved.txt
+    oer-kit approve --by "山田 太郎" --all --dry-run
 """
 
 from __future__ import annotations
@@ -62,7 +62,8 @@ def write_meta(path: Path, meta: dict) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("slugs", nargs="*")
     parser.add_argument("--by", help="レビュー者名（reviewedBy に記入）。"
                         "aggregator 運用では省略可（未レビューのまま公開し、ページに明示）")

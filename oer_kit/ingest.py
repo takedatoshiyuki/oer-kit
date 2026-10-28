@@ -216,7 +216,8 @@ def ingest(source: str, prefix: str = "", kind: str = "personal", limit: int = 0
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("source", help="GitHub リポジトリURL / 公開サイトURL / ローカルパス")
     parser.add_argument("--prefix", default="", help="slug の接頭辞 (既定: 取り込み元の名前)")
     parser.add_argument("--kind", choices=["personal", "organizational"], default="personal")

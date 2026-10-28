@@ -429,7 +429,8 @@ def _parse_multipart(content_type: str, body: bytes):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-open", action="store_true", help="ブラウザを自動で開かない")
     args = parser.parse_args()

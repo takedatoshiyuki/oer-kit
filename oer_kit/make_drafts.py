@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """サイトパーサを使った referenced 下書きの一括生成。
 
-取得済みキャッシュ (fetch.py --batch) を parsers/<site>.py で解析し、
+取得済みキャッシュ (oer-kit fetch --batch) を parsers/<site>.py で解析し、
 drafts/<slug>/metadata.yaml を生成する。description は自作要約が必要なため
 TODO のまま出力し、別途 (AI生成 → 人手レビュー) で埋める。
 あわせて description 作成用のダイジェストを .cache/<site>_digest.jsonl に書く。
 
 使い方:
-    python tools/make_drafts.py --site nagoya_u --urls .cache/urls_nagoya_courses_ja.tsv
+    oer-kit make-drafts --site nagoya_u --urls .cache/urls_nagoya_courses_ja.tsv
         [--limit N] [--overwrite]
 """
 
@@ -159,7 +159,8 @@ HEADER = """# 一括生成の下書き (要レビュー)。docs/review-checklist
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--site", required=True, help="parsers/ のモジュール名 (例: nagoya_u)")
     parser.add_argument("--urls", required=True, help="対象URLの一覧ファイル")
     parser.add_argument("--limit", type=int, default=0)

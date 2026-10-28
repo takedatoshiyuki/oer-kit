@@ -11,10 +11,10 @@
 - description と引用文（丸写しでないかの最終確認。機械検査は通過済み）
 - 原ページへのリンク
 
-チェックした slug をコピーして tools/approve.py に渡すと承認できる。
+チェックした slug をコピーして `oer-kit approve` に渡すと承認できる。
 
 使い方:
-    python tools/review_sheet.py [--out .cache/review.html] [--open]
+    oer-kit review-sheet [--out .cache/review.html] [--open]
 """
 
 from __future__ import annotations
@@ -134,7 +134,7 @@ description が引用の丸写しでないか、リポジトリ横断の重複�
 <button onclick="pickAll()">表示中を全選択</button>
 <button onclick="emit()">承認リストを出す</button>
 <span id="count" class="meta"></span>
-<textarea id="out" placeholder="ここに承認する slug が出ます。コピーして tools/approve.py に渡してください"></textarea>
+<textarea id="out" placeholder="ここに承認する slug が出ます。コピーして oer-kit approve に渡してください"></textarea>
 </div>
 <table>
 <tr><th>承認</th><th>ID</th><th>講義</th><th>分類</th><th>description（CC0・自作要約）</th>
@@ -174,7 +174,8 @@ count();
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("paths", nargs="*", help="対象（省略時は drafts/ 全件）")
     parser.add_argument("--out", default=str(CACHE_DIR / "review.html"))
     parser.add_argument("--open", action="store_true", help="生成後にブラウザで開く")

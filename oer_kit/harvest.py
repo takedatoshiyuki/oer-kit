@@ -12,7 +12,7 @@
   下流 (LLM 学習データ・LMS) が権利で絞り込めるようにする
 
 使い方:
-    python tools/harvest.py drafts/nagoya-u-course-0001 [--limit 2] [--force]
+    oer-kit harvest drafts/nagoya-u-course-0001 [--limit 2] [--force]
 """
 
 from __future__ import annotations
@@ -178,7 +178,8 @@ def harvest_resource(slug, meta, config, session, limit=0, force=False):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("paths", nargs="+", help="リソースディレクトリ (resources/ or drafts/)")
     parser.add_argument("--limit", type=int, default=0, help="1リソースあたりの最大取得数")
     parser.add_argument("--force", action="store_true", help="既存ファイルも再取得")

@@ -5,7 +5,7 @@ robots.txt の Sitemap: 行 → 無ければ /sitemap.xml を起点に、
 sitemapindex を再帰的にたどって URL を列挙する。
 
 使い方:
-    python tools/discover.py https://ocw.kyoto-u.ac.jp/ [--limit 100] [--out urls.tsv]
+    oer-kit discover https://ocw.kyoto-u.ac.jp/ [--limit 100] [--out urls.tsv]
 """
 
 from __future__ import annotations
@@ -61,7 +61,8 @@ def iter_sitemap(sitemap_url: str, session: requests.Session, sleep_seconds: flo
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("site_url", help="サイトのトップ URL")
     parser.add_argument("--limit", type=int, default=0, help="列挙する最大件数 (0=無制限)")
     parser.add_argument("--out", help="TSV 出力先 (省略時は標準出力)")

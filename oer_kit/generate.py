@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """description（CC0 で提供する自作要約）の一括生成。
 
-`quotedDescription`（原文の転載）はコードの仕事（extract.py）、`description` は
-「自分の言葉による要約」なので LLM／人が書く（docs/design.md §7.3、tools/README.md）。
+`quotedDescription`（原文の転載）はコードの仕事（oer-kit extract）、`description` は
+「自分の言葉による要約」なので LLM／人が書く（docs/design.md §7.3、docs/commands.md）。
 本ツールは後者だけを生成する。**原文の書き写しにならないこと**を機械検査してから書き戻す。
 
 プロバイダ抽象化: OpenAI 互換の /chat/completions を叩くだけなので、base_url を
@@ -14,10 +14,10 @@
 情報が足りなければ confidence=low を返させ、**書けないときは書かせない**。
 
 使い方:
-    python tools/generate.py --provider mock drafts/nagoya-u-course-0003   # API不要の試運転
-    python tools/generate.py --limit 10                                   # まず10件で実測
-    OPENAI_API_KEY=... python tools/generate.py --model gpt-5.4-mini drafts/nagoya-u-course-*
-    python tools/generate.py --base-url http://localhost:11434/v1 --model qwen3 --api-key dummy
+    oer-kit generate --provider mock drafts/nagoya-u-course-0003   # API不要の試運転
+    oer-kit generate --limit 10                                   # まず10件で実測
+    OPENAI_API_KEY=... oer-kit generate --model gpt-5.4-mini drafts/nagoya-u-course-*
+    oer-kit generate --base-url http://localhost:11434/v1 --model qwen3 --api-key dummy
 """
 
 from __future__ import annotations
@@ -217,7 +217,8 @@ def update_draft(path: Path, meta, result, model):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("paths", nargs="*", help="対象ディレクトリ（省略時は drafts/ 全件）")
     parser.add_argument("--provider", choices=["openai", "mock"], default="openai")
     parser.add_argument("--model", default=DEFAULT_MODEL)
@@ -290,7 +291,7 @@ def main() -> int:
     if low_confidence:
         print(f"confidence=low（要確認）{len(low_confidence)} 件: "
               + "、".join(low_confidence[:8]) + ("…" if len(low_confidence) > 8 else ""))
-    print("次: python tools/validate.py --check-quotes drafts/<slug> でレビューへ")
+    print("次: oer-kit validate --check-quotes drafts/<slug> でレビューへ")
     return 1 if failed else 0
 
 

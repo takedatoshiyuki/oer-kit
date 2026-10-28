@@ -10,9 +10,9 @@ JSON Schema 検証に加え、スキーマでは表現しない運用ポリシ�
 - リポジトリ横断の重複 (同じ externalUrl の二重登録、description の使い回し)
 
 使い方:
-    python tools/validate.py                # resources/ 全件
-    python tools/validate.py resources/xxx  # 指定ディレクトリのみ
-    python tools/validate.py --check-quotes # 引用文が原文のままかキャッシュと照合
+    oer-kit validate                # resources/ 全件
+    oer-kit validate resources/xxx  # 指定ディレクトリのみ
+    oer-kit validate --check-quotes # 引用文が原文のままかキャッシュと照合
 終了コード: エラーがあれば 1 (警告のみなら 0)
 """
 
@@ -54,7 +54,7 @@ def check_quote_verbatim(meta):
     source = quoted.get("source") or meta.get("externalUrl")
     cache_path = cache_path_for(source)
     if not cache_path.exists():
-        return [], [f"引用の照合をスキップ（キャッシュ無し: {source} → tools/fetch.py で取得）"]
+        return [], [f"引用の照合をスキップ（キャッシュ無し: {source} → oer-kit fetch で取得）"]
 
     html = cache_path.read_text(encoding="utf-8", errors="ignore")
     # 可視テキストに加えて meta 由来の説明文も照合対象にする。
@@ -181,7 +181,7 @@ def validate_resource(slug, resource_dir, meta, validator, vocabs, check_quotes=
     collection = meta.get("sourceCollection") or {}
     if collection.get("kind") == "personal" and not meta.get("archivedAt"):
         warnings.append("個人サイトの資料は archivedAt (Webアーカイブ) を強く推奨 "
-                        "(tools/wayback.py --save <url> で保存できる。§7.5)")
+                        "(oer-kit wayback --save <url> で保存できる。§7.5)")
 
     mode = meta.get("mode", "hosted")
     has_content = (resource_dir / "content").is_dir()
@@ -216,7 +216,8 @@ def validate_resource(slug, resource_dir, meta, validator, vocabs, check_quotes=
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("paths", nargs="*", help="検証するリソースディレクトリ (省略時は全件)")
     parser.add_argument("--check-quotes", action="store_true",
                         help="quotedDescription を取得済みキャッシュと照合する (レビュー支援)")

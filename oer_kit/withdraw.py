@@ -107,7 +107,8 @@ def withdraw(slugs: list[str], reason: str, by: str = ""):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("slugs", nargs="+")
     parser.add_argument("--demote", action="store_true",
                         help="恒久取り下げでなく drafts/ への差し戻しにする")

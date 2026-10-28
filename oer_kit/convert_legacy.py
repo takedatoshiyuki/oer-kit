@@ -3,13 +3,13 @@
 
 course 単位の行を mode: referenced の metadata.yaml 下書きにする。機械変換なので:
 - description は TODO のまま (§7.3 の AI 生成 → 人手レビューで作成する)
-- about・dateAccessed など埋められない項目は欠落のまま出力し、validate.py に
+- about・dateAccessed など埋められない項目は欠落のまま出力し、oer-kit validate に
   検出させる (下書きは検証を通るまで resources/ に移さない)
 - 元ページの本文テキストは --with-source で .cache/legacy_source/ に退避
   (AI 生成の入力用。公開物ではない)
 
 使い方:
-    python tools/convert_legacy.py <output/ocw_xxx.xlsx> [--out drafts] [--limit 10]
+    oer-kit convert-legacy <output/ocw_xxx.xlsx> [--out drafts] [--limit 10]
         [--all] [--with-source]
 """
 
@@ -21,7 +21,6 @@ import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
-import pandas
 import yaml
 
 from .common import CACHE_DIR, LICENSE_URL, PROJECT_ROOT
@@ -98,14 +97,15 @@ def row_to_metadata(row: dict, generated_date: str) -> dict:
     meta["metadataProvenance"] = {
         "method": "manual",
         "generatedDate": generated_date,
-        "notes": ("tools/convert_legacy.py による旧収集データ(2023)からの機械変換ドラフト。"
+        "notes": ("oer-kit convert-legacy による旧収集データ(2023)からの機械変換ドラフト。"
                   "description の作成、about・dateAccessed 等の補完、再クロールでの現況確認が必要"),
     }
     return meta
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("xlsx", help="旧クローラの output/*.xlsx")
     parser.add_argument("--out", default=str(PROJECT_ROOT / "drafts"), help="下書きの出力先")
     parser.add_argument("--limit", type=int, default=0)
@@ -115,6 +115,12 @@ def main() -> int:
                         help="本文テキストを .cache/legacy_source/ に退避 (AI生成の入力用)")
     args = parser.parse_args()
 
+    # pandas は任意依存 (oer-kit[legacy])。--help は無しでも出せるよう、ここで読み込む
+    try:
+        import pandas
+    except ImportError:
+        raise SystemExit('pandas が必要です: pip install "oer-kit[legacy] @ '
+                         'git+https://github.com/takedatoshiyuki/oer-kit"')
     df = pandas.read_excel(args.xlsx)
     if not args.all and "material_type" in df.columns:
         df = df[df["material_type"] == "course"]
@@ -142,7 +148,7 @@ def main() -> int:
 
         draft_dir = out_dir / slug
         draft_dir.mkdir(parents=True, exist_ok=True)
-        header = ("# 機械変換ドラフト (要レビュー)。validate.py が通るまで resources/ に移さない。\n"
+        header = ("# 機械変換ドラフト (要レビュー)。oer-kit validate が通るまで resources/ に移さない。\n"
                   f"# 変換元: {Path(args.xlsx).name}\n")
         body = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False, width=100)
         (draft_dir / "metadata.yaml").write_text(header + body, encoding="utf-8")

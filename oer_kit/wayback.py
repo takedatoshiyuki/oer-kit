@@ -6,8 +6,8 @@
   スナップショット確認を行い、TSV で報告する (読み取り専用。metadata.yaml は変更しない)
 
 使い方:
-    python tools/wayback.py https://example.org/some/page
-    python tools/wayback.py --check
+    oer-kit wayback https://example.org/some/page
+    oer-kit wayback --check
 """
 
 from __future__ import annotations
@@ -76,7 +76,8 @@ def check_referenced(session: requests.Session, sleep_seconds: float) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("url", nargs="?", help="確認する URL")
     parser.add_argument("--check", action="store_true",
                         help="referenced リソース全件のリンク・スナップショット確認")

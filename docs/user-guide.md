@@ -294,7 +294,7 @@ oer-kit ingest https://github.com/<ユーザー名>/my-oer      # 公開サイ�
 | `'license' is a required property` ほか license/usageTerms 関連 | hosted は `license` 必須。referenced は `license` か `usageTerms` のどちらかが必須 |
 | `description が quotedDescription の丸写し` | 内容紹介を自分の言葉で書き直す（CC0 で出せないため） |
 | `externalUrl の重複` | 同じ教材を二重登録している。既存エントリを確認 |
-| `description が N 件で同一` | サイト共通の定型文を掴んでいる。抽出方法を疑う（[diagnose](commands.md#重複が出たときの調べ方diagnosepy)） |
+| `description が N 件で同一` | サイト共通の定型文を掴んでいる。抽出方法を疑う（[oer-kit diagnose](commands.md#重複が出たときの調べ方oer-kit-diagnose)） |
 | `語彙キー '...' が無い` | `vocabularies/` に定義されたキーを使う（必要なら語彙に追加） |
 | `slug '...' がディレクトリ名と不一致` | `slug` はディレクトリ名と一致させる（省略可） |
 | `NC 系ライセンスは非推奨` (警告) | 掲載は可能。営利形態の教育機関で使えなくなる旨の注意喚起 |

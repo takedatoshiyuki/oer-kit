@@ -11,9 +11,9 @@
 3. ラベル付きセクション（概要／講義の概要／授業の内容／Course Description …）
 
 使い方:
-    python tools/extract.py <html ファイル|URL>            # 候補を列挙
-    python tools/extract.py <ファイル> --corpus <ディレクトリ>  # 定型文を除外して列挙
-    python tools/extract.py --survey <ディレクトリ>          # コーパス全体の的中率を測る
+    oer-kit extract <html ファイル|URL>            # 候補を列挙
+    oer-kit extract <ファイル> --corpus <ディレクトリ>  # 定型文を除外して列挙
+    oer-kit extract --survey <ディレクトリ>          # コーパス全体の的中率を測る
 """
 
 from __future__ import annotations
@@ -246,7 +246,8 @@ def survey(root: Path):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("target", nargs="?", help="HTML ファイルまたは URL")
     parser.add_argument("--corpus", help="定型文判定に使う同一サイトのディレクトリ")
     parser.add_argument("--survey", help="コーパス全体の的中率を測る")

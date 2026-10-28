@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """重複検査に引っかかった群について、判断材料を1か所に集める。
 
-`validate.py` の横断検査が「description が同一」と言うとき、直すべきなのは
+`oer-kit validate` の横断検査が「description が同一」と言うとき、直すべきなのは
 個々の記述ではなく**抽出方法か生成指示**であることが多い（docs/review-checklist.md）。
 その判断には「各リソースの出力」と「原ページから本来取れたはずの候補」を
 並べて見る必要があるので、それを集めて Markdown で出す。
 
 集めるのはコード、吟味するのは人／LLM という分担にしている。
 出力をそのまま Claude 等に読ませて原因を特定し、直す先は
-`extract.py` のラベル辞書・定型文しきい値か、生成プロンプト。
+`oer_kit/extract.py` のラベル辞書・定型文しきい値か、生成プロンプト。
 
 使い方:
-    python tools/diagnose.py                    # 重複が出た群すべて
-    python tools/diagnose.py --slugs a b c      # 指定した群だけ
-    python tools/diagnose.py --out report.md
+    oer-kit diagnose                    # 重複が出た群すべて
+    oer-kit diagnose --slugs a b c      # 指定した群だけ
+    oer-kit diagnose --out report.md
 """
 
 from __future__ import annotations
@@ -79,14 +79,14 @@ def candidates_for(meta):
 
 def render(groups, metas) -> str:
     out = ["# 重複の原因調査", "",
-           "`validate.py` の横断検査で重複と判定された群について、各リソースの出力と",
+           "`oer-kit validate` の横断検査で重複と判定された群について、各リソースの出力と",
            "原ページから抽出できる候補を並べたもの。", "",
            "## 判断してほしいこと", "",
            "1. 並んでいる `description` は、原ページの内容を反映しているか。",
            "   サイト共通の定型文（「○○大学 OCW は…」）を掴んでいないか",
            "2. 掴んでいる場合、正しい説明文は下の「抽出候補」のどれか。",
            "   どの手段（JSON-LD / meta / ラベル）で取れるか",
-           "3. 直す先は `extract.py` のラベル辞書・定型文しきい値か、生成プロンプトか。",
+           "3. 直す先は `oer_kit/extract.py` のラベル辞書・定型文しきい値か、生成プロンプトか。",
            "   **個々の metadata.yaml を手直しするのは最後の手段**（原因が残るため）", ""]
 
     for heading, slugs in groups:
@@ -113,7 +113,7 @@ def render(groups, metas) -> str:
             if path is None:
                 out += ["（externalUrl が無く、原ページを参照できない）", ""]
             elif not path.exists():
-                out += [f"（キャッシュ無し: `tools/fetch.py {meta['externalUrl']}` で取得してから再実行）", ""]
+                out += [f"（キャッシュ無し: `oer-kit fetch {meta['externalUrl']}` で取得してから再実行）", ""]
             elif not candidates:
                 out += ["**抽出候補**: なし",
                         "（原ページに説明文が存在しない可能性。その場合は自作 description を書くしかない）", ""]
@@ -128,7 +128,8 @@ def render(groups, metas) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--slugs", nargs="+", help="調査する slug（省略時は重複検査の結果を使う）")
     parser.add_argument("--out", help="Markdown の出力先（省略時は標準出力）")
     args = parser.parse_args()

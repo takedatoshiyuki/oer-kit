@@ -6,11 +6,11 @@
 - 取得履歴を .cache/access_log.tsv に記録する (dateAccessed の根拠)
 
 使い方:
-    python tools/fetch.py <url> [--engine auto|requests|playwright] [--force]
-    python tools/fetch.py --batch urls.tsv [--concurrency 2]   # 一括 (ブラウザ使い回し)
+    oer-kit fetch <url> [--engine auto|requests|playwright] [--force]
+    oer-kit fetch --batch urls.tsv [--concurrency 2]   # 一括 (ブラウザ使い回し)
 
-備考: Playwright は genai-activities 環境に入っている。JSレンダリングが要る場合:
-    ~/Dropbox/Projects/genai_activities/.venv/bin/python tools/fetch.py <url>
+備考: JSレンダリング (Playwright) は、config.yaml の lib_paths で取得層
+`common_knowledge.web` を読み込める環境でのみ使える (無ければ requests で取得)。
 """
 
 from __future__ import annotations
@@ -242,7 +242,8 @@ def batch_fetch(urls, engine="auto", force=False, concurrency=2,
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("url", nargs="?")
     parser.add_argument("--batch", help="URL一覧ファイル (1行1URL。ヘッダ行 'url' は無視)")
     parser.add_argument("--engine", choices=["auto", "requests", "playwright"], default="auto")

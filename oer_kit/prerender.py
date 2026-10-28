@@ -9,12 +9,13 @@
   (quarto はページと同じ場所、hugo は site/static/r/<slug>/ = 加工せずそのまま配信)
 
 使い方:
-    python -m oer_kit.prerender
+    oer-kit prerender
     make render               # → _site/
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import shutil
@@ -312,6 +313,8 @@ def render_site_config(config, engine):
 
 def main() -> int:
     global ENGINE
+    argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     config = load_config()
     ENGINE = config["site_engine"]
     vocabs = load_all_vocabs(config)
