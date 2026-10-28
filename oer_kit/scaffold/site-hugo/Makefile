@@ -27,4 +27,4 @@ preview: prerender   ## ローカルプレビュー
 	cd site && $(HUGO) server
 
 clean:
-	rm -rf _site site/_site site/content/r site/hugo.yaml
+	rm -rf _site site/_site site/content/r site/static/r site/hugo.yaml

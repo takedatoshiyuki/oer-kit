@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install "oer-kit[legacy] @ git+https://github.com/OWNER/oer-kit"  # ← 自分の oer-kit の場所に変更
+      # oer-kit を fork して使う場合はここを自分のリポジトリに変更する
+      - run: pip install "oer-kit[legacy] @ git+https://github.com/takedatoshiyuki/oer-kit"
       - name: リンク生存・Wayback スナップショット確認
         run: python -m oer_kit.wayback --check

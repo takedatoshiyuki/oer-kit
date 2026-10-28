@@ -5,7 +5,8 @@
 - hugo:   site/hugo.in.yaml → site/hugo.yaml、resources → site/content/r/<slug>/index.md
   (本文は共通の Markdown。注意枠は Quarto では callout、Hugo では太字見出し付き
    引用ブロックとして出す。JSON-LD は front matter 経由でレイアウトが埋め込む)
-- hosted リソースは content/ と assets/ をページ配下へコピーする
+- hosted リソースは content/ と assets/ を公開URL /r/<slug>/ 配下へコピーする
+  (quarto はページと同じ場所、hugo は site/static/r/<slug>/ = 加工せずそのまま配信)
 
 使い方:
     python -m oer_kit.prerender
@@ -26,7 +27,10 @@ from .jsonld import build_jsonld
 
 SITE_SRC = PROJECT_ROOT / "site"
 R_DIR = SITE_SRC / "r"                       # quarto の出力先
-HUGO_R_DIR = SITE_SRC / "content" / "r"      # hugo の出力先
+HUGO_R_DIR = SITE_SRC / "content" / "r"      # hugo の出力先 (ページ)
+# hugo の hosted 教材ファイル置き場。ページバンドル内に置くと Hugo は .md を
+# 「ページ素材」とみなして公開しないため、static/ からそのまま配信する
+HUGO_FILES_DIR = SITE_SRC / "static" / "r"
 
 # main() が config から設定する (build_body の注意枠の書式が変わる)
 ENGINE = "quarto"
@@ -137,7 +141,7 @@ def text_item(value, lang) -> str:
     return localized(value.get("prefLabel"), lang) or value.get("id", "")
 
 
-def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
+def build_body(slug, meta, config, vocabs, lang, mode, files_dir):
     lines = []
     if mode == "referenced":
         access = f"（最終確認: {meta['dateAccessed']}）" if meta.get("dateAccessed") else ""
@@ -231,12 +235,12 @@ def build_body(slug, meta, config, vocabs, lang, mode, page_dir):
         lines.append("")
 
     if mode == "hosted":
-        content_dir = page_dir / "content"
+        content_dir = files_dir / "content"
         if content_dir.is_dir():
             lines.append("## コンテンツ")
             for f in sorted(content_dir.rglob("*")):
                 if f.is_file() and not f.name.startswith("."):
-                    rel = f.relative_to(page_dir)
+                    rel = f.relative_to(files_dir)
                     lines.append(f"- [{rel}]({rel})")
             lines.append("")
     else:
@@ -314,8 +318,9 @@ def main() -> int:
     render_site_config(config, ENGINE)
 
     out_dir = R_DIR if ENGINE == "quarto" else HUGO_R_DIR
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
+    for stale in (out_dir, HUGO_FILES_DIR if ENGINE == "hugo" else None):
+        if stale and stale.exists():
+            shutil.rmtree(stale)
 
     count = 0
     for slug, resource_dir, meta in iter_resources():
@@ -323,12 +328,14 @@ def main() -> int:
         mode = meta.get("mode", "hosted")
         page_dir = out_dir / slug
         page_dir.mkdir(parents=True)
+        # 教材ファイルの置き場 (公開URL上はどちらもページと同じ /r/<slug>/ 配下)
+        files_dir = page_dir if ENGINE == "quarto" else HUGO_FILES_DIR / slug
 
         if mode == "hosted":
             for sub in ("content", "assets"):
                 src = resource_dir / sub
                 if src.is_dir():
-                    shutil.copytree(src, page_dir / sub)
+                    shutil.copytree(src, files_dir / sub)
 
         doc = build_jsonld(slug, meta, config, vocabs)
         front = {"title": localized(meta["name"], lang)}
@@ -368,7 +375,7 @@ def main() -> int:
         if categories:
             front["categories"] = categories
         image = meta.get("image")
-        if image and (image.startswith("http") or (page_dir / image).exists()):
+        if image and (image.startswith("http") or (files_dir / image).exists()):
             front["image"] = image
         if ENGINE == "quarto":
             front["format"] = {"html": {"include-in-header": {"text": jsonld_script(doc)}}}
@@ -378,7 +385,7 @@ def main() -> int:
             front["jsonld"] = json.dumps(doc, ensure_ascii=False).replace("</", "<\\/")
             filename = "index.md"
 
-        body = build_body(slug, meta, config, vocabs, lang, mode, page_dir)
+        body = build_body(slug, meta, config, vocabs, lang, mode, files_dir)
         page = ("---\n"
                 + yaml.safe_dump(front, allow_unicode=True, sort_keys=False, width=1000)
                 + "---\n\n" + body)

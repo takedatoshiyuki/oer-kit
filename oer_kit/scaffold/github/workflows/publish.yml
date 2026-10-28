@@ -25,7 +25,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install "oer-kit @ git+https://github.com/OWNER/oer-kit"  # ← 自分の oer-kit の場所に変更
+      # oer-kit を fork して使う場合はここを自分のリポジトリに変更する
+      - run: pip install "oer-kit @ git+https://github.com/takedatoshiyuki/oer-kit"
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: サイト生成（検証 → prerender → quarto render → catalog）
         run: make site

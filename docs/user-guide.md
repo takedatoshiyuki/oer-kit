@@ -1,15 +1,16 @@
 # 利用ガイド（導入者向け）
 
 このシステムで OER（オープンな教育資源）のカタログを作り、公開するためのガイドです。
-設計の背景や根拠は[設計書](design.md)に、ツールの詳細は [tools/README.md](../tools/README.md) に
+設計の背景や根拠は[設計書](design.md)に、コマンドの詳細は [commands.md](commands.md) に
 あります。ここでは「使うために必要なこと」だけを順に説明します。
+個人で数件の教材を公開したいだけなら、[§3 の最短手順](#個人で数件の教材を公開する最短手順)から読めば足ります。
 
 ## 1. これは何か
 
 教育資源のメタデータを `metadata.yaml`（1教材=1ファイル）で管理し、
 
 - **検証**（スキーマ・語彙・引用照合・重複検査）
-- **公開サイト生成**（Quarto。schema.org/LRMI 準拠の JSON-LD 埋め込み）
+- **公開サイト生成**（Quarto または Hugo。schema.org/LRMI 準拠の JSON-LD 埋め込み）
 - **外部教材の収集支援**（クロール・説明文抽出・AI下書き生成・教材ファイル収集）
 
 をコマンドラインで行う道具立てです。想定する使い方は3つあります:
@@ -24,11 +25,29 @@
 
 必要なもの:
 
-- Python 3.10+ と `pyyaml` `jsonschema` `requests`（収集系を使うなら追加で `pandas`）
-- [Quarto](https://quarto.org/)（サイト生成。`brew install --cask quarto` 等）
-- `make`
+- Python 3.10+ と `make`
+- サイトエンジンのどちらか一方（下の「エンジンの選び方」）:
+  [Hugo](https://gohugo.io/) 0.132 以上（`brew install hugo` 等）または
+  [Quarto](https://quarto.org/)（`brew install --cask quarto` 等）
 
-最初に [config.yaml](../config.yaml) を自分の環境に合わせて編集します:
+oer-kit をインストールして、プロジェクト（1サイト = 1ディレクトリ）を作ります:
+
+```sh
+pip install "oer-kit @ git+https://github.com/takedatoshiyuki/oer-kit"
+oer-kit init my-oer --engine hugo      # または --engine quarto（省略すると対話で選択）
+cd my-oer
+```
+
+旧クローラの収集データ（Excel）を変換する場合だけ `oer-kit[legacy]` で入れます。
+
+**エンジンの選び方**: 教材ページに**文献リスト**（BibTeX からの引用）・**実行可能な
+コード例**（実行結果や図表をビルド時に生成）・**章や図表への相互参照**を含めたい
+場合は Quarto、それ以外（資料ファイルの配布・目録）は Hugo を選びます。Hugo は
+ビルドが速く、件数が増えても破綻しません。**数式（LaTeX 記法）はどちらでも使えます**。
+エンジンは `config.yaml` の `site_engine` に記録され、`make` と公開用 CI もそれに
+合わせて配置されます。
+
+次に `config.yaml` を自分の環境に合わせて編集します:
 
 ```yaml
 site_name: ○○大学 OER カタログ        # サイト名
@@ -45,6 +64,27 @@ feedback_url: https://github.com/.../issues   # 誤り報告・削除依頼の�
 
 `personal` / `institutional` の基本形です。**`oer-kit ui` の「＋ 新規教材」フォームを使えば、
 メタデータの記入（ライセンス選択の説明つき）とファイルのアップロードまで画面上で完結します**。
+
+### 個人で数件の教材を公開する（最短手順）
+
+収集（クロール・AI下書き生成・一括承認）は不要です。自分の教材を置いて、
+自分で確認して、GitHub Pages で公開するだけです:
+
+1. §2 のとおりインストールして `oer-kit init my-oer --engine hugo`
+   （資料ファイルの配布が目的なら Hugo。文献リスト等を書くなら Quarto）
+2. `config.yaml` に `site_name`・`base_url`（例: `https://<ユーザー名>.github.io/my-oer`）・
+   `review_policy: personal` を書く
+3. `oer-kit ui` で管理画面を開き、「＋ 新規教材」でメタデータを記入して
+   ファイル（PDF・docx・xlsx・スライド原稿・Markdown など）をアップロード
+4. 内容を確認して承認する（`personal` では承認者名 = 自分の名前が必須）
+5. `make preview` で表示を確認し、GitHub に push して公開（§6「GitHub Pages で公開する」）
+6. 横断カタログ（OER World など）に載せてもらう（§6「カタログに登録してもらう」）
+
+内容紹介（`description`）は自分で書きます。AI による一括生成（`oer-kit generate`）は
+収集向けの機能で、自作教材では作者自身の説明のほうが正確です。
+
+### 教材ディレクトリの構成
+
 以下は手作業（またはフォームが作るもの）の説明です。1教材=1ディレクトリを作ります:
 
 ```
@@ -76,11 +116,13 @@ datePublished: "2026-07-24"     # 年のみ ("2026") でも可
 - **ソース形式で置く**こと（PDF だけにしない）。再利用者が編集・翻案できることが OER の要件です
 - `license` は Creative Commons のみ。改変禁止（ND）は受け入れません
 - 語彙フィールド（`learningResourceType` / `about` など）は `vocabularies/` のキーを書きます
+- `content/` のファイルは、Hugo ではそのまま配布されます（Markdown もソースのまま）。
+  Quarto では Markdown・`.qmd` が HTML ページに変換されて表示されます
 
 検証してからサイトを生成します:
 
 ```sh
-python tools/validate.py          # スキーマ + 語彙 + 運用ポリシーの検査
+oer-kit validate                   # スキーマ + 語彙 + 運用ポリシーの検査
 make preview                       # ローカルで表示確認
 make site                          # 公開一式を _site/ へ生成
 ```
@@ -131,18 +173,18 @@ metadataProvenance:
 ### 便利なツール
 
 ```sh
-python tools/fetch.py <url>                        # ページ取得 (キャッシュ・取得日記録)
-python tools/extract.py <url>                      # 説明文の候補を抽出 (引用の下ごしらえ)
-python tools/extract.py <url> --materials          # 教材ファイルリンクを抽出
-python tools/wayback.py --save <url>               # Web アーカイブに保存 → archivedAt に記入
-python tools/validate.py --check-quotes            # 引用が原文のままかを機械照合
+oer-kit fetch <url>                        # ページ取得 (キャッシュ・取得日記録)
+oer-kit extract <url>                      # 説明文の候補を抽出 (引用の下ごしらえ)
+oer-kit extract <url> --materials          # 教材ファイルリンクを抽出
+oer-kit wayback --save <url>               # Web アーカイブに保存 → archivedAt に記入
+oer-kit validate --check-quotes            # 引用が原文のままかを機械照合
 ```
 
 出典の説明文をそのまま見せたい場合は `quotedDescription` に入れます（ページに引用として
 表示されます。CC0 のカタログデータには含まれません）。`description` は必ず自分の言葉で
 書いてください——引用の丸写しは検証が拒否します。
 
-個人サイトの教材は消えやすいので、登録時に `wayback.py --save` でスナップショットを作り
+個人サイトの教材は消えやすいので、登録時に `oer-kit wayback --save` でスナップショットを作り
 `archivedAt` に記録することを強く推奨します（無いと validate が警告します）。
 
 ## 5. サイト単位の一括収集（aggregator 向け）
@@ -173,24 +215,25 @@ discover (sitemap からURL列挙)
   → harvest (教材ファイルをコーパス層へ。権利ゲートつき)
 ```
 
-各ステップの詳細・実測に基づく注意点は [tools/README.md](../tools/README.md) を
+各ステップの詳細・実測に基づく注意点は [commands.md](commands.md) を
 参照してください。
 
 ## 6. レビューと公開（モード別）
 
 | モード | 公開の条件 | 流れ |
 |--------|-----------|------|
-| `aggregator` | 機械検査 + AI生成と信頼度の明示 + 誤り報告窓口 | `approve.py --all` で未レビューのまま公開可（ページに「未確認」と明示される）。人手は[レビューシート](../tools/README.md#レビューの回し方)での面の確認とサンプリングに充てる |
-| `institutional` | 組織のレビュー | 下書きを PR にし、[チェックリスト](review-checklist.md)で確認 → `approve.py --by "氏名"` |
-| `personal` | 本人の確認 | 自分で確認して `approve.py --by "自分の名前"` |
+| `aggregator` | 機械検査 + AI生成と信頼度の明示 + 誤り報告窓口 | `oer-kit approve --all` で未レビューのまま公開可（ページに「未確認」と明示される）。人手はレビューシート（`oer-kit review-sheet`）での面の確認とサンプリングに充てる |
+| `institutional` | 組織のレビュー | 下書きを PR にし、[チェックリスト](review-checklist.md)で確認 → `oer-kit approve --by "氏名"` |
+| `personal` | 本人の確認 | 自分で確認して `oer-kit approve --by "自分の名前"`（管理UIの承認ボタンでも可） |
 
 公開は `make site` で `_site/` に生成される一式（HTML・JSON-LD・catalog.json・
 sitemap.xml）を任意の静的ホスティングに置くだけです。
 
 ### GitHub Pages で公開する
 
-同梱のワークフロー（[.github/workflows/publish.yml](../.github/workflows/publish.yml)）が
-main への push ごとにサイトを生成して配信します。手順:
+`oer-kit init` が配置するワークフロー（プロジェクトの `.github/workflows/publish.yml`。
+選んだエンジンに応じて Hugo 用か Quarto 用が入る）が、main への push ごとに
+サイトを生成して配信します。手順:
 
 ```sh
 gh repo create <リポジトリ名> --public --source . --push   # リポジトリ作成 + push
@@ -214,6 +257,27 @@ gh api repos/{owner}/{repo}/pages -X POST -f build_type=workflow   # Pages を�
   独自ドメインを使う場合は Pages のカスタムドメイン設定後に `base_url` を差し替えます
 - あわせて PR ごとの検証（validate）と週次のリンク切れ確認も同梱の CI が行います
 
+### カタログに登録してもらう
+
+公開したプロジェクトは、他の oer-kit カタログ（例:
+[OER World](https://takedatoshiyuki.github.io/oer-world/)）が**リポジトリの URL だけで
+取り込めます**（連合。[設計書 §7.6](design.md)）。クロールは不要で、相手側は次の
+1行で取り込みます:
+
+```sh
+oer-kit ingest https://github.com/<ユーザー名>/my-oer      # 公開サイトの URL でも可
+```
+
+- 取り込まれると、相手のカタログに「あなたのページを指す目録エントリ」ができます
+  （教材本体はあなたのサイトに置かれたまま。出典種別は「個人公開」と表示）
+- 依頼はカタログの誤り報告・依頼窓口へ（OER World は
+  [GitHub Issues](https://github.com/takedatoshiyuki/oer-world/issues)）。掲載の
+  取り下げも同じ窓口で受け付けます
+- 取り込み済みの教材をあとで修正しても、相手のカタログには自動では反映されません。
+  大きく変えたときは窓口で再取り込みを依頼してください（新しく追加した教材は
+  再取り込みで追加されます）
+- リポジトリは公開（public）にしておく必要があります
+
 ## 7. ライセンスの決まりごと
 
 - **メタデータは CC0**（このリポジトリの記述・catalog.json）。誰でも許諾なしで利用できます
@@ -230,7 +294,7 @@ gh api repos/{owner}/{repo}/pages -X POST -f build_type=workflow   # Pages を�
 | `'license' is a required property` ほか license/usageTerms 関連 | hosted は `license` 必須。referenced は `license` か `usageTerms` のどちらかが必須 |
 | `description が quotedDescription の丸写し` | 内容紹介を自分の言葉で書き直す（CC0 で出せないため） |
 | `externalUrl の重複` | 同じ教材を二重登録している。既存エントリを確認 |
-| `description が N 件で同一` | サイト共通の定型文を掴んでいる。抽出方法を疑う（[diagnose.py](../tools/README.md#重複が出たときの調べ方diagnosepy)） |
+| `description が N 件で同一` | サイト共通の定型文を掴んでいる。抽出方法を疑う（[diagnose](commands.md#重複が出たときの調べ方diagnosepy)） |
 | `語彙キー '...' が無い` | `vocabularies/` に定義されたキーを使う（必要なら語彙に追加） |
 | `slug '...' がディレクトリ名と不一致` | `slug` はディレクトリ名と一致させる（省略可） |
 | `NC 系ライセンスは非推奨` (警告) | 掲載は可能。営利形態の教育機関で使えなくなる旨の注意喚起 |
@@ -240,7 +304,7 @@ gh api repos/{owner}/{repo}/pages -X POST -f build_type=workflow   # Pages を�
 | 文書 | 対象 |
 |------|------|
 | このガイド | システムを導入して使う人 |
-| [サイトの使い方](../site/guide.qmd) | 公開されたカタログの閲覧者（サイトに掲載される） |
+| [サイトの使い方](../oer_kit/scaffold/site/guide.qmd) | 公開されたカタログの閲覧者（Quarto 雛形のサイトに掲載される） |
 | [設計書](design.md) | 設計の全体像・根拠・決定の記録 |
 | [レビュー チェックリスト](review-checklist.md) | レビュー担当者 |
-| [tools/README.md](../tools/README.md) | 全コマンドのリファレンスと運用ノート |
+| [commands.md](commands.md) | 全コマンドのリファレンスと運用ノート |

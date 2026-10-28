@@ -25,5 +25,12 @@ __pycache__/
 # 恒久取り下げの保管 (記録は withdrawn.yaml が git 管理)
 withdrawn/
 
-# Quarto のプロジェクト内出力 (render 後に _site/ へ同期される)
+# サイトエンジンのプロジェクト内出力 (render 後に _site/ へ同期される)
 site/_site/
+
+# Hugo の生成物 (site/hugo.yaml・ページ・教材ファイルは prerender が生成)
+site/hugo.yaml
+site/content/r/
+site/static/r/
+site/resources/
+site/.hugo_build.lock

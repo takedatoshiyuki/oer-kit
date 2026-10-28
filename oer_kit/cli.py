@@ -76,8 +76,11 @@ def init(argv: list[str]) -> int:
     if engine == "hugo":
         hugo_src = scaffold / "site-hugo"
         shutil.copy2(hugo_src / "Makefile", destination / "Makefile")
+        # 公開ワークフローも Hugo 用に差し替える (既定の publish.yml は Quarto 用)
+        shutil.copy2(hugo_src / "publish.yml",
+                     destination / ".github" / "workflows" / "publish.yml")
         shutil.copytree(hugo_src, destination / "site", dirs_exist_ok=True,
-                        ignore=shutil.ignore_patterns("Makefile"))
+                        ignore=shutil.ignore_patterns("Makefile", "publish.yml"))
         # config.yaml にエンジンを記録する (既定は quarto)
         config_path = destination / "config.yaml"
         config_path.write_text(

@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 dist/
+build/
 *.egg-info/
 
 # モジュール開発時の試験プロジェクト
