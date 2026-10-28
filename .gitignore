@@ -19,6 +19,14 @@ drafts/
 site/_quarto.yml
 site/r/
 site/.quarto/
+# 雛形の中でビルドを試した際の生成物 (上の site/... はリポジトリ直下にしか効かない。
+# 2026-07-26 に雛形へ生成ページが混入し公開された事故の再発防止)
+oer_kit/scaffold/site/_quarto.yml
+oer_kit/scaffold/site/r/
+oer_kit/scaffold/site/_site/
+oer_kit/scaffold/site-hugo/hugo.yaml
+oer_kit/scaffold/site-hugo/content/r/
+oer_kit/scaffold/site-hugo/static/r/
 
 .reviews/
 
